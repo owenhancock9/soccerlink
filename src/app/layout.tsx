@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SoccerLink — Find Your Perfect Coach",
+  title: "CoachMatching — Find Your Perfect Coach",
   description:
     "Connect with verified soccer coaches for personalized VOD reviews, tactical analysis, and 1-on-1 training. Secure escrow payments, pro-level feedback.",
 };

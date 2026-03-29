@@ -1,6 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import { createClient } from "@/app/lib/supabase/client";
+import { signOut } from "@/app/actions/auth";
+import { getCoaches } from "@/app/actions/coaches";
+import { createBooking, getCoachBookings } from "@/app/actions/bookings";
 
 /* ─── Mock Data ─── */
 const COACHES = [
@@ -260,7 +265,7 @@ function StatBar({
 
 /* ─── Coach Card ─── */
 interface Coach {
-  id: number;
+  id: number | string;
   name: string;
   style: string;
   role: string;
@@ -351,14 +356,21 @@ function CoachCard({
    MAIN APP
    ═══════════════════════════════════ */
 export default function SoccerPlatform() {
-  /* ── State ── */
-  const [currentUser, setCurrentUser] = useState({
+  /* ── Auth State ── */
+  const [currentUser, setCurrentUser] = useState<{
+    role: string;
+    name: string;
+    isAuthenticated: boolean;
+  }>({
     role: "player",
-    name: "Alex",
+    name: "",
+    isAuthenticated: false,
   });
+  const [authLoading, setAuthLoading] = useState(true);
+
   const [view, setView] = useState("discovery");
   const [search, setSearch] = useState("");
-  const [viewKey, setViewKey] = useState(0); // triggers re-animation
+  const [viewKey, setViewKey] = useState(0);
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null);
@@ -369,8 +381,81 @@ export default function SoccerPlatform() {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
+  /* ── Real Coaches from DB ── */
+  const [dbCoaches, setDbCoaches] = useState<Coach[]>([]);
+  const [coachesLoaded, setCoachesLoaded] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingMessage, setBookingMessage] = useState<{type: "success" | "error"; text: string} | null>(null);
+  const [realBookings, setRealBookings] = useState<Record<string, unknown>[]>([]);
+
+  /* ── Fetch Coaches from DB ── */
+  useEffect(() => {
+    async function loadCoaches() {
+      const coaches = await getCoaches();
+      if (coaches.length > 0) {
+        setDbCoaches(coaches as unknown as Coach[]);
+      }
+      setCoachesLoaded(true);
+    }
+    loadCoaches();
+  }, []);
+
+  /* ── Fetch Coach Bookings (for coach dashboard) ── */
+  useEffect(() => {
+    if (currentUser.role === "coach" && currentUser.isAuthenticated) {
+      getCoachBookings().then((bookings) => {
+        setRealBookings(bookings);
+      });
+    }
+  }, [currentUser.role, currentUser.isAuthenticated]);
+
+  /* ── Fetch Auth User ── */
+  useEffect(() => {
+    const supabase = createClient();
+
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        // Try to get profile from DB
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, role")
+          .eq("id", user.id)
+          .single();
+
+        const role = profile?.role || user.user_metadata?.role || "player";
+        const name = profile?.full_name || user.user_metadata?.full_name || "User";
+
+        setCurrentUser({
+          role,
+          name,
+          isAuthenticated: true,
+        });
+
+        // Set initial view based on role
+        if (role === "coach") setView("dashboard");
+        else if (role === "admin") setView("admin");
+        else setView("discovery");
+      } else {
+        setCurrentUser({ role: "player", name: "", isAuthenticated: false });
+      }
+      setAuthLoading(false);
+    }
+
+    getUser();
+
+    // Listen for auth changes (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      getUser();
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   /* ── Derived ── */
-  const filteredCoaches = COACHES.filter((c) => {
+  const allCoaches = coachesLoaded && dbCoaches.length > 0 ? dbCoaches : COACHES;
+  const filteredCoaches = allCoaches.filter((c) => {
     const q = search.toLowerCase();
     const matchesSearch =
       c.style.toLowerCase().includes(q) ||
@@ -389,16 +474,6 @@ export default function SoccerPlatform() {
       setIsMobileMenuOpen(false);
     },
     []
-  );
-
-  const handleRoleSwitch = useCallback(
-    (role: string, name: string) => {
-      setCurrentUser({ role, name });
-      const targetView =
-        role === "coach" ? "dashboard" : role === "admin" ? "admin" : "discovery";
-      switchView(targetView);
-    },
-    [switchView]
   );
 
   const handleBookingClick = useCallback((coach: Coach) => {
@@ -563,15 +638,54 @@ export default function SoccerPlatform() {
                   </div>
                 </div>
 
+                {bookingMessage && (
+                  <div className={`p-3 rounded-xl text-xs mb-4 border anim-fade-in ${
+                    bookingMessage.type === "success"
+                      ? "bg-emerald-950/30 border-emerald-900/40 text-emerald-400"
+                      : "bg-rose-950/30 border-rose-900/40 text-rose-400"
+                  }`}>
+                    {bookingMessage.text}
+                  </div>
+                )}
                 <button
                   id="pay-stripe"
-                  onClick={() => {
-                    alert("Success! Stripe Escrow locked.");
-                    closeModal();
+                  disabled={bookingLoading || !currentUser.isAuthenticated}
+                  onClick={async () => {
+                    if (!currentUser.isAuthenticated) {
+                      setBookingMessage({ type: "error", text: "Please sign in to book a session." });
+                      return;
+                    }
+                    setBookingLoading(true);
+                    setBookingMessage(null);
+                    const formData = new FormData();
+                    formData.set("coachId", String(selectedCoach.id));
+                    formData.set("sessionDate", `2025-10-${String(selectedDate).padStart(2, "0")}`);
+                    formData.set("sessionTime", selectedTime || "10:00 AM");
+                    formData.set("rate", String(selectedCoach.rate));
+                    const result = await createBooking(formData);
+                    if (result.error) {
+                      setBookingMessage({ type: "error", text: result.error });
+                    } else {
+                      setBookingMessage({ type: "success", text: "Session booked! Your coach will confirm shortly." });
+                      setTimeout(() => {
+                        closeModal();
+                        setBookingMessage(null);
+                      }, 2000);
+                    }
+                    setBookingLoading(false);
                   }}
-                  className="glow-btn w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 py-3.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/25 relative z-10 active:scale-[0.97]"
+                  className="glow-btn w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 py-3.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/25 relative z-10 active:scale-[0.97]"
                 >
-                  Pay via Stripe →
+                  {bookingLoading ? (
+                    <span className="inline-flex items-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Booking...
+                    </span>
+                  ) : !currentUser.isAuthenticated ? (
+                    "Sign In to Book"
+                  ) : (
+                    "Book Session →"
+                  )}
                 </button>
               </div>
             )}
@@ -614,7 +728,7 @@ export default function SoccerPlatform() {
             )
           }
         >
-          SOCCER_LINK
+          COACH_MATCHING
         </h1>
 
         {/* Desktop Nav */}
@@ -658,21 +772,35 @@ export default function SoccerPlatform() {
 
           <div className="h-5 w-px bg-slate-700/50" />
 
-          <select
-            id="role-switcher"
-            className="bg-slate-800/70 border border-slate-700/50 text-[11px] font-medium px-3 py-2 rounded-lg outline-none cursor-pointer text-slate-300 hover:bg-slate-700/70 transition-colors focus:ring-1 focus:ring-indigo-500/50"
-            value={currentUser.role}
-            onChange={(e) =>
-              handleRoleSwitch(
-                e.target.value,
-                e.target.options[e.target.selectedIndex].text
-              )
-            }
-          >
-            <option value="player">👤 Player View</option>
-            <option value="coach">⚽ Coach View</option>
-            <option value="admin">🛡️ Admin View</option>
-          </select>
+          {currentUser.isAuthenticated ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${
+                  currentUser.role === "coach" ? "from-emerald-500 to-teal-600" : currentUser.role === "admin" ? "from-rose-500 to-pink-600" : "from-indigo-500 to-violet-600"
+                } flex items-center justify-center text-white font-bold text-xs`}>
+                  {currentUser.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-[11px] text-slate-400 font-medium max-w-[100px] truncate">
+                  {currentUser.name}
+                </span>
+              </div>
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  className="bg-slate-800/70 border border-slate-700/50 text-[11px] font-medium px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/70 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </form>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-[11px] font-semibold px-4 py-2 rounded-lg text-white transition-all shadow-lg shadow-indigo-600/20"
+            >
+              Sign In
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -730,27 +858,46 @@ export default function SoccerPlatform() {
             )}
 
             <hr className="border-slate-800/50 my-2" />
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
-              Switch Account
-            </p>
-            <button
-              onClick={() => handleRoleSwitch("player", "Alex")}
-              className="text-left text-sm text-slate-400 hover:text-white transition-colors"
-            >
-              👤 Player View
-            </button>
-            <button
-              onClick={() => handleRoleSwitch("coach", "Ricardo")}
-              className="text-left text-sm text-slate-400 hover:text-white transition-colors"
-            >
-              ⚽ Coach View
-            </button>
-            <button
-              onClick={() => handleRoleSwitch("admin", "Admin")}
-              className="text-left text-sm text-slate-400 hover:text-white transition-colors"
-            >
-              🛡️ Admin View
-            </button>
+            {currentUser.isAuthenticated ? (
+              <>
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${
+                    currentUser.role === "coach" ? "from-emerald-500 to-teal-600" : "from-indigo-500 to-violet-600"
+                  } flex items-center justify-center text-white font-bold text-sm`}>
+                    {currentUser.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{currentUser.name}</p>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">{currentUser.role}</p>
+                  </div>
+                </div>
+                <form action={signOut}>
+                  <button
+                    type="submit"
+                    className="text-left text-sm text-slate-400 hover:text-rose-400 transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-left text-indigo-400 hover:text-indigo-300 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="text-left text-slate-300 hover:text-white transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Create Account
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -969,6 +1116,12 @@ export default function SoccerPlatform() {
               <span className="text-[10px] bg-indigo-500/15 text-indigo-400 px-2.5 py-1 rounded-full border border-indigo-500/20 font-semibold shrink-0">
                 ✓ VERIFIED
               </span>
+              <Link
+                href="/coach/edit"
+                className="ml-auto bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold px-4 py-2 rounded-xl hover:bg-emerald-600/25 transition-all"
+              >
+                Edit My Profile
+              </Link>
             </div>
 
             {/* Metrics */}
@@ -1331,7 +1484,7 @@ export default function SoccerPlatform() {
           ═══════════════ */}
       <footer className="mt-24 py-8 border-t border-slate-800/30 text-center px-4 relative z-10">
         <p className="text-[11px] text-slate-500 max-w-2xl mx-auto leading-loose">
-          By using SoccerLink, you agree to our{" "}
+          By using CoachMatching, you agree to our{" "}
           <button
             id="tos-link"
             onClick={() => setActiveModal("tos")}
