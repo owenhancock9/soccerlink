@@ -1,9 +1,9 @@
-import Stripe from 'stripe';
+import Stripe from "stripe";
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-03-25.dahlia',
+  apiVersion: "2026-03-25.dahlia",
   appInfo: {
-    name: 'CoachMatching',
-    version: '1.0.0',
+    name: "CoachMatching",
+    version: "1.0.0",
   },
 });

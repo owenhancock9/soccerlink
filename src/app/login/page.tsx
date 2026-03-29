@@ -34,9 +34,7 @@ export default function LoginPage() {
               COACH_MATCHING
             </h1>
           </Link>
-          <p className="text-slate-500 text-sm mt-2">
-            Sign in to your account
-          </p>
+          <p className="text-slate-500 text-sm mt-2">Sign in to your account</p>
         </div>
 
         {/* Login Card */}

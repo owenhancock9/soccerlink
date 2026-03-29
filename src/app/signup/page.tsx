@@ -35,9 +35,7 @@ export default function SignupPage() {
               COACH_MATCHING
             </h1>
           </Link>
-          <p className="text-slate-500 text-sm mt-2">
-            Create your account
-          </p>
+          <p className="text-slate-500 text-sm mt-2">Create your account</p>
         </div>
 
         {/* Signup Card */}

@@ -6,7 +6,9 @@ import { stripe } from "@/app/lib/stripe/server";
 
 export async function createBooking(formData: FormData) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) return { error: "You must be logged in to book a session." };
 
@@ -74,19 +76,23 @@ export async function createBooking(formData: FormData) {
 
 export async function getMyBookings() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) return [];
 
   // Get bookings where user is the player
   const { data: playerBookings } = await supabase
     .from("bookings")
-    .select(`
+    .select(
+      `
       *,
       coach:profiles!bookings_coach_id_fkey (
         full_name
       )
-    `)
+    `,
+    )
     .eq("player_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -95,19 +101,23 @@ export async function getMyBookings() {
 
 export async function getCoachBookings() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) return [];
 
   // Get bookings where user is the coach
   const { data: coachBookings } = await supabase
     .from("bookings")
-    .select(`
+    .select(
+      `
       *,
       player:profiles!bookings_player_id_fkey (
         full_name
       )
-    `)
+    `,
+    )
     .eq("coach_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -116,7 +126,9 @@ export async function getCoachBookings() {
 
 export async function updateBookingStatus(bookingId: string, status: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) return { error: "Not authenticated" };
 

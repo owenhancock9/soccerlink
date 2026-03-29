@@ -7,7 +7,8 @@ export async function getCoaches() {
 
   const { data, error } = await supabase
     .from("coach_profiles")
-    .select(`
+    .select(
+      `
       id,
       style,
       specialty,
@@ -20,7 +21,8 @@ export async function getCoaches() {
         full_name,
         avatar_url
       )
-    `)
+    `,
+    )
     .order("rating", { ascending: false });
 
   if (error) {
@@ -48,7 +50,9 @@ export async function getCoaches() {
 
 export async function getMyCoachProfile() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) return null;
 
@@ -64,7 +68,9 @@ export async function getMyCoachProfile() {
 
 export async function updateCoachProfile(formData: FormData) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) return { error: "Not authenticated" };
 
@@ -73,15 +79,13 @@ export async function updateCoachProfile(formData: FormData) {
   const rate = parseInt(formData.get("rate") as string) || 50;
   const bio = formData.get("bio") as string;
 
-  const { error } = await supabase
-    .from("coach_profiles")
-    .upsert({
-      id: user.id,
-      style,
-      specialty,
-      rate,
-      bio,
-    });
+  const { error } = await supabase.from("coach_profiles").upsert({
+    id: user.id,
+    style,
+    specialty,
+    rate,
+    bio,
+  });
 
   if (error) {
     console.error("Error updating coach profile:", error);

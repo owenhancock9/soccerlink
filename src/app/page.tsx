@@ -4,8 +4,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { createClient } from "@/app/lib/supabase/client";
 import { signOut } from "@/app/actions/auth";
-import { getCoaches } from "@/app/actions/coaches";
+import { getCoaches, getMyCoachProfile } from "@/app/actions/coaches";
 import { createBooking, getCoachBookings } from "@/app/actions/bookings";
+import { createStripeConnectAccount } from "@/app/actions/stripe";
 
 /* ─── Mock Data ─── */
 const COACHES = [
@@ -149,9 +150,24 @@ const COACH_SESSIONS = [
     totalEarnings: 7440,
     platformFees: 967.2,
     schedule: [
-      { day: "Mon", time: "10:00 AM", player: "Alex Rivera", status: "confirmed" as const },
-      { day: "Wed", time: "2:00 PM", player: "Liam Chen", status: "confirmed" as const },
-      { day: "Fri", time: "6:30 PM", player: "Sofia Reyes", status: "pending" as const },
+      {
+        day: "Mon",
+        time: "10:00 AM",
+        player: "Alex Rivera",
+        status: "confirmed" as const,
+      },
+      {
+        day: "Wed",
+        time: "2:00 PM",
+        player: "Liam Chen",
+        status: "confirmed" as const,
+      },
+      {
+        day: "Fri",
+        time: "6:30 PM",
+        player: "Sofia Reyes",
+        status: "pending" as const,
+      },
     ],
   },
   {
@@ -166,8 +182,18 @@ const COACH_SESSIONS = [
     totalEarnings: 4005,
     platformFees: 520.65,
     schedule: [
-      { day: "Tue", time: "10:00 AM", player: "Jordan Mills", status: "confirmed" as const },
-      { day: "Thu", time: "2:00 PM", player: "Marcus Johnson", status: "confirmed" as const },
+      {
+        day: "Tue",
+        time: "10:00 AM",
+        player: "Jordan Mills",
+        status: "confirmed" as const,
+      },
+      {
+        day: "Thu",
+        time: "2:00 PM",
+        player: "Marcus Johnson",
+        status: "confirmed" as const,
+      },
     ],
   },
   {
@@ -182,8 +208,18 @@ const COACH_SESSIONS = [
     totalEarnings: 2310,
     platformFees: 300.3,
     schedule: [
-      { day: "Mon", time: "6:30 PM", player: "Alex Rivera", status: "disputed" as const },
-      { day: "Sat", time: "10:00 AM", player: "Jordan Mills", status: "pending" as const },
+      {
+        day: "Mon",
+        time: "6:30 PM",
+        player: "Alex Rivera",
+        status: "disputed" as const,
+      },
+      {
+        day: "Sat",
+        time: "10:00 AM",
+        player: "Jordan Mills",
+        status: "pending" as const,
+      },
     ],
   },
   {
@@ -198,10 +234,30 @@ const COACH_SESSIONS = [
     totalEarnings: 10500,
     platformFees: 1365,
     schedule: [
-      { day: "Mon", time: "10:00 AM", player: "Liam Chen", status: "confirmed" as const },
-      { day: "Tue", time: "6:30 PM", player: "Marcus Johnson", status: "confirmed" as const },
-      { day: "Wed", time: "10:00 AM", player: "Sofia Reyes", status: "confirmed" as const },
-      { day: "Fri", time: "2:00 PM", player: "Alex Rivera", status: "pending" as const },
+      {
+        day: "Mon",
+        time: "10:00 AM",
+        player: "Liam Chen",
+        status: "confirmed" as const,
+      },
+      {
+        day: "Tue",
+        time: "6:30 PM",
+        player: "Marcus Johnson",
+        status: "confirmed" as const,
+      },
+      {
+        day: "Wed",
+        time: "10:00 AM",
+        player: "Sofia Reyes",
+        status: "confirmed" as const,
+      },
+      {
+        day: "Fri",
+        time: "2:00 PM",
+        player: "Alex Rivera",
+        status: "pending" as const,
+      },
     ],
   },
 ];
@@ -385,8 +441,17 @@ export default function SoccerPlatform() {
   const [dbCoaches, setDbCoaches] = useState<Coach[]>([]);
   const [coachesLoaded, setCoachesLoaded] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [bookingMessage, setBookingMessage] = useState<{type: "success" | "error"; text: string} | null>(null);
-  const [realBookings, setRealBookings] = useState<Record<string, unknown>[]>([]);
+  const [bookingMessage, setBookingMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  const [realBookings, setRealBookings] = useState<Record<string, unknown>[]>(
+    [],
+  );
+
+  /* ── Coach Context ── */
+  const [stripeOnboarded, setStripeOnboarded] = useState<boolean | null>(null);
+  const [connectingStripe, setConnectingStripe] = useState(false);
 
   /* ── Fetch Coaches from DB ── */
   useEffect(() => {
@@ -400,11 +465,16 @@ export default function SoccerPlatform() {
     loadCoaches();
   }, []);
 
-  /* ── Fetch Coach Bookings (for coach dashboard) ── */
+  /* ── Fetch Coach Bookings & Details (for coach dashboard) ── */
   useEffect(() => {
     if (currentUser.role === "coach" && currentUser.isAuthenticated) {
       getCoachBookings().then((bookings) => {
         setRealBookings(bookings);
+      });
+      getMyCoachProfile().then((profile) => {
+        if (profile) {
+          setStripeOnboarded(profile.stripe_onboarding_complete);
+        }
       });
     }
   }, [currentUser.role, currentUser.isAuthenticated]);
@@ -414,7 +484,9 @@ export default function SoccerPlatform() {
     const supabase = createClient();
 
     async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (user) {
         // Try to get profile from DB
@@ -425,7 +497,8 @@ export default function SoccerPlatform() {
           .single();
 
         const role = profile?.role || user.user_metadata?.role || "player";
-        const name = profile?.full_name || user.user_metadata?.full_name || "User";
+        const name =
+          profile?.full_name || user.user_metadata?.full_name || "User";
 
         setCurrentUser({
           role,
@@ -446,7 +519,9 @@ export default function SoccerPlatform() {
     getUser();
 
     // Listen for auth changes (login/logout)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
       getUser();
     });
 
@@ -454,27 +529,24 @@ export default function SoccerPlatform() {
   }, []);
 
   /* ── Derived ── */
-  const allCoaches = coachesLoaded && dbCoaches.length > 0 ? dbCoaches : COACHES;
+  const allCoaches =
+    coachesLoaded && dbCoaches.length > 0 ? dbCoaches : COACHES;
   const filteredCoaches = allCoaches.filter((c) => {
     const q = search.toLowerCase();
     const matchesSearch =
       c.style.toLowerCase().includes(q) ||
       c.name.toLowerCase().includes(q) ||
       c.role.toLowerCase().includes(q);
-    const matchesRole =
-      activeFilter === "All Roles" || c.role === activeFilter;
+    const matchesRole = activeFilter === "All Roles" || c.role === activeFilter;
     return matchesSearch && matchesRole;
   });
 
   /* ── Handlers ── */
-  const switchView = useCallback(
-    (v: string) => {
-      setView(v);
-      setViewKey((k) => k + 1);
-      setIsMobileMenuOpen(false);
-    },
-    []
-  );
+  const switchView = useCallback((v: string) => {
+    setView(v);
+    setViewKey((k) => k + 1);
+    setIsMobileMenuOpen(false);
+  }, []);
 
   const handleBookingClick = useCallback((coach: Coach) => {
     setSelectedCoach(coach);
@@ -491,7 +563,10 @@ export default function SoccerPlatform() {
   useEffect(() => {
     if (!isFilterOpen) return;
     const handler = () => setIsFilterOpen(false);
-    const timer = setTimeout(() => document.addEventListener("click", handler), 0);
+    const timer = setTimeout(
+      () => document.addEventListener("click", handler),
+      0,
+    );
     return () => {
       clearTimeout(timer);
       document.removeEventListener("click", handler);
@@ -639,11 +714,13 @@ export default function SoccerPlatform() {
                 </div>
 
                 {bookingMessage && (
-                  <div className={`p-3 rounded-xl text-xs mb-4 border anim-fade-in ${
-                    bookingMessage.type === "success"
-                      ? "bg-emerald-950/30 border-emerald-900/40 text-emerald-400"
-                      : "bg-rose-950/30 border-rose-900/40 text-rose-400"
-                  }`}>
+                  <div
+                    className={`p-3 rounded-xl text-xs mb-4 border anim-fade-in ${
+                      bookingMessage.type === "success"
+                        ? "bg-emerald-950/30 border-emerald-900/40 text-emerald-400"
+                        : "bg-rose-950/30 border-rose-900/40 text-rose-400"
+                    }`}
+                  >
                     {bookingMessage.text}
                   </div>
                 )}
@@ -652,14 +729,20 @@ export default function SoccerPlatform() {
                   disabled={bookingLoading || !currentUser.isAuthenticated}
                   onClick={async () => {
                     if (!currentUser.isAuthenticated) {
-                      setBookingMessage({ type: "error", text: "Please sign in to book a session." });
+                      setBookingMessage({
+                        type: "error",
+                        text: "Please sign in to book a session.",
+                      });
                       return;
                     }
                     setBookingLoading(true);
                     setBookingMessage(null);
                     const formData = new FormData();
                     formData.set("coachId", String(selectedCoach.id));
-                    formData.set("sessionDate", `2025-10-${String(selectedDate).padStart(2, "0")}`);
+                    formData.set(
+                      "sessionDate",
+                      `2025-10-${String(selectedDate).padStart(2, "0")}`,
+                    );
                     formData.set("sessionTime", selectedTime || "10:00 AM");
                     formData.set("rate", String(selectedCoach.rate));
                     const result = await createBooking(formData);
@@ -670,7 +753,10 @@ export default function SoccerPlatform() {
                       // Redirect to Stripe Checkout
                       window.location.href = result.url;
                     } else {
-                      setBookingMessage({ type: "error", text: "Stripe error: No checkout URL returned." });
+                      setBookingMessage({
+                        type: "error",
+                        text: "Stripe error: No checkout URL returned.",
+                      });
                       setBookingLoading(false);
                     }
                   }}
@@ -724,7 +810,7 @@ export default function SoccerPlatform() {
                 ? "dashboard"
                 : currentUser.role === "admin"
                   ? "admin"
-                  : "discovery"
+                  : "discovery",
             )
           }
         >
@@ -775,9 +861,15 @@ export default function SoccerPlatform() {
           {currentUser.isAuthenticated ? (
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${
-                  currentUser.role === "coach" ? "from-emerald-500 to-teal-600" : currentUser.role === "admin" ? "from-rose-500 to-pink-600" : "from-indigo-500 to-violet-600"
-                } flex items-center justify-center text-white font-bold text-xs`}>
+                <div
+                  className={`w-7 h-7 rounded-lg bg-gradient-to-br ${
+                    currentUser.role === "coach"
+                      ? "from-emerald-500 to-teal-600"
+                      : currentUser.role === "admin"
+                        ? "from-rose-500 to-pink-600"
+                        : "from-indigo-500 to-violet-600"
+                  } flex items-center justify-center text-white font-bold text-xs`}
+                >
                   {currentUser.name.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-[11px] text-slate-400 font-medium max-w-[100px] truncate">
@@ -861,14 +953,22 @@ export default function SoccerPlatform() {
             {currentUser.isAuthenticated ? (
               <>
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${
-                    currentUser.role === "coach" ? "from-emerald-500 to-teal-600" : "from-indigo-500 to-violet-600"
-                  } flex items-center justify-center text-white font-bold text-sm`}>
+                  <div
+                    className={`w-8 h-8 rounded-lg bg-gradient-to-br ${
+                      currentUser.role === "coach"
+                        ? "from-emerald-500 to-teal-600"
+                        : "from-indigo-500 to-violet-600"
+                    } flex items-center justify-center text-white font-bold text-sm`}
+                  >
                     {currentUser.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white">{currentUser.name}</p>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">{currentUser.role}</p>
+                    <p className="text-sm font-semibold text-white">
+                      {currentUser.name}
+                    </p>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">
+                      {currentUser.role}
+                    </p>
                   </div>
                 </div>
                 <form action={signOut}>
@@ -954,24 +1054,28 @@ export default function SoccerPlatform() {
                 </button>
                 {isFilterOpen && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800/95 backdrop-blur-xl border border-slate-600/50 rounded-xl shadow-2xl shadow-black/30 overflow-hidden z-50 anim-fade-in-down">
-                    {["All Roles", "Striker", "Midfield", "Defense", "Tactical"].map(
-                      (role) => (
-                        <button
-                          key={role}
-                          onClick={() => {
-                            setActiveFilter(role);
-                            setIsFilterOpen(false);
-                          }}
-                          className={`w-full text-left px-4 py-3 text-sm font-medium border-b border-slate-700/30 last:border-0 transition-colors duration-150 ${
-                            activeFilter === role
-                              ? "bg-indigo-600/15 text-indigo-400"
-                              : "hover:bg-slate-700/50 text-slate-300"
-                          }`}
-                        >
-                          {role}
-                        </button>
-                      )
-                    )}
+                    {[
+                      "All Roles",
+                      "Striker",
+                      "Midfield",
+                      "Defense",
+                      "Tactical",
+                    ].map((role) => (
+                      <button
+                        key={role}
+                        onClick={() => {
+                          setActiveFilter(role);
+                          setIsFilterOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 text-sm font-medium border-b border-slate-700/30 last:border-0 transition-colors duration-150 ${
+                          activeFilter === role
+                            ? "bg-indigo-600/15 text-indigo-400"
+                            : "hover:bg-slate-700/50 text-slate-300"
+                        }`}
+                      >
+                        {role}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
@@ -1124,6 +1228,45 @@ export default function SoccerPlatform() {
               </Link>
             </div>
 
+            {/* Stripe Connect Banner */}
+            {stripeOnboarded === false && (
+              <div className="glass-card bg-indigo-950/30 border-indigo-900/40 p-5 md:p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 anim-fade-in-up">
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                    Connect your bank account
+                  </h3>
+                  <p className="text-slate-400 text-sm max-w-lg">
+                    To receive payouts from your coaching sessions, you need to
+                    securely connect a bank account via Stripe Connect.
+                  </p>
+                </div>
+                <button
+                  disabled={connectingStripe}
+                  onClick={async () => {
+                    setConnectingStripe(true);
+                    const res = await createStripeConnectAccount();
+                    if (res?.url) {
+                      window.location.href = res.url;
+                    } else {
+                      alert("Failed to connect to Stripe.");
+                      setConnectingStripe(false);
+                    }
+                  }}
+                  className="shrink-0 bg-white text-black hover:bg-slate-200 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-[0.97]"
+                >
+                  {connectingStripe ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-4 h-4 rounded-full border-2 border-slate-400/30 border-t-black animate-spin" />
+                      Connecting...
+                    </span>
+                  ) : (
+                    "Setup Payouts →"
+                  )}
+                </button>
+              </div>
+            )}
+
             {/* Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 stagger-children">
               {[
@@ -1243,7 +1386,9 @@ export default function SoccerPlatform() {
                               : "bg-emerald-500/10 text-emerald-400 border-emerald-500/25"
                           }`}
                         >
-                          {player.status === "vod-pending" ? "⏳ VOD PENDING" : "✓ UP TO DATE"}
+                          {player.status === "vod-pending"
+                            ? "⏳ VOD PENDING"
+                            : "✓ UP TO DATE"}
                         </span>
                       </div>
                     </div>
@@ -1252,16 +1397,37 @@ export default function SoccerPlatform() {
                   {/* Mini Stats */}
                   <div className="grid grid-cols-4 gap-2 mb-4 relative z-10">
                     {[
-                      { label: "TEC", val: player.stats.technical, color: "text-indigo-400" },
-                      { label: "TAC", val: player.stats.tactical, color: "text-cyan-400" },
-                      { label: "PHY", val: player.stats.physical, color: "text-emerald-400" },
-                      { label: "MEN", val: player.stats.mental, color: "text-amber-400" },
+                      {
+                        label: "TEC",
+                        val: player.stats.technical,
+                        color: "text-indigo-400",
+                      },
+                      {
+                        label: "TAC",
+                        val: player.stats.tactical,
+                        color: "text-cyan-400",
+                      },
+                      {
+                        label: "PHY",
+                        val: player.stats.physical,
+                        color: "text-emerald-400",
+                      },
+                      {
+                        label: "MEN",
+                        val: player.stats.mental,
+                        color: "text-amber-400",
+                      },
                     ].map((s) => (
-                      <div key={s.label} className="text-center bg-slate-950/40 rounded-lg py-2 border border-slate-800/30">
+                      <div
+                        key={s.label}
+                        className="text-center bg-slate-950/40 rounded-lg py-2 border border-slate-800/30"
+                      >
                         <p className="text-[9px] text-slate-500 uppercase tracking-wider font-semibold mb-0.5">
                           {s.label}
                         </p>
-                        <p className={`font-mono font-extrabold text-sm ${s.color}`}>
+                        <p
+                          className={`font-mono font-extrabold text-sm ${s.color}`}
+                        >
                           {s.val}
                         </p>
                       </div>
@@ -1272,19 +1438,27 @@ export default function SoccerPlatform() {
                   <div className="space-y-2 text-sm relative z-10">
                     <div className="flex justify-between text-slate-400">
                       <span>Sessions</span>
-                      <span className="text-white font-semibold font-mono">{player.sessions}</span>
+                      <span className="text-white font-semibold font-mono">
+                        {player.sessions}
+                      </span>
                     </div>
                     <div className="flex justify-between text-slate-400">
                       <span>VODs Submitted</span>
-                      <span className="text-white font-semibold font-mono">{player.vodsSubmitted}</span>
+                      <span className="text-white font-semibold font-mono">
+                        {player.vodsSubmitted}
+                      </span>
                     </div>
                     <div className="flex justify-between text-slate-400">
                       <span>Next Session</span>
-                      <span className="text-indigo-400 font-medium text-xs">{player.nextSession}</span>
+                      <span className="text-indigo-400 font-medium text-xs">
+                        {player.nextSession}
+                      </span>
                     </div>
                     <div className="flex justify-between text-slate-400">
                       <span>Last Active</span>
-                      <span className="text-slate-500 text-xs">{player.lastActive}</span>
+                      <span className="text-slate-500 text-xs">
+                        {player.lastActive}
+                      </span>
                     </div>
                   </div>
 
@@ -1311,10 +1485,33 @@ export default function SoccerPlatform() {
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-children">
                 {[
-                  { label: "Total Coaches", val: COACH_SESSIONS.length.toString(), color: "text-indigo-400", icon: "⚽" },
-                  { label: "Total Sessions", val: COACH_SESSIONS.reduce((a, c) => a + c.totalSessions, 0).toString(), color: "text-white", icon: "📊" },
-                  { label: "Revenue (Fees)", val: `$${COACH_SESSIONS.reduce((a, c) => a + c.platformFees, 0).toFixed(0)}`, color: "text-emerald-400", icon: "💰" },
-                  { label: "Active Disputes", val: "1", color: "text-rose-400", icon: "⚠️" },
+                  {
+                    label: "Total Coaches",
+                    val: COACH_SESSIONS.length.toString(),
+                    color: "text-indigo-400",
+                    icon: "⚽",
+                  },
+                  {
+                    label: "Total Sessions",
+                    val: COACH_SESSIONS.reduce(
+                      (a, c) => a + c.totalSessions,
+                      0,
+                    ).toString(),
+                    color: "text-white",
+                    icon: "📊",
+                  },
+                  {
+                    label: "Revenue (Fees)",
+                    val: `$${COACH_SESSIONS.reduce((a, c) => a + c.platformFees, 0).toFixed(0)}`,
+                    color: "text-emerald-400",
+                    icon: "💰",
+                  },
+                  {
+                    label: "Active Disputes",
+                    val: "1",
+                    color: "text-rose-400",
+                    icon: "⚠️",
+                  },
                 ].map((stat, i) => (
                   <div key={i} className="glass-card p-4 md:p-5">
                     <div className="flex items-center gap-2 mb-2">
@@ -1323,7 +1520,9 @@ export default function SoccerPlatform() {
                         {stat.label}
                       </p>
                     </div>
-                    <p className={`text-xl md:text-2xl font-mono font-extrabold ${stat.color}`}>
+                    <p
+                      className={`text-xl md:text-2xl font-mono font-extrabold ${stat.color}`}
+                    >
                       {stat.val}
                     </p>
                   </div>
@@ -1339,7 +1538,10 @@ export default function SoccerPlatform() {
               </h3>
               <div className="space-y-5 stagger-children">
                 {COACH_SESSIONS.map((coach) => (
-                  <div key={coach.coachId} className="glass-card overflow-hidden hover:transform-none">
+                  <div
+                    key={coach.coachId}
+                    className="glass-card overflow-hidden hover:transform-none"
+                  >
                     {/* Coach Header Row */}
                     <div className="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/40">
                       <div className="flex items-center gap-4">
@@ -1350,7 +1552,9 @@ export default function SoccerPlatform() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-0.5">
-                            <h4 className="font-bold text-white">{coach.name}</h4>
+                            <h4 className="font-bold text-white">
+                              {coach.name}
+                            </h4>
                             {coach.verified ? (
                               <span className="text-[9px] bg-indigo-500/15 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/25 font-semibold">
                                 ✓ VERIFIED
@@ -1371,25 +1575,39 @@ export default function SoccerPlatform() {
                       </div>
                       <div className="flex items-center gap-5">
                         <div className="text-right">
-                          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Total Sessions</p>
-                          <p className="font-mono font-bold text-white">{coach.totalSessions}</p>
+                          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                            Total Sessions
+                          </p>
+                          <p className="font-mono font-bold text-white">
+                            {coach.totalSessions}
+                          </p>
                         </div>
                         <div className="h-8 w-px bg-slate-800/60 hidden md:block" />
                         <div className="text-right">
-                          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Earnings</p>
-                          <p className="font-mono font-bold text-emerald-400">${coach.totalEarnings.toLocaleString()}</p>
+                          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                            Earnings
+                          </p>
+                          <p className="font-mono font-bold text-emerald-400">
+                            ${coach.totalEarnings.toLocaleString()}
+                          </p>
                         </div>
                         <div className="h-8 w-px bg-slate-800/60 hidden md:block" />
                         <div className="text-right">
-                          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Fees Collected</p>
-                          <p className="font-mono font-bold text-slate-500">${coach.platformFees.toFixed(0)}</p>
+                          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                            Fees Collected
+                          </p>
+                          <p className="font-mono font-bold text-slate-500">
+                            ${coach.platformFees.toFixed(0)}
+                          </p>
                         </div>
                       </div>
                     </div>
 
                     {/* Session Schedule */}
                     <div className="p-5 md:p-6">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">Upcoming Sessions</p>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
+                        Upcoming Sessions
+                      </p>
                       <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                         {coach.schedule.map((session, si) => (
                           <div
@@ -1414,9 +1632,14 @@ export default function SoccerPlatform() {
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold text-white truncate">{session.player}</p>
+                              <p className="text-sm font-semibold text-white truncate">
+                                {session.player}
+                              </p>
                               <p className="text-xs text-slate-500">
-                                <span className="font-mono font-medium text-slate-400">{session.day}</span> · {session.time}
+                                <span className="font-mono font-medium text-slate-400">
+                                  {session.day}
+                                </span>{" "}
+                                · {session.time}
                               </p>
                             </div>
                             <span

@@ -5,13 +5,32 @@ import Link from "next/link";
 import { createClient } from "@/app/lib/supabase/client";
 import { updateCoachProfile } from "@/app/actions/coaches";
 
-const STYLES = ["Tiki-Taka", "Gegenpressing", "Catenaccio", "Target Man", "Total Football", "Counter-Attack", "Possession"];
-const SPECIALTIES = ["Midfield", "Striker", "Defense", "Goalkeeper", "Tactical", "Winger", "All Positions"];
+const STYLES = [
+  "Tiki-Taka",
+  "Gegenpressing",
+  "Catenaccio",
+  "Target Man",
+  "Total Football",
+  "Counter-Attack",
+  "Possession",
+];
+const SPECIALTIES = [
+  "Midfield",
+  "Striker",
+  "Defense",
+  "Goalkeeper",
+  "Tactical",
+  "Winger",
+  "All Positions",
+];
 
 export default function EditCoachProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const [style, setStyle] = useState("");
   const [specialty, setSpecialty] = useState("");
@@ -21,7 +40,9 @@ export default function EditCoachProfile() {
   useEffect(() => {
     async function loadProfile() {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data } = await supabase
@@ -57,7 +78,10 @@ export default function EditCoachProfile() {
     if (result.error) {
       setMessage({ type: "error", text: result.error });
     } else {
-      setMessage({ type: "success", text: "Profile updated! Players can now find you." });
+      setMessage({
+        type: "success",
+        text: "Profile updated! Players can now find you.",
+      });
     }
     setSaving(false);
   }
