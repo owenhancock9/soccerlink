@@ -332,6 +332,9 @@ interface Coach {
   bio: string;
   avatar: string;
   gradient: string;
+  experience?: string;
+  highlightUrl?: string;
+  availability?: string[];
 }
 
 function CoachCard({
@@ -369,10 +372,19 @@ function CoachCard({
             </div>
             <div className="flex items-center gap-2">
               <Stars rating={coach.rating} />
-              <span className="text-[11px] text-slate-500 font-medium">
-                {coach.rating} · {coach.reviews} reviews
+              <span className="text-xs text-slate-400 font-medium tracking-wide">
+                {coach.rating}
+              </span>
+              <span className="text-slate-600">·</span>
+              <span className="text-xs text-slate-400 font-medium">
+                {coach.reviews} reviews
               </span>
             </div>
+            {coach.experience && (
+              <div className="mt-2 text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">
+                {coach.experience}
+              </div>
+            )}
           </div>
           <span className="text-xl font-extrabold text-white shrink-0">
             ${coach.rate}
@@ -391,9 +403,22 @@ function CoachCard({
         </div>
 
         {/* Bio */}
-        <p className="text-slate-400 text-sm leading-relaxed line-clamp-2 mb-6">
+        <p className="text-sm text-slate-400 leading-relaxed mb-5 line-clamp-3">
           {coach.bio}
         </p>
+
+        {coach.availability && coach.availability.length > 0 && (
+          <div className="mb-5 flex flex-wrap gap-1.5">
+            {coach.availability.map((day, i) => (
+              <span
+                key={i}
+                className="text-[9px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700 font-mono"
+              >
+                {day}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* CTA */}
@@ -607,14 +632,84 @@ export default function SoccerPlatform() {
             {/* Schedule Modal */}
             {activeModal === "schedule" && selectedCoach && (
               <div className="anim-fade-in">
-                <h3 className="text-lg font-bold mb-1">Select a Time</h3>
-                <p className="text-sm text-slate-400 mb-6">
-                  Booking{" "}
-                  <span className="text-indigo-400 font-medium">
-                    {selectedCoach.name}
-                  </span>{" "}
-                  for a VOD Review.
+                <div className="flex gap-4 mb-6">
+                  <div
+                    className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${selectedCoach.gradient} flex items-center justify-center text-white font-black text-2xl shadow-lg shrink-0`}
+                  >
+                    {selectedCoach.avatar}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h2 className="text-xl font-bold text-white">
+                        {selectedCoach.name}
+                      </h2>
+                      {selectedCoach.verified && (
+                        <span className="text-[9px] bg-indigo-500/15 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/25 font-semibold shrink-0">
+                          ✓ VERIFIED
+                        </span>
+                      )}
+                    </div>
+
+                    {selectedCoach.experience && (
+                      <p className="text-xs text-emerald-400 font-semibold uppercase tracking-wider mb-2">
+                        {selectedCoach.experience}
+                      </p>
+                    )}
+
+                    <div className="flex items-center gap-2 text-sm text-slate-400">
+                      <Stars rating={selectedCoach.rating} />
+                      <span className="font-medium text-white">
+                        {selectedCoach.rating}
+                      </span>
+                      <span>({selectedCoach.reviews} reviews)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider mb-6">
+                  <span className="bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700">
+                    {selectedCoach.role}
+                  </span>
+                  <span className="bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700">
+                    {selectedCoach.style}
+                  </span>
+                </div>
+
+                <p className="text-slate-300 text-sm leading-relaxed mb-6 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60">
+                  {selectedCoach.bio}
                 </p>
+
+                {selectedCoach.availability &&
+                  selectedCoach.availability.length > 0 && (
+                    <div className="mb-6">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-2">
+                        Standard Availability
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedCoach.availability.map((day, i) => (
+                          <span
+                            key={i}
+                            className="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700 font-mono"
+                          >
+                            {day}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                {selectedCoach.highlightUrl && (
+                  <div className="mb-6">
+                    <a
+                      href={selectedCoach.highlightUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center justify-center gap-2 w-full bg-red-600/10 border border-red-500/30 text-red-500 hover:bg-red-600/20 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                    >
+                      <span>▶</span> Watch Highlight Reel
+                    </a>
+                  </div>
+                )}
 
                 {/* Calendar Grid */}
                 <div className="grid grid-cols-7 gap-1.5 mb-5 text-center text-sm">

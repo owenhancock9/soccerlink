@@ -24,6 +24,8 @@ const SPECIALTIES = [
   "All Positions",
 ];
 
+const DAYS_OF_WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
 export default function EditCoachProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -36,6 +38,16 @@ export default function EditCoachProfile() {
   const [specialty, setSpecialty] = useState("");
   const [rate, setRate] = useState(50);
   const [bio, setBio] = useState("");
+
+  const [experience, setExperience] = useState("");
+  const [highlightUrl, setHighlightUrl] = useState("");
+  const [availability, setAvailability] = useState<string[]>([]);
+
+  const toggleDay = (day: string) => {
+    setAvailability((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
+    );
+  };
 
   useEffect(() => {
     async function loadProfile() {
@@ -56,6 +68,9 @@ export default function EditCoachProfile() {
         setSpecialty(data.specialty || "");
         setRate(data.rate || 50);
         setBio(data.bio || "");
+        setExperience(data.experience || "");
+        setHighlightUrl(data.highlight_reel_url || "");
+        setAvailability(data.availability || []);
       }
       setLoading(false);
     }
@@ -72,6 +87,9 @@ export default function EditCoachProfile() {
     formData.set("specialty", specialty);
     formData.set("rate", rate.toString());
     formData.set("bio", bio);
+    formData.set("experience", experience);
+    formData.set("highlight_reel_url", highlightUrl);
+    formData.set("availability", JSON.stringify(availability));
 
     const result = await updateCoachProfile(formData);
 
@@ -214,7 +232,7 @@ export default function EditCoachProfile() {
               htmlFor="bio"
               className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3"
             >
-              Bio
+              Bio & Experience Details
             </label>
             <textarea
               id="bio"
@@ -228,6 +246,67 @@ export default function EditCoachProfile() {
             <p className="text-[10px] text-slate-600 mt-1 text-right">
               {bio.length}/300
             </p>
+          </div>
+
+          {/* New Customizations: Experience, Availability, Highlight */}
+          <div className="glass-card p-6 hover:transform-none space-y-6">
+            <div>
+              <label className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
+                Experience Level
+              </label>
+              <select
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
+                className="w-full p-3 bg-slate-950/60 border border-slate-700/50 rounded-xl focus:ring-2 ring-emerald-500/50 outline-none text-white text-sm"
+              >
+                <option value="">Select your experience...</option>
+                <option value="Pro/Semi-Pro Player">
+                  Played Pro / Semi-Pro
+                </option>
+                <option value="College Player (D1/D2/D3)">
+                  Played College
+                </option>
+                <option value="Certified Youth Coach">
+                  Certified Youth Coach
+                </option>
+                <option value="High School Varsity">Played Varsity</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
+                Highlight Reel URL
+              </label>
+              <input
+                type="url"
+                value={highlightUrl}
+                onChange={(e) => setHighlightUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=..."
+                className="w-full p-3 bg-slate-950/60 border border-slate-700/50 rounded-xl focus:ring-2 ring-emerald-500/50 outline-none text-white text-sm placeholder:text-slate-600"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
+                General Availability
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {DAYS_OF_WEEK.map((day) => (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => toggleDay(day)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 border ${
+                      availability.includes(day)
+                        ? "bg-emerald-600 border-emerald-500 text-white"
+                        : "bg-slate-900/40 border-slate-700/50 text-slate-400 hover:border-slate-600 hover:text-slate-300"
+                    }`}
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Live Preview */}

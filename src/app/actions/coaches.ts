@@ -14,6 +14,9 @@ export async function getCoaches() {
       specialty,
       rate,
       bio,
+      experience,
+      highlight_reel_url,
+      availability,
       verified,
       rating,
       review_count,
@@ -42,6 +45,9 @@ export async function getCoaches() {
       rating: Number(coach.rating) || 0,
       reviews: (coach.review_count as number) || 0,
       bio: (coach.bio as string) || "No bio yet.",
+      experience: (coach.experience as string) || "",
+      highlightUrl: (coach.highlight_reel_url as string) || "",
+      availability: (coach.availability as string[]) || [],
       avatar: (profile?.full_name as string)?.charAt(0)?.toUpperCase() || "C",
       gradient: getGradient(coach.id as string),
     };
@@ -78,6 +84,14 @@ export async function updateCoachProfile(formData: FormData) {
   const specialty = formData.get("specialty") as string;
   const rate = parseInt(formData.get("rate") as string) || 50;
   const bio = formData.get("bio") as string;
+  const experience = formData.get("experience") as string;
+  const highlight_reel_url = formData.get("highlight_reel_url") as string;
+  const availabilityText = formData.get("availability") as string;
+
+  let availability = [];
+  try {
+    availability = JSON.parse(availabilityText || "[]");
+  } catch (e) {}
 
   const { error } = await supabase.from("coach_profiles").upsert({
     id: user.id,
@@ -85,6 +99,9 @@ export async function updateCoachProfile(formData: FormData) {
     specialty,
     rate,
     bio,
+    experience,
+    highlight_reel_url,
+    availability,
   });
 
   if (error) {
