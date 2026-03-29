@@ -665,26 +665,26 @@ export default function SoccerPlatform() {
                     const result = await createBooking(formData);
                     if (result.error) {
                       setBookingMessage({ type: "error", text: result.error });
+                      setBookingLoading(false);
+                    } else if (result.url) {
+                      // Redirect to Stripe Checkout
+                      window.location.href = result.url;
                     } else {
-                      setBookingMessage({ type: "success", text: "Session booked! Your coach will confirm shortly." });
-                      setTimeout(() => {
-                        closeModal();
-                        setBookingMessage(null);
-                      }, 2000);
+                      setBookingMessage({ type: "error", text: "Stripe error: No checkout URL returned." });
+                      setBookingLoading(false);
                     }
-                    setBookingLoading(false);
                   }}
                   className="glow-btn w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 py-3.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/25 relative z-10 active:scale-[0.97]"
                 >
                   {bookingLoading ? (
                     <span className="inline-flex items-center gap-2">
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Booking...
+                      Redirecting to Stripe...
                     </span>
                   ) : !currentUser.isAuthenticated ? (
                     "Sign In to Book"
                   ) : (
-                    "Book Session →"
+                    "Pay via Stripe →"
                   )}
                 </button>
               </div>

@@ -2,6 +2,8 @@
 
 import { createClient } from "@/app/lib/supabase/server";
 
+import { stripe } from "@/app/lib/stripe/server";
+
 export async function createBooking(formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -41,7 +43,33 @@ export async function createBooking(formData: FormData) {
     return { error: error.message };
   }
 
-  return { success: true, booking: data };
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "Coaching Session",
+              description: `Session on ${sessionDate} at ${sessionTime}`,
+            },
+            unit_amount: Math.round(total * 100), // Stripe uses cents
+          },
+          quantity: 1,
+        },
+      ],
+      client_reference_id: data.id,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}?canceled=true`,
+    });
+
+    return { success: true, booking: data, url: session.url };
+  } catch (err: any) {
+    console.error("Stripe Checkout Error:", err);
+    return { error: "Failed to create payment session." };
+  }
 }
 
 export async function getMyBookings() {
