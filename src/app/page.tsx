@@ -5,8 +5,10 @@ import Link from "next/link";
 import { createClient } from "@/app/lib/supabase/client";
 import { signOut } from "@/app/actions/auth";
 import { getCoaches, getMyCoachProfile } from "@/app/actions/coaches";
-import { createBooking, getCoachBookings } from "@/app/actions/bookings";
+import { createBooking, getCoachBookings, getMyBookings, updateBookingStatus } from "@/app/actions/bookings";
 import { createStripeConnectAccount } from "@/app/actions/stripe";
+import { uploadVodForBooking } from "@/app/actions/upload";
+import { releaseFundsToCoach } from "@/app/actions/payouts";
 
 /* ─── Mock Data ─── */
 const COACHES = [
@@ -477,6 +479,10 @@ export default function SoccerPlatform() {
   /* ── Coach Context ── */
   const [stripeOnboarded, setStripeOnboarded] = useState<boolean | null>(null);
   const [connectingStripe, setConnectingStripe] = useState(false);
+  
+  /* ── File Upload State ── */
+  const [uploadingVod, setUploadingVod] = useState<string | null>(null);
+  const [releasingFunds, setReleasingFunds] = useState<string | null>(null);
 
   /* ── Fetch Coaches from DB ── */
   useEffect(() => {
@@ -500,6 +506,10 @@ export default function SoccerPlatform() {
         if (profile) {
           setStripeOnboarded(profile.stripe_onboarding_complete);
         }
+      });
+    } else if (currentUser.role === "player" && currentUser.isAuthenticated) {
+      getMyBookings().then((bookings) => {
+        setRealBookings(bookings);
       });
     }
   }, [currentUser.role, currentUser.isAuthenticated]);
@@ -597,6 +607,47 @@ export default function SoccerPlatform() {
       document.removeEventListener("click", handler);
     };
   }, [isFilterOpen]);
+
+  /* ── File Upload Handlers ── */
+  const handleVodUpload = async (e: React.ChangeEvent<HTMLInputElement>, bookingId: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingVod(bookingId);
+    setBookingMessage({ type: "success", text: "Starting upload..." });
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const result = await uploadVodForBooking(bookingId, formData);
+
+    if (result.error) {
+      setBookingMessage({ type: "error", text: result.error });
+    } else {
+      setBookingMessage({ type: "success", text: "VOD uploaded successfully!" });
+      // Refresh realBookings
+      const updated = await getMyBookings();
+      setRealBookings(updated);
+    }
+    setUploadingVod(null);
+  };
+
+  const handleReleaseFunds = async (bookingId: string) => {
+    setReleasingFunds(bookingId);
+    setBookingMessage({ type: "success", text: "Releasing funds to coach..." });
+    
+    const result = await releaseFundsToCoach(bookingId);
+    
+    if (result.error) {
+      setBookingMessage({ type: "error", text: result.error });
+    } else {
+      setBookingMessage({ type: "success", text: "Funds released! Session completed." });
+      // Refresh realBookings
+      const updated = await getMyBookings();
+      setRealBookings(updated);
+    }
+    setReleasingFunds(null);
+  };
 
   /* ═══════════════════
      RENDER
@@ -1209,98 +1260,105 @@ export default function SoccerPlatform() {
 
         {/* ── VIEW 2: VOD PORTAL ── */}
         {view === "session" && currentUser.role === "player" && (
-          <div className="grid lg:grid-cols-3 gap-6 anim-fade-in-up">
-            {/* Left: Video + Notes */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Video Player */}
-              <div className="aspect-video bg-black/60 rounded-2xl border border-slate-800/50 flex items-center justify-center relative overflow-hidden group cursor-pointer glass-card p-0">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/10 to-violet-900/10 group-hover:from-indigo-900/20 group-hover:to-violet-900/20 transition-all duration-500" />
-                <div className="text-center z-10 transition-transform duration-500 group-hover:scale-110">
-                  <span className="text-5xl block mb-3 text-white/60 group-hover:text-white/90 transition-colors float-dot">
-                    ▶
-                  </span>
-                  <p className="text-slate-500 font-mono text-xs tracking-wider uppercase">
-                    Play VOD Review
-                  </p>
-                </div>
+          <div className="space-y-6 anim-fade-in-up">
+            <h2 className="text-2xl font-extrabold tracking-tight mb-8">
+              My <span className="gradient-text">Booked Sessions</span>
+            </h2>
+            
+            {bookingMessage && (
+              <div className={`p-4 rounded-xl mb-6 text-sm font-semibold border ${
+                bookingMessage.type === "error" 
+                  ? "bg-rose-950/40 text-rose-400 border-rose-900/50" 
+                  : "bg-emerald-950/40 text-emerald-400 border-emerald-900/50"
+              }`}>
+                {bookingMessage.text}
               </div>
-
-              {/* Coach Notes */}
-              <div className="glass-card p-6 md:p-7 hover:transform-none">
-                <h3 className="font-bold text-sm mb-5 text-indigo-400 flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)] animate-pulse" />
-                  Coach Notes
-                </h3>
-                <ul className="space-y-3 text-sm text-slate-300">
-                  {[
-                    {
-                      time: "01:45",
-                      note: "Body shape was closed when receiving. Open up your hips to see the full picture.",
-                    },
-                    {
-                      time: "03:22",
-                      note: "Great scanning before the pass. This is exactly the habit to build.",
-                    },
-                    {
-                      time: "07:10",
-                      note: "First touch too heavy under pressure. Cushion it with the inside of your foot.",
-                    },
-                  ].map((item, i) => (
-                    <li
-                      key={i}
-                      className="p-4 bg-slate-950/40 rounded-xl border border-slate-800/40 flex flex-col sm:flex-row gap-2 sm:gap-4 transition-all duration-200 hover:bg-slate-950/60 hover:border-slate-700/40"
-                    >
-                      <span className="text-indigo-400 font-mono font-bold text-xs shrink-0 mt-0.5 bg-indigo-500/10 px-2 py-1 rounded-md w-fit">
-                        {item.time}
+            )}
+            
+            {realBookings.map((b: any) => (
+              <div key={b.id} className="glass-card p-6 md:p-8 relative hover:transform-none">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                  
+                  {/* Left: Info */}
+                  <div>
+                    <h3 className="text-lg font-bold text-white mb-2">
+                      Session with Coach {b.coach?.full_name || "Unknown"}
+                    </h3>
+                    <p className="text-slate-400 text-sm mb-4">
+                      {new Date(b.session_date).toLocaleDateString()} at {b.session_time}
+                    </p>
+                    
+                    <div className="flex items-center gap-3">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${
+                        b.status === "pending" || b.status === "confirmed" ? "bg-amber-950/30 text-amber-500 border-amber-900/50" :
+                        b.status === "vod_submitted" ? "bg-indigo-950/30 text-indigo-400 border-indigo-900/50" :
+                        b.status === "reviewed" ? "bg-emerald-950/30 text-emerald-400 border-emerald-900/50" :
+                        "bg-slate-900 text-slate-400 border-slate-700"
+                      }`}>
+                        {b.status === "pending" ? "Awaiting Checkout" : 
+                         b.status === "confirmed" ? "Awaiting VOD Upload" :
+                         b.status === "vod_submitted" ? "Coach is Reviewing" :
+                         b.status === "reviewed" ? "Review Ready" : 
+                         "Completed"}
                       </span>
-                      <p className="leading-relaxed">{item.note}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* Right: Player Profile */}
-            <div className="glass-card p-7 h-fit relative overflow-hidden hover:transform-none">
-              <div className="absolute inset-0 bg-gradient-to-b from-indigo-600/5 to-transparent pointer-events-none" />
-              <div className="text-center mb-7 relative z-10">
-                <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-violet-600 mx-auto rounded-2xl mb-4 flex items-center justify-center text-3xl font-black shadow-xl shadow-indigo-600/20 rotate-3 hover:rotate-0 transition-transform duration-300">
-                  A
+                      
+                      <span className="font-mono text-emerald-400 font-bold">${b.total}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Right: Actions */}
+                  <div className="flex flex-col sm:flex-row gap-3 md:w-1/3">
+                    {/* Upload VOD (If booking confirmed but no VOD yet) */}
+                    {(b.status === "confirmed" || (b.status === "vod_submitted" && !b.vod_url)) && (
+                      <div className="w-full">
+                        <label className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-sm transition-all cursor-pointer border border-dashed ${
+                          uploadingVod === b.id 
+                            ? "bg-indigo-600/20 text-indigo-400 border-indigo-500/50" 
+                            : "bg-slate-900/50 text-indigo-400 border-indigo-500/30 hover:bg-slate-800 hover:border-indigo-400"
+                        }`}>
+                          {uploadingVod === b.id ? "Uploading..." : "Upload MP4 Match Footage"}
+                          <input 
+                            type="file" 
+                            accept="video/mp4,video/x-m4v,video/*" 
+                            className="hidden" 
+                            disabled={uploadingVod === b.id}
+                            onChange={(e) => handleVodUpload(e, b.id)}
+                          />
+                        </label>
+                      </div>
+                    )}
+                    
+                    {/* View VOD (If URL exists) */}
+                    {b.vod_url && (
+                      <a href={b.vod_url} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-slate-800 text-white rounded-xl font-semibold text-sm hover:bg-slate-700 transition-colors border border-slate-700">
+                        ▶ Watch VOD
+                      </a>
+                    )}
+                    
+                    {/* Release Funds (Only if reviewed or actually wanted by player) */}
+                    {(b.status === "reviewed" || b.status === "vod_submitted" || b.status === "confirmed") && b.status !== "completed" && (
+                      <button 
+                        onClick={() => handleReleaseFunds(b.id)}
+                        disabled={releasingFunds === b.id}
+                        className="flex-1 py-3 px-4 bg-emerald-600/10 text-emerald-500 border border-emerald-500/30 rounded-xl font-semibold text-sm hover:bg-emerald-600/20 transition-all disabled:opacity-50"
+                      >
+                        {releasingFunds === b.id ? "Releasing..." : "Release Funds"}
+                      </button>
+                    )}
+                  </div>
+                  
                 </div>
-                <h2 className="text-xl font-extrabold uppercase tracking-tight">
-                  Alex Rivera
-                </h2>
-                <p className="text-[10px] text-indigo-400 font-semibold tracking-[0.2em] uppercase mt-2 bg-indigo-900/15 inline-block px-3 py-1 rounded-full border border-indigo-500/15">
-                  Midfielder
-                </p>
               </div>
-              <div className="relative z-10">
-                <StatBar
-                  label="Technical"
-                  value={PLAYER_STATS.technical}
-                  color="bg-indigo-500"
-                  delay={100}
-                />
-                <StatBar
-                  label="Tactical"
-                  value={PLAYER_STATS.tactical}
-                  color="bg-cyan-500"
-                  delay={200}
-                />
-                <StatBar
-                  label="Physical"
-                  value={PLAYER_STATS.physical}
-                  color="bg-emerald-500"
-                  delay={300}
-                />
-                <StatBar
-                  label="Mental"
-                  value={PLAYER_STATS.mental}
-                  color="bg-amber-500"
-                  delay={400}
-                />
+            ))}
+            
+            {realBookings.length === 0 && (
+              <div className="text-center py-20 glass-card">
+                <p className="text-slate-400 mb-4">You haven't booked any sessions yet.</p>
+                <button onClick={() => setView("discovery")} className="text-indigo-400 font-semibold hover:text-indigo-300">
+                  Find a Coach →
+                </button>
               </div>
-            </div>
+            )}
           </div>
         )}
 
