@@ -4,6 +4,12 @@ import { createClient } from "@/app/lib/supabase/server";
 import { stripe } from "@/app/lib/stripe/server";
 
 export async function createStripeConnectAccount() {
+  const getBaseUrl = () => {
+    let url = process.env.NEXT_PUBLIC_SITE_URL ?? "https://coachingmatch.co";
+    url = url.includes("http") ? url : `https://${url}`;
+    return url.endsWith("/") ? url.slice(0, -1) : url;
+  };
+  const baseUrl = getBaseUrl();
   const supabase = await createClient();
   const {
     data: { user },
@@ -41,8 +47,8 @@ export async function createStripeConnectAccount() {
     // 3. Create an onboarding link
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
-      refresh_url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}`,
-      return_url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}?setup=success`,
+      refresh_url: `${baseUrl}`,
+      return_url: `${baseUrl}?setup=success`,
       type: "account_onboarding",
     });
 
