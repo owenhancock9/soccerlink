@@ -48,12 +48,21 @@ export default function EditCoachProfile() {
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
+  const addSlot = (day: string) => {
+    setAvailability((prev) => [...prev, { day, start: "09:00", end: "17:00" }]);
+  };
+
+  const removeSlot = (index: number) => {
+    setAvailability((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const toggleDay = (day: string) => {
-    setAvailability((prev) => {
-      const exists = prev.find((s) => s.day === day);
-      if (exists) return prev.filter((s) => s.day !== day);
-      return [...prev, { day, start: "09:00", end: "17:00" }];
-    });
+    const daySlots = availability.filter((s) => s.day === day);
+    if (daySlots.length > 0) {
+      setAvailability((prev) => prev.filter((s) => s.day !== day));
+    } else {
+      addSlot(day);
+    }
   };
 
   async function refreshStripeStatus() {
@@ -82,12 +91,20 @@ export default function EditCoachProfile() {
         setBio(data.bio || "");
         setExperience(data.experience || "");
         setHighlightUrl(data.highlight_reel_url || "");
-        const parsedSlots: TimeSlot[] = (data.availability || []).map((slot: string) => {
-          const match = slot.match(/^([A-Za-z]+):\s*(.*)\s*-\s*(.*)$/);
-          if (match) return { day: match[1], start: match[2], end: match[3] };
-          return { day: slot, start: "09:00", end: "17:00" };
-        });
-        setAvailability(parsedSlots);
+        if (data.availability) {
+          // Fallback handle for old string format if any exists, but primarily expect JSON
+          let slots: TimeSlot[] = [];
+          if (Array.isArray(data.availability)) {
+            slots = data.availability.map((s: { day?: string; start?: string; end?: string } | string) => {
+              if (typeof s === 'string') {
+                 const match = s.match(/^([A-Za-z]+):\s*(.*)\s*-\s*(.*)$/);
+                 return match ? { day: match[1], start: match[2], end: match[3] } : null;
+              }
+              return s;
+            }).filter(Boolean) as TimeSlot[];
+          }
+          setAvailability(slots);
+        }
         setStripeOnboarded(data.stripe_onboarding_complete || false);
       }
       setLoading(false);
@@ -118,8 +135,7 @@ export default function EditCoachProfile() {
     formData.set("bio", bio);
     formData.set("experience", experience);
     formData.set("highlight_reel_url", highlightUrl);
-    const formatAvailability = availability.map((slot) => `${slot.day}: ${slot.start} - ${slot.end}`);
-    formData.set("availability", JSON.stringify(formatAvailability));
+    formData.set("availability", JSON.stringify(availability));
 
     const result = await updateCoachProfile(formData);
 
@@ -342,58 +358,90 @@ export default function EditCoachProfile() {
               <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-6 ml-1">
                  Weekly Operation Schedule
               </label>
-              <div className="grid gap-3">
+              <div className="grid gap-4">
                 {DAYS_OF_WEEK.map((day) => {
-                  const slot = availability.find((s) => s.day === day);
-                  const isSelected = !!slot;
+                  const daySlots = availability.filter((s) => s.day === day);
+                  const isSelected = daySlots.length > 0;
 
                   return (
                     <div
                       key={day}
-                      className={`flex flex-col sm:flex-row sm:items-center gap-5 p-5 rounded-2xl border transition-all duration-500 ${
+                      className={`flex flex-col gap-5 p-6 rounded-2xl border transition-all duration-500 ${
                         isSelected
                           ? "bg-slate-950/80 border-emerald-500/40 shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
                           : "bg-slate-950/20 border-slate-900 opacity-60 hover:opacity-100"
                       }`}
                     >
-                      <button
-                        type="button"
-                        onClick={() => toggleDay(day)}
-                        className="flex items-center gap-4 cursor-pointer sm:w-32 group/toggle"
-                      >
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                          isSelected ? "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]" : "bg-slate-900 text-slate-600 border border-slate-800"
-                        }`}>
-                          <span className="text-[11px] font-black transition-transform group-hover/toggle:scale-110">{day.toUpperCase()}</span>
-                        </div>
-                        <span className={`text-[10px] font-black uppercase tracking-widest hidden sm:block ${isSelected ? "text-emerald-400" : "text-slate-600"}`}>
-                          {isSelected ? "Active" : "Closed"}
-                        </span>
-                      </button>
+                      <div className="flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => toggleDay(day)}
+                          className="flex items-center gap-4 cursor-pointer group/toggle"
+                        >
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                            isSelected ? "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]" : "bg-slate-900 text-slate-600 border border-slate-800"
+                          }`}>
+                            <span className="text-[11px] font-black transition-transform group-hover/toggle:scale-110">{day.toUpperCase()}</span>
+                          </div>
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${isSelected ? "text-emerald-400" : "text-slate-600"}`}>
+                            {isSelected ? `${daySlots.length} Slots Active` : "Closed"}
+                          </span>
+                        </button>
+                        
+                        {isSelected && (
+                          <button
+                            type="button"
+                            onClick={() => addSlot(day)}
+                            className="text-[10px] bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-lg border border-emerald-500/20 font-black uppercase tracking-widest hover:bg-emerald-500/20 transition-all flex items-center gap-2"
+                          >
+                            <span>Add Break</span>
+                            <span className="text-sm">+</span>
+                          </button>
+                        )}
+                      </div>
 
-                      {isSelected && slot && (
-                        <div className="flex items-center gap-4 anim-fade-in text-sm ml-auto sm:ml-0">
-                          <input
-                            type="time"
-                            value={slot.start}
-                            onChange={(e) => {
-                              setAvailability(
-                                availability.map((s) => (s.day === day ? { ...s, start: e.target.value } : s)),
-                              );
-                            }}
-                            className="bg-slate-900 border border-slate-800 rounded-[0.75rem] px-4 py-2.5 outline-none focus:border-emerald-500/50 text-white font-mono font-bold text-xs transition-all shadow-inner"
-                          />
-                          <span className="text-slate-700 font-bold">—</span>
-                          <input
-                            type="time"
-                            value={slot.end}
-                            onChange={(e) => {
-                              setAvailability(
-                                availability.map((s) => (s.day === day ? { ...s, end: e.target.value } : s)),
-                              );
-                            }}
-                            className="bg-slate-900 border border-slate-800 rounded-[0.75rem] px-4 py-2.5 outline-none focus:border-emerald-500/50 text-white font-mono font-bold text-xs transition-all shadow-inner"
-                          />
+                      {isSelected && (
+                        <div className="grid gap-3 anim-fade-in pl-1 sm:pl-14">
+                          {availability.map((s, idx) => {
+                            if (s.day !== day) return null;
+                            return (
+                              <div key={`${day}-${idx}`} className="flex items-center gap-4 bg-slate-900/50 p-3 rounded-xl border border-slate-800 animate-slide-in">
+                                <div className="flex items-center gap-3">
+                                  <input
+                                    type="time"
+                                    value={s.start}
+                                    onChange={(e) => {
+                                      setAvailability(
+                                        availability.map((slot, i) => (i === idx ? { ...slot, start: e.target.value } : slot)),
+                                      );
+                                    }}
+                                    className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 outline-none focus:border-emerald-500/50 text-white font-mono font-bold text-xs transition-all"
+                                  />
+                                  <span className="text-slate-700 font-bold text-[10px] uppercase">to</span>
+                                  <input
+                                    type="time"
+                                    value={s.end}
+                                    onChange={(e) => {
+                                      setAvailability(
+                                        availability.map((slot, i) => (i === idx ? { ...slot, end: e.target.value } : slot)),
+                                      );
+                                    }}
+                                    className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 outline-none focus:border-emerald-500/50 text-white font-mono font-bold text-xs transition-all"
+                                  />
+                                </div>
+                                
+                                {daySlots.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => removeSlot(idx)}
+                                    className="ml-auto w-8 h-8 rounded-lg flex items-center justify-center text-slate-600 hover:text-rose-500 hover:bg-rose-500/10 transition-all"
+                                  >
+                                    ✕
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>

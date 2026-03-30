@@ -50,7 +50,7 @@ export async function getCoaches() {
       bio: (coach.bio as string) || "No bio yet.",
       experience: (coach.experience as string) || "",
       highlightUrl: (coach.highlight_reel_url as string) || "",
-      availability: (coach.availability as string[]) || [],
+      availability: (coach.availability as { day: string; start: string; end: string }[]) || [],
       avatar: (profile?.full_name as string)?.charAt(0)?.toUpperCase() || "C",
       gradient: getGradient(coach.id as string),
     };
@@ -112,7 +112,7 @@ export async function updateCoachProfile(formData: FormData) {
   const highlight_reel_url = formData.get("highlight_reel_url") as string;
   const availabilityText = formData.get("availability") as string;
 
-  let availability = [];
+  let availability: { day: string; start: string; end: string }[] = [];
   try {
     availability = JSON.parse(availabilityText || "[]");
   } catch {
@@ -166,6 +166,7 @@ export async function getAllCoachesAdmin() {
       rating,
       review_count,
       banned,
+      availability,
       stripe_account_id,
       stripe_onboarding_complete,
       profiles!inner (

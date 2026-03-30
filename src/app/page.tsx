@@ -49,6 +49,41 @@ interface Booking {
   [key: string]: unknown; // Index signature for safety with dynamic properties
 }
 
+/* ─── Scheduling Helpers ─── */
+interface AvailabilitySlot {
+  day: string;
+  start: string;
+  end: string;
+}
+
+function getAvailableSlots(availability: AvailabilitySlot[], date: Date) {
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const dayName = days[date.getDay()];
+  const daySlots = availability.filter((s) => s.day === dayName);
+  
+  if (!daySlots || daySlots.length === 0) return [];
+  
+  const intervals: string[] = [];
+  daySlots.forEach((slot) => {
+    try {
+      // Create date objects for comparison (dummy date)
+      const [startH, startM] = slot.start.split(':').map(Number);
+      const [endH, endM] = slot.end.split(':').map(Number);
+      
+      const current = new Date(2024, 0, 1, startH, startM);
+      const end = new Date(2024, 0, 1, endH, endM);
+      
+      while (current < end) {
+        intervals.push(current.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }));
+        current.setHours(current.getHours() + 1);
+      }
+    } catch (e) {
+      console.error("Error parsing slot:", e);
+    }
+  });
+  return intervals;
+}
+
 /* ─── Star Renderer ─── */
 function Stars({ rating }: { rating: number }) {
   const full = Math.floor(rating);
@@ -81,7 +116,7 @@ interface Coach {
   gradient: string;
   experience?: string;
   highlightUrl?: string;
-  availability?: string[];
+  availability: AvailabilitySlot[];
 }
 
 function CoachCard({
@@ -95,86 +130,96 @@ function CoachCard({
 }) {
   return (
     <div
-      className="glass-card p-7 flex flex-col justify-between group overflow-visible relative border-slate-800/60 hover:border-indigo-500/30 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+      className="glass-card p-8 flex flex-col justify-between group overflow-visible relative border-slate-800/60 hover:border-emerald-500/30 transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] hover:-translate-y-2"
       style={{ animationDelay: `${index * 80}ms` }}
     >
-      {/* Background Glow */}
-      <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${coach.gradient} opacity-[0.02] blur-3xl rounded-full -mr-16 -mt-16 group-hover:opacity-[0.05] transition-all duration-700`} />
+      {/* Background Ambient Glow */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${coach.gradient} opacity-[0.02] blur-3xl rounded-full transition-opacity duration-1000 group-hover:opacity-[0.08] pointer-events-none`} />
       
       <div className="relative z-10">
-        {/* Header Section */}
-        <div className="flex justify-between items-start mb-8">
-          <div className="flex items-center gap-5">
-            <div className="relative">
+        {/* Superior Header */}
+        <div className="flex justify-between items-start mb-10">
+          <div className="flex items-center gap-6">
+            <div className="relative group/avatar">
               <div
-                className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-black text-xl shadow-2xl shrink-0 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 z-10 relative border border-white/10`}
+                className={`w-16 h-16 rounded-[1.5rem] bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-black text-2xl shadow-2xl shrink-0 transition-all duration-700 group-hover/avatar:scale-110 group-hover/avatar:rotate-6 z-10 relative border-2 border-white/10`}
               >
                 {coach.avatar}
               </div>
-              <div className={`absolute inset-0 bg-gradient-to-br ${coach.gradient} blur-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-700 rounded-full scale-125`} />
+              <div className={`absolute inset-0 bg-gradient-to-br ${coach.gradient} blur-2xl opacity-0 group-hover/avatar:opacity-60 transition-opacity duration-1000 rounded-full scale-150`} />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-4 border-slate-900 z-20 shadow-lg" title="Online now" />
             </div>
             
             <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-2.5 mb-1.5 flex-wrap">
-                <h3 className="text-xl font-black text-white tracking-tighter leading-none">
+              <div className="flex items-center gap-3 mb-1.5 flex-wrap">
+                <h3 className="text-2xl font-black text-white tracking-tighter leading-none group-hover:text-emerald-400 transition-colors">
                   {coach.name}
                 </h3>
                 {coach.verified && (
-                  <span className="shrink-0 flex items-center gap-1 text-[9px] bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-lg border border-emerald-500/20 font-black uppercase tracking-[0.1em] shadow-sm shadow-emerald-500/5">
-                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
-                    PRO
-                  </span>
+                  <div className="shrink-0 flex items-center gap-1.5 text-[10px] bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30 font-black uppercase tracking-widest shadow-lg shadow-emerald-500/10">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
+                    VERIFIED
+                  </div>
                 )}
               </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                    <Stars rating={coach.rating} />
-                   <span className="text-[11px] text-white font-black font-mono tracking-tighter">
+                   <span className="text-sm text-white font-black font-mono tracking-tighter">
                      {coach.rating}
                    </span>
                 </div>
-                <span className="w-1 h-1 rounded-full bg-slate-800" />
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest opacity-80 decoration-slate-700">
-                  {coach.reviews} REVIEWS
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-slate-700" />
+                  <span className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] opacity-80">
+                    {coach.reviews} INTEL REVIEWS
+                  </span>
+                </div>
               </div>
             </div>
           </div>
           
           <div className="flex flex-col items-end leading-none">
-            <span className="text-2xl font-black text-white font-mono tracking-tighter">
+            <span className="text-3xl font-black text-white font-mono tracking-tighter">
               ${coach.rate}
             </span>
-            <span className="text-[9px] text-slate-600 uppercase font-black tracking-[0.2em] mt-1.5 opacity-60">PER SESSION</span>
+            <span className="text-[9px] text-slate-600 uppercase font-black tracking-[0.25em] mt-2 opacity-60">PER SESSION</span>
           </div>
         </div>
 
-        {/* Tactical Info */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <span className="bg-slate-950/80 text-slate-300 text-[9px] px-3 py-1.5 rounded-lg font-black uppercase tracking-[0.15em] border border-slate-800/80 shadow-inner">
+        {/* Technical Profile Tags */}
+        <div className="flex flex-wrap gap-2.5 mb-8">
+          <span className="bg-slate-950/80 text-slate-200 text-[10px] px-4 py-2 rounded-xl font-black uppercase tracking-[0.2em] border border-slate-800 shadow-[inset_0_2px_10px_rgba(0,0,0,0.4)]">
             {coach.role}
           </span>
-          <span className="text-cyan-400 text-[10px] font-black font-mono uppercase tracking-widest bg-cyan-500/10 px-3 py-1.5 rounded-lg border border-cyan-500/20">
+          <span className="text-indigo-400 text-[10px] font-black font-mono uppercase tracking-[0.2em] bg-indigo-500/10 px-4 py-2 rounded-xl border border-indigo-500/20 shadow-lg shadow-indigo-500/5">
             {coach.style}
           </span>
         </div>
 
-        {/* Narrative Bio */}
-        <p className="text-sm text-slate-400/90 leading-relaxed mb-8 line-clamp-2 font-medium tracking-tight h-10 italic">
-          &quot;{coach.bio}&quot;
-        </p>
+        {/* Narrative Strategic Bio */}
+        <div className="relative mb-10 group/bio">
+          <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-slate-800 to-transparent opacity-50 group-hover/bio:via-emerald-500/50 transition-all duration-700" />
+          <p className="text-sm text-slate-400 leading-relaxed line-clamp-3 font-medium tracking-tight italic pl-2">
+            &quot;{coach.bio || "Tactical specialist available for full-match analysis and position-specific breakdown."}&quot;
+          </p>
+        </div>
 
-        {/* Digital Availability Rails */}
+        {/* Real-time Schedule Status */}
         {coach.availability && coach.availability.length > 0 && (
-          <div className="mb-8 overflow-hidden relative group/rails">
-            <div className="flex gap-2.5">
-              {coach.availability.map((day) => (
+          <div className="mb-10 bg-slate-950/50 rounded-2xl p-4 border border-slate-900 shadow-inner group/schedule">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-[9px] text-slate-600 font-black uppercase tracking-[0.3em]">Operational Readiness</span>
+              <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest animate-pulse">Available</span>
+            </div>
+            <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
+              {coach.availability.map((slot: AvailabilitySlot, i: number) => (
                 <div
-                  key={day}
-                  className="flex flex-col items-center bg-slate-950 border border-slate-800/60 rounded-xl px-4 py-2 min-w-[64px] transition-all group-hover/rails:border-indigo-500/20 group-hover/rails:bg-indigo-500/[0.02]"
+                  key={i}
+                  className="flex flex-col items-center bg-slate-900 border border-slate-800/80 rounded-xl px-4 py-2.5 min-w-[80px] transition-all hover:border-emerald-500/30 hover:bg-emerald-500/[0.03]"
                 >
-                  <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest mb-1.5">{day.split(" ")[0]}</span>
-                  <span className="text-[10px] text-slate-300 font-black font-mono">{day.split(" ")[1] || "ANY"}</span>
+                  <span className="text-[8px] text-slate-500 font-black uppercase tracking-widest mb-1.5">{slot.day?.substring(0, 3)}</span>
+                  <span className="text-[10px] text-slate-200 font-black font-mono">{slot.start}</span>
                 </div>
               ))}
             </div>
@@ -182,16 +227,16 @@ function CoachCard({
         )}
       </div>
 
-      {/* Deployment Trigger (CTA) */}
-      <div className="relative">
+      {/* Primary Action Trigger */}
+      <div className="relative mt-auto">
         <button
           id={`book-coach-${coach.id}`}
           onClick={() => onBook(coach)}
-          className="relative w-full py-4.5 bg-white text-black hover:bg-slate-200 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] transition-all active:scale-[0.98] overflow-hidden group/btn shadow-[0_15px_30px_rgba(255,255,255,0.1)] hover:-translate-y-1"
+          className="relative w-full py-5 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] transition-all duration-500 active:scale-[0.98] overflow-hidden group/btn shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_25px_50px_rgba(16,185,129,0.3)] hover:-translate-y-1 block text-center"
         >
-          {/* Shimmer Effect */}
-          <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite] pointer-events-none" />
-          Reserve Deployment
+          {/* Shimmer Intensity */}
+          <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1s_infinite] pointer-events-none" />
+          <span className="relative z-10">Initiate Tactical Protocol</span>
         </button>
       </div>
     </div>
@@ -553,12 +598,13 @@ export default function SoccerPlatform() {
                           Coach&apos;s Weekly Hours
                         </p>
                         <div className="flex flex-wrap gap-2.5">
-                          {selectedCoach.availability.map((day, i) => (
+                          {selectedCoach.availability.map((slot: AvailabilitySlot, i: number) => (
                             <span
                               key={i}
-                              className="text-xs bg-slate-950 text-slate-200 px-4 py-2.5 rounded-xl border-l-4 border-emerald-500 font-mono font-bold shadow-2xl flex items-center"
+                              className="text-[10px] bg-slate-950 text-slate-200 px-3 py-2 rounded-xl border-l-2 border-emerald-500 font-mono font-bold shadow-2xl flex items-center gap-2"
                             >
-                              {day}
+                              <span className="text-emerald-500/50">{slot.day}</span>
+                              {slot.start} - {slot.end}
                             </span>
                           ))}
                         </div>
@@ -626,20 +672,27 @@ export default function SoccerPlatform() {
                         <label className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black block mb-4 ml-1">
                           2 • Preferred Time
                         </label>
-                        <div className="grid grid-cols-1 gap-2.5">
-                          {["10:00 AM", "2:30 PM", "7:00 PM"].map((t) => (
-                            <button
-                              key={t}
-                              onClick={() => setSelectedTime(t)}
-                              className={`w-full py-3.5 rounded-2xl text-[13px] font-black tracking-wide transition-all border-2 ${
-                                selectedTime === t
-                                  ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[inset_0_0_20px_rgba(16,185,129,0.05)]"
-                                  : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200 shadow-lg"
-                              }`}
-                            >
-                              {t}
-                            </button>
-                          ))}
+                        <div className="grid grid-cols-2 gap-3">
+                          {getAvailableSlots(selectedCoach.availability || [], new Date(2025, 9, selectedDate || 1)).length > 0 ? (
+                            getAvailableSlots(selectedCoach.availability || [], new Date(2025, 9, selectedDate || 1)).map((t) => (
+                              <button
+                                key={t}
+                                type="button"
+                                onClick={() => setSelectedTime(t)}
+                                className={`py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all border-2 ${
+                                  selectedTime === t
+                                    ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+                                    : "bg-slate-900/50 border-slate-800/40 text-slate-500 hover:border-slate-700 hover:text-slate-300"
+                                }`}
+                              >
+                                {t}
+                              </button>
+                            ))
+                          ) : (
+                            <div className="col-span-2 py-8 bg-slate-950/40 rounded-2xl border border-slate-800 border-dashed text-center">
+                              <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest">No availability on this day</p>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -962,89 +1015,90 @@ export default function SoccerPlatform() {
       >
         {/* ── VIEW 1: DISCOVERY ── */}
         {view === "discovery" && currentUser.role === "player" && (
-          <section className="anim-fade-in-up">
+          <section className="anim-fade-in-up pb-32">
             {/* Hero Section */}
-            <div className="pt-12 md:pt-24 pb-16 relative z-20 overflow-hidden md:overflow-visible">
-              <div className="absolute top-1/2 left-1/4 w-[70vw] md:w-[60vw] h-[70vw] md:h-[60vw] bg-emerald-600/[0.04] blur-[100px] rounded-full -translate-y-1/2 -z-10 animate-pulse pointer-events-none" />
-              <div className="absolute top-1/4 right-1/4 w-[50vw] md:w-[40vw] h-[50vw] md:h-[40vw] bg-cyan-600/[0.03] blur-[120px] rounded-full -translate-y-1/2 -z-10 pointer-events-none" />
-              
-              <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter mb-6 text-white leading-[1.05] drop-shadow-2xl">
-                Elevate Your <br className="hidden md:block"/> <span className="gradient-text-accent">Game.</span>
-              </h1>
-              <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl leading-relaxed mb-12 drop-shadow-sm">
-                Book 1-on-1 video breakdown and tactical review with verified professional players, college athletes, and elite coaches.
-              </p>
-              
-              {/* Search & Filter Bar */}
-              <div className="flex flex-col md:flex-row gap-4 items-center w-full max-w-3xl glass-card p-3 shadow-2xl">
-                <div className="relative w-full group">
-                  <input
-                    id="coach-search"
-                    type="text"
-                    placeholder="Search coaches, styles, or roles..."
-                    className="w-full pl-12 pr-4 py-4 bg-transparent outline-none text-white placeholder:text-slate-500 font-semibold text-lg transition-all"
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg group-focus-within:text-emerald-400 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                    </svg>
-                  </div>
+            <div className="pt-20 md:pt-32 pb-24 relative">
+              {/* Dynamic Background Elements */}
+              <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
+                <div className="absolute top-1/4 -left-20 w-[40rem] h-[40rem] bg-indigo-600/[0.07] blur-[120px] rounded-full animate-pulse" />
+                <div className="absolute bottom-0 right-1/4 w-[30rem] h-[30rem] bg-emerald-600/[0.05] blur-[100px] rounded-full animate-[pulse_8s_infinite]" />
+              </div>
+
+              <div className="flex flex-col items-center text-center max-w-4xl mx-auto px-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 border border-slate-800/80 mb-10 transition-all hover:border-indigo-500/30 group cursor-default">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 group-hover:text-emerald-400 transition-colors">Elite Performance Network</span>
                 </div>
 
-                <div className="h-10 w-px bg-slate-800 hidden md:block" />
-
-                <div className="relative w-full md:w-auto md:min-w-[200px] shrink-0">
-                  <button
-                    id="filter-toggle"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsFilterOpen(!isFilterOpen);
-                    }}
-                    className="w-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/50 px-5 py-4 rounded-xl font-bold text-[15px] flex justify-between items-center gap-3 text-slate-200 transition-all duration-300 hover:shadow-lg"
-                  >
-                  {activeFilter}
-                  <span
-                    className="text-xs transition-transform duration-200"
-                    style={{
-                      transform: isFilterOpen ? "rotate(180deg)" : "none",
-                    }}
-                  >
-                    ▼
-                  </span>
-                </button>
-                {isFilterOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800/95 backdrop-blur-xl border border-slate-600/50 rounded-xl shadow-2xl shadow-black/30 overflow-hidden z-50 anim-fade-in-down">
-                    {[
-                      "All Roles",
-                      "Striker",
-                      "Midfield",
-                      "Defense",
-                      "Tactical",
-                    ].map((role) => (
+                <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter mb-8 text-white leading-[0.9] drop-shadow-2xl">
+                  Unlock Your <br/> <span className="gradient-text-accent">Tactical Edge.</span>
+                </h1>
+                
+                <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl leading-relaxed mb-16 drop-shadow-sm opacity-90">
+                  Connect with verified professional coaches for high-precision video breakdowns and tactical intelligence to dominate your league.
+                </p>
+                
+                {/* Search & Filter Bar */}
+                <div className="w-full max-w-3xl glass-card p-4 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] border-slate-800/40 relative group/search overflow-visible transition-all hover:border-indigo-500/20">
+                  <div className="flex flex-col md:flex-row gap-4 items-center">
+                    <div className="relative w-full group">
+                      <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-600 group-focus-within:text-indigo-400 transition-colors">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                      </div>
+                      <input
+                        id="coach-search"
+                        className="w-full bg-slate-950/40 border border-slate-800 focus:border-indigo-500/50 rounded-2xl py-4.5 pl-14 pr-6 outline-none text-white font-bold text-sm tracking-tight transition-all shadow-inner placeholder:text-slate-600"
+                        placeholder="Search by position, style, or coach name..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="shrink-0 flex items-center gap-3 w-full md:w-auto">
                       <button
-                        key={role}
-                        onClick={() => {
-                          setActiveFilter(role);
-                          setIsFilterOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-3 text-sm font-medium border-b border-slate-700/30 last:border-0 transition-colors duration-150 ${
-                          activeFilter === role
-                            ? "bg-indigo-600/15 text-indigo-400"
-                            : "hover:bg-slate-700/50 text-slate-300"
+                        id="filter-toggle"
+                        onClick={() => setIsFilterOpen(!isFilterOpen)}
+                        className={`flex items-center justify-between md:justify-start gap-3 w-full md:w-auto px-6 py-4.5 rounded-2xl font-black text-[11px] uppercase tracking-widest border transition-all ${
+                          isFilterOpen || activeFilter !== "All Roles"
+                            ? "bg-indigo-500/10 border-indigo-500/40 text-indigo-400 shadow-lg shadow-indigo-500/5"
+                            : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700"
                         }`}
                       >
-                        {role}
+                        <div className="flex items-center gap-3">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                          {activeFilter === "All Roles" ? "Filters" : activeFilter}
+                        </div>
+                        <span className={`text-[8px] transition-transform ${isFilterOpen ? 'rotate-180' : ''}`}>▼</span>
                       </button>
-                    ))}
+                    </div>
                   </div>
-                )}
+                  
+                  {isFilterOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-4 bg-slate-900 border border-slate-800 rounded-[2rem] p-6 shadow-3xl z-50 anim-scale-in grid grid-cols-2 md:grid-cols-5 gap-3">
+                      {["All Roles", "Forward", "Midfielder", "Defender", "Goalkeeper"].map((f) => (
+                        <button
+                          key={f}
+                          onClick={() => {
+                            setActiveFilter(f);
+                            setIsFilterOpen(false);
+                          }}
+                          className={`py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                            activeFilter === f
+                              ? "bg-indigo-500 text-white shadow-xl shadow-indigo-600/20"
+                              : "bg-slate-950 border border-slate-800 text-slate-500 hover:text-white hover:border-slate-700"
+                          }`}
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Coach Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-5 relative z-10 stagger-children">
+            {/* Coach Grid */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 relative z-10 stagger-children">
               {filteredCoaches.map((coach, i) => (
                 <CoachCard
                   key={coach.id}
@@ -1056,39 +1110,71 @@ export default function SoccerPlatform() {
             </div>
 
             {filteredCoaches.length === 0 && allCoaches.length === 0 && coachesLoaded && (
-              <div className="text-center py-20 anim-fade-in">
-                <p className="text-6xl mb-6">🏟️</p>
-                <h3 className="text-xl font-bold text-white mb-3">No Coaches Yet</h3>
-                <p className="text-slate-400 max-w-md mx-auto leading-relaxed">
-                  Be the first to join CoachMatching! Sign up as a coach to start offering your expertise to players worldwide.
+              <div className="text-center py-32 anim-fade-in glass-card border-dashed">
+                <p className="text-6xl mb-8">🏟️</p>
+                <h3 className="text-2xl font-black text-white mb-4 tracking-tighter">No Active Deployments</h3>
+                <p className="text-slate-400 max-w-sm mx-auto leading-relaxed font-bold uppercase text-[10px] tracking-[0.2em]">
+                  Be the first to join the elite network.
                 </p>
                 {!currentUser.isAuthenticated && (
                   <Link
                     href="/signup"
-                    className="inline-block mt-6 bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-6 py-3 rounded-xl font-semibold text-sm hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-300"
+                    className="inline-block mt-10 gradient-btn px-8 py-4 text-xs"
                   >
-                    Sign Up as a Coach →
+                    Register as Coach →
                   </Link>
                 )}
               </div>
             )}
 
             {filteredCoaches.length === 0 && allCoaches.length > 0 && (
-              <div className="text-center py-20 anim-fade-in">
-                <p className="text-slate-500 text-lg font-medium">
-                  No coaches found matching your criteria.
+              <div className="text-center py-32 anim-fade-in glass-card">
+                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mb-4">
+                  0 RESULTS FOUND FOR QUERY
                 </p>
                 <button
                   onClick={() => {
                     setSearch("");
                     setActiveFilter("All Roles");
                   }}
-                  className="mt-3 text-indigo-400 text-sm hover:underline"
+                  className="text-indigo-400 text-[12px] font-bold uppercase tracking-widest hover:underline decoration-2"
                 >
-                  Clear filters
+                  Reset Parameters
                 </button>
               </div>
             )}
+
+            {/* Tactical Lifecycle Section */}
+            <div className="mt-40 mb-20">
+              <div className="text-center mb-20 flex flex-col items-center">
+                <span className="text-[10px] font-black tracking-[0.4em] uppercase text-emerald-500 mb-6 bg-emerald-500/10 px-6 py-2 rounded-full border border-emerald-500/20 shadow-xl shadow-emerald-500/5">Protocol Overview</span>
+                <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-white mb-6">The Tactical <span className="gradient-text-accent">Lifecycle.</span></h2>
+                <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-[11px] max-w-lg leading-loose opacity-70">A professional-grade performance optimization pipeline secured by encrypted escrow.</p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
+                <div className="glass-card p-10 relative group hover:border-indigo-500/30 transition-all duration-700">
+                  <div className="absolute top-0 right-0 p-8 text-6xl font-black text-slate-800/20 group-hover:text-indigo-500/10 transition-colors">01</div>
+                  <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-2xl mb-8 border border-indigo-500/20 shadow-xl shadow-indigo-500/5 group-hover:scale-110 transition-transform">🎯</div>
+                  <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Reserve Agent</h4>
+                  <p className="text-sm text-slate-400 leading-relaxed font-medium">Select a verified professional or tactical specialist matching your performance profile and book a high-precision review slot.</p>
+                </div>
+
+                <div className="glass-card p-10 relative group hover:border-emerald-500/30 transition-all duration-700">
+                  <div className="absolute top-0 right-0 p-8 text-6xl font-black text-slate-800/20 group-hover:text-emerald-500/10 transition-colors">02</div>
+                  <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-2xl mb-8 border border-emerald-500/20 shadow-xl shadow-emerald-500/5 group-hover:scale-110 transition-transform">🔐</div>
+                  <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Secure Escrow</h4>
+                  <p className="text-sm text-slate-400 leading-relaxed font-medium">Deployment funds are locked in our secure vault. Coaches only receive payment upon successful upload of your custom tactical VOD breakdown.</p>
+                </div>
+
+                <div className="glass-card p-10 relative group hover:border-cyan-500/30 transition-all duration-700">
+                  <div className="absolute top-0 right-0 p-8 text-6xl font-black text-slate-800/20 group-hover:text-cyan-500/10 transition-colors">03</div>
+                  <div className="w-14 h-14 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-2xl mb-8 border border-cyan-500/20 shadow-xl shadow-cyan-500/5 group-hover:scale-110 transition-transform">📊</div>
+                  <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Review Intel</h4>
+                  <p className="text-sm text-slate-400 leading-relaxed font-medium">Receive your encrypted tactical intelligence packet including timestamped analysis, technical corrections, and elite performance scaling.</p>
+                </div>
+              </div>
+            </div>
           </section>
         )}
 
