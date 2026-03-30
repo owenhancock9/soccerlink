@@ -518,6 +518,27 @@ export default function EditCoachProfile() {
                     )}
                     Refresh Connection Status
                   </button>
+
+                  <button
+                    type="button"
+                    disabled={isSyncing}
+                    onClick={async () => {
+                      const { resetStripeConnection } = await import('@/app/actions/stripe');
+                      if (confirm("This will completely erase your current Stripe connection so you can start the process over. Are you sure you want to restart?")) {
+                         setIsSyncing(true);
+                         const res = await resetStripeConnection();
+                         if (res.success) {
+                           window.location.reload();
+                         } else {
+                           setMessage({ type: "error", text: `Reset failed: ${res.error}` });
+                           setIsSyncing(false);
+                         }
+                      }
+                    }}
+                    className="flex-shrink bg-red-500/10 border border-red-500/50 hover:bg-red-500/20 text-red-500 py-4 px-4 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl flex items-center justify-center group/reset"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
                 </div>
               </div>
             )}
