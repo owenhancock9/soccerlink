@@ -1317,11 +1317,10 @@ export default function SoccerPlatform() {
                       <p className="text-xs font-medium text-slate-400 leading-relaxed max-w-xl">
                         You must complete your Stripe onboarding to receive session payouts. Your profile is currently hidden from players until this connection is verified.
                       </p>
-                      {profile && !profile.stripe_onboarding_complete && (
-                        <p className="text-[10px] text-rose-500/80 mt-3 font-mono uppercase tracking-[0.2em] bg-rose-500/5 p-2 rounded-lg border border-rose-500/20 max-w-sm">
-                           System Check: {profile.dbError ? `DB ERR: ${profile.dbError}` : (profile.stripeDiagnostic || 'Awaiting ID Link')}
-                        </p>
-                      )}
+                      <div className="mt-4 p-3 bg-red-900/50 text-red-100 text-[10px] font-mono whitespace-pre-wrap rounded-md border border-red-500/50">
+                        RAW PROFILE DATA:
+                        {JSON.stringify(profile || { nullOrUndefined: true }, null, 2)}
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-3 w-full md:w-auto">
