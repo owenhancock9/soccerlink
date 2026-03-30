@@ -213,15 +213,15 @@ export default function EditCoachProfile() {
             </div>
             <input
               type="range"
-              min="20"
+              min="1"
               max="200"
-              step="5"
+              step="1"
               value={rate}
               onChange={(e) => setRate(parseInt(e.target.value))}
               className="w-full mt-4 accent-emerald-500 h-2 bg-slate-800 rounded-full appearance-none cursor-pointer"
             />
             <div className="flex justify-between text-[10px] text-slate-600 mt-1">
-              <span>$20</span>
+              <span>$1</span>
               <span>$200</span>
             </div>
           </div>

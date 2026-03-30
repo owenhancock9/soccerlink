@@ -8,8 +8,16 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState("player");
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   async function handleSubmit(formData: FormData) {
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     const result = await signUp(formData);
@@ -132,15 +140,48 @@ export default function SignupPage() {
               >
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                minLength={6}
-                placeholder="Min. 6 characters"
-                className="w-full p-4 bg-slate-950/60 border border-slate-700/50 rounded-xl focus:ring-2 ring-indigo-500/50 outline-none text-white placeholder:text-slate-600 transition-all duration-300 focus:bg-slate-900/80 focus:border-indigo-500/30 text-sm"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Min. 6 characters"
+                  className="w-full p-4 bg-slate-950/60 border border-slate-700/50 rounded-xl focus:ring-2 ring-indigo-500/50 outline-none text-white placeholder:text-slate-600 transition-all duration-300 focus:bg-slate-900/80 focus:border-indigo-500/30 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                >
+                  {showPassword ? "👁️" : "👁️‍🗨️"}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-2"
+              >
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repeat your password"
+                  className="w-full p-4 bg-slate-950/60 border border-slate-700/50 rounded-xl focus:ring-2 ring-indigo-500/50 outline-none text-white placeholder:text-slate-600 transition-all duration-300 focus:bg-slate-900/80 focus:border-indigo-500/30 text-sm"
+                />
+              </div>
             </div>
 
             {/* Submit */}

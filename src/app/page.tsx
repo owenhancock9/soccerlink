@@ -12,77 +12,8 @@ import { releaseFundsToCoach } from "@/app/actions/payouts";
 
 /* ─── Constants ─── */
 
-const PLAYER_STATS = { technical: 88, tactical: 75, physical: 92, mental: 81 };
+/* ─── Constants ─── */
 const PLATFORM_CUT = 0.13;
-
-/* ─── Coach's Player Roster ─── */
-const MY_PLAYERS = [
-  {
-    id: 1,
-    name: "Alex Rivera",
-    position: "Midfielder",
-    avatar: "A",
-    gradient: "from-indigo-500 to-violet-600",
-    sessions: 12,
-    lastActive: "2 hours ago",
-    status: "vod-pending" as const,
-    stats: { technical: 88, tactical: 75, physical: 92, mental: 81 },
-    nextSession: "Oct 15 at 2:00 PM",
-    vodsSubmitted: 8,
-  },
-  {
-    id: 2,
-    name: "Jordan Mills",
-    position: "Striker",
-    avatar: "J",
-    gradient: "from-amber-500 to-orange-600",
-    sessions: 7,
-    lastActive: "Yesterday",
-    status: "vod-pending" as const,
-    stats: { technical: 82, tactical: 68, physical: 95, mental: 73 },
-    nextSession: "Oct 16 at 10:00 AM",
-    vodsSubmitted: 5,
-  },
-  {
-    id: 3,
-    name: "Liam Chen",
-    position: "Center Back",
-    avatar: "L",
-    gradient: "from-emerald-500 to-teal-600",
-    sessions: 19,
-    lastActive: "3 days ago",
-    status: "up-to-date" as const,
-    stats: { technical: 71, tactical: 89, physical: 88, mental: 90 },
-    nextSession: "Oct 18 at 6:30 PM",
-    vodsSubmitted: 14,
-  },
-  {
-    id: 4,
-    name: "Sofia Reyes",
-    position: "Winger",
-    avatar: "S",
-    gradient: "from-rose-500 to-pink-600",
-    sessions: 4,
-    lastActive: "1 week ago",
-    status: "up-to-date" as const,
-    stats: { technical: 91, tactical: 66, physical: 85, mental: 70 },
-    nextSession: "Oct 20 at 2:00 PM",
-    vodsSubmitted: 3,
-  },
-  {
-    id: 5,
-    name: "Marcus Johnson",
-    position: "Goalkeeper",
-    avatar: "M",
-    gradient: "from-cyan-500 to-blue-600",
-    sessions: 9,
-    lastActive: "5 hours ago",
-    status: "vod-pending" as const,
-    stats: { technical: 78, tactical: 83, physical: 90, mental: 86 },
-    nextSession: "Oct 14 at 10:00 AM",
-    vodsSubmitted: 7,
-  },
-];
 
 /* ─── Admin Coach type ─── */
 interface AdminCoach {
@@ -1304,25 +1235,34 @@ export default function SoccerPlatform() {
               {[
                 {
                   label: "Escrow Pending",
-                  val: "$180.00",
+                  val: `$${realBookings
+                    .filter((b) => b.status === "completed" && !b.payout_id)
+                    .reduce((sum, b) => sum + Number(b.amount || 0), 0)
+                    .toFixed(2)}`,
                   color: "text-orange-400",
                   icon: "🔒",
                 },
                 {
-                  label: "Available Payout",
-                  val: "$425.50",
+                  label: "Total Earned",
+                  val: `$${realBookings
+                    .filter((b) => b.payout_id)
+                    .reduce((sum, b) => sum + Number(b.amount || 0) * (1 - PLATFORM_CUT), 0)
+                    .toFixed(2)}`,
                   color: "text-emerald-400",
                   icon: "💰",
                 },
                 {
-                  label: "Pending VODs",
-                  val: "3",
+                  label: "Total Sessions",
+                  val: realBookings.length.toString(),
                   color: "text-white",
                   icon: "📹",
                 },
                 {
                   label: "Platform Fee Paid",
-                  val: "$65.50",
+                  val: `$${realBookings
+                    .filter((b) => b.payout_id)
+                    .reduce((sum, b) => sum + Number(b.amount || 0) * PLATFORM_CUT, 0)
+                    .toFixed(2)}`,
                   color: "text-slate-500",
                   icon: "📊",
                 },
@@ -1348,162 +1288,113 @@ export default function SoccerPlatform() {
               <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
               Action Required
             </h3>
-            <div className="glass-card overflow-hidden hover:transform-none">
-              <div className="p-5 md:p-6 flex flex-col md:flex-row justify-between md:items-center border-b border-slate-800/50 gap-4">
-                <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.4)]" />
-                    <p className="font-bold">Alex Rivera (Midfielder)</p>
+            {realBookings.filter(b => b.status === 'completed' && !b.vod_url).length > 0 ? (
+              <div className="glass-card overflow-hidden hover:transform-none">
+                {realBookings.filter(b => b.status === 'completed' && !b.vod_url).map((booking: any) => (
+                  <div key={booking.id} className="p-5 md:p-6 flex flex-col md:flex-row justify-between md:items-center border-b border-slate-800/50 last:border-0 gap-4">
+                    <div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.4)]" />
+                        <p className="font-bold">{(booking.profiles as any)?.full_name || "Anonymous Player"}</p>
+                      </div>
+                      <p className="text-sm text-slate-400 ml-5">
+                        Session on {new Date(booking.session_date).toLocaleDateString()}. Payment confirmed. Awaiting video review.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                       <label className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg shadow-emerald-900/20 active:scale-[0.97] shrink-0 text-white">
+                        {uploadingVod === booking.id ? "Uploading..." : "Upload VOD Breakdown"}
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="video/*"
+                          disabled={!!uploadingVod}
+                          onChange={(e) => handleVodUpload(e, booking.id)}
+                        />
+                      </label>
+                    </div>
                   </div>
-                  <p className="text-sm text-slate-400 ml-5">
-                    Match footage uploaded 2 hours ago. Needs review.
-                  </p>
-                </div>
-                <button className="bg-emerald-600 hover:bg-emerald-500 px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg shadow-emerald-900/20 active:scale-[0.97] shrink-0">
-                  Start VOD Review
-                </button>
+                ))}
               </div>
-              <div className="p-5 md:p-6 flex flex-col md:flex-row justify-between md:items-center gap-4">
-                <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    <span className="w-2 h-2 rounded-full bg-blue-500" />
-                    <p className="font-bold">Jordan Mills (Striker)</p>
-                  </div>
-                  <p className="text-sm text-slate-400 ml-5">
-                    Submitted game film yesterday. Awaiting your breakdown.
-                  </p>
-                </div>
-                <button className="bg-slate-800 hover:bg-slate-700 border border-slate-700/50 px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 active:scale-[0.97] shrink-0">
-                  Review Later
-                </button>
+            ) : (
+              <div className="glass-card p-8 text-center bg-slate-900/20 border-dashed border-slate-800">
+                <p className="text-slate-500 text-sm">No pending actions. You're all caught up!</p>
               </div>
-            </div>
+            )}
 
-            {/* ── My Players ── */}
+            {/* ── My Orders & Players ── */}
             <h3 className="text-base font-bold mb-4 mt-10 text-slate-300 flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-              My Players
+              My Orders & Players
               <span className="text-[10px] bg-slate-800/80 text-slate-500 px-2 py-0.5 rounded-full font-mono ml-1">
-                {MY_PLAYERS.length}
+                {realBookings.length}
               </span>
             </h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
-              {MY_PLAYERS.map((player) => (
-                <div
-                  key={player.id}
-                  className="glass-card p-5 md:p-6 group relative overflow-hidden"
-                >
-                  {/* Subtle gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
-
-                  {/* Header */}
-                  <div className="flex items-start gap-4 mb-4 relative z-10">
-                    <div
-                      className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${player.gradient} flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
-                    >
-                      {player.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-base font-bold text-white truncate">
-                        {player.name}
-                      </h4>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="bg-slate-800/80 text-slate-300 text-[10px] px-2.5 py-0.5 rounded-lg font-semibold uppercase tracking-wider">
-                          {player.position}
-                        </span>
-                        <span
-                          className={`text-[9px] px-2 py-0.5 rounded-full font-semibold border ${
-                            player.status === "vod-pending"
-                              ? "bg-orange-500/10 text-orange-400 border-orange-500/25"
-                              : "bg-emerald-500/10 text-emerald-400 border-emerald-500/25"
-                          }`}
-                        >
-                          {player.status === "vod-pending"
-                            ? "⏳ VOD PENDING"
-                            : "✓ UP TO DATE"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Mini Stats */}
-                  <div className="grid grid-cols-4 gap-2 mb-4 relative z-10">
-                    {[
-                      {
-                        label: "TEC",
-                        val: player.stats.technical,
-                        color: "text-indigo-400",
-                      },
-                      {
-                        label: "TAC",
-                        val: player.stats.tactical,
-                        color: "text-cyan-400",
-                      },
-                      {
-                        label: "PHY",
-                        val: player.stats.physical,
-                        color: "text-emerald-400",
-                      },
-                      {
-                        label: "MEN",
-                        val: player.stats.mental,
-                        color: "text-amber-400",
-                      },
-                    ].map((s) => (
-                      <div
-                        key={s.label}
-                        className="text-center bg-slate-950/40 rounded-lg py-2 border border-slate-800/30"
-                      >
-                        <p className="text-[9px] text-slate-500 uppercase tracking-wider font-semibold mb-0.5">
-                          {s.label}
-                        </p>
-                        <p
-                          className={`font-mono font-extrabold text-sm ${s.color}`}
-                        >
-                          {s.val}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Meta Info */}
-                  <div className="space-y-2 text-sm relative z-10">
-                    <div className="flex justify-between text-slate-400">
-                      <span>Sessions</span>
-                      <span className="text-white font-semibold font-mono">
-                        {player.sessions}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>VODs Submitted</span>
-                      <span className="text-white font-semibold font-mono">
-                        {player.vodsSubmitted}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Next Session</span>
-                      <span className="text-indigo-400 font-medium text-xs">
-                        {player.nextSession}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Last Active</span>
-                      <span className="text-slate-500 text-xs">
-                        {player.lastActive}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* CTA */}
-                  <button
-                    id={`view-player-${player.id}`}
-                    className="w-full mt-5 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/60 text-slate-300 border border-slate-700/50 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-500 group-hover:shadow-lg group-hover:shadow-emerald-600/20 active:scale-[0.97] relative z-10"
+            {realBookings.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
+                {realBookings.map((booking: any) => (
+                  <div
+                    key={booking.id}
+                    className="glass-card p-5 md:p-6 group relative overflow-hidden"
                   >
-                    View Player Profile
-                  </button>
-                </div>
-              ))}
-            </div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
+
+                    {/* Header */}
+                    <div className="flex items-start gap-4 mb-4 relative z-10">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center font-bold">
+                        {(booking.profiles as any)?.full_name?.charAt(0) || "P"}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-white truncate">
+                          {(booking.profiles as any)?.full_name || "Anonymous Player"}
+                        </h4>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                          Session Date: {new Date(booking.session_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Stats/Status */}
+                    <div className="space-y-2 mt-4 relative z-10">
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-slate-500">Status</span>
+                        <span className={`font-bold ${
+                          booking.status === 'completed' ? 'text-emerald-400' : 'text-amber-400'
+                        }`}>
+                          {booking.status.toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-slate-500">Amount</span>
+                        <span className="text-white font-mono">${booking.amount}</span>
+                      </div>
+                    </div>
+
+                    {/* Action Payout */}
+                    {!booking.payout_id && booking.status === 'completed' && booking.vod_url && (
+                      <button
+                        onClick={() => handleReleaseFunds(booking.id)}
+                        disabled={!!releasingFunds}
+                        className="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-lg active:scale-[0.98] disabled:opacity-50"
+                      >
+                        {releasingFunds === booking.id ? "Processing..." : `Release $${(Number(booking.amount) * (1 - PLATFORM_CUT)).toFixed(2)}`}
+                      </button>
+                    )}
+                    {booking.payout_id && (
+                      <div className="w-full mt-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-center py-2 rounded-xl text-[10px] font-bold">
+                        ✓ FUNDS RELEASED
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="glass-card p-12 text-center bg-slate-900/10 border-dashed border-slate-800">
+                <p className="text-4xl mb-4">🛒</p>
+                <p className="text-slate-300 font-semibold mb-2">No players yet</p>
+                <p className="text-slate-500 text-sm">When players book and pay for your sessions, they will appear here.</p>
+              </div>
+            )}
           </div>
         )}
 
