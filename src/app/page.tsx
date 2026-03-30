@@ -183,7 +183,7 @@ function CoachCard({
             {coach.availability.map((day, i) => (
               <span
                 key={i}
-                className="text-[9px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700 font-mono"
+                className="text-[10px] bg-slate-900 border-l-[3px] border-emerald-500/80 text-slate-300 px-2.5 py-1 rounded shadow-sm font-mono whitespace-nowrap"
               >
                 {day}
               </span>
@@ -534,7 +534,7 @@ export default function SoccerPlatform() {
                         {selectedCoach.availability.map((day, i) => (
                           <span
                             key={i}
-                            className="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700 font-mono"
+                            className="text-xs bg-slate-900 text-slate-300 px-3 py-1.5 rounded-md border-l-4 border-emerald-500/80 font-mono flex items-center shadow-md whitespace-nowrap"
                           >
                             {day}
                           </span>

@@ -42,12 +42,15 @@ export default function EditCoachProfile() {
 
   const [experience, setExperience] = useState("");
   const [highlightUrl, setHighlightUrl] = useState("");
-  const [availability, setAvailability] = useState<string[]>([]);
+  type TimeSlot = { day: string; start: string; end: string };
+  const [availability, setAvailability] = useState<TimeSlot[]>([]);
 
   const toggleDay = (day: string) => {
-    setAvailability((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
-    );
+    setAvailability((prev) => {
+      const exists = prev.find((s) => s.day === day);
+      if (exists) return prev.filter((s) => s.day !== day);
+      return [...prev, { day, start: "09:00", end: "17:00" }];
+    });
   };
 
   useEffect(() => {
@@ -71,7 +74,12 @@ export default function EditCoachProfile() {
         setBio(data.bio || "");
         setExperience(data.experience || "");
         setHighlightUrl(data.highlight_reel_url || "");
-        setAvailability(data.availability || []);
+        const parsedSlots: TimeSlot[] = (data.availability || []).map((slot: string) => {
+          const match = slot.match(/^([A-Za-z]+):\s*(.*)\s*-\s*(.*)$/);
+          if (match) return { day: match[1], start: match[2], end: match[3] };
+          return { day: slot, start: "09:00", end: "17:00" };
+        });
+        setAvailability(parsedSlots);
         setStripeOnboarded(data.stripe_onboarding_complete);
       }
       setLoading(false);
@@ -105,7 +113,8 @@ export default function EditCoachProfile() {
     formData.set("bio", bio);
     formData.set("experience", experience);
     formData.set("highlight_reel_url", highlightUrl);
-    formData.set("availability", JSON.stringify(availability));
+    const formatAvailability = availability.map((slot) => `${slot.day}: ${slot.start} - ${slot.end}`);
+    formData.set("availability", JSON.stringify(formatAvailability));
 
     const result = await updateCoachProfile(formData);
 
@@ -306,21 +315,60 @@ export default function EditCoachProfile() {
               <label className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
                 General Availability
               </label>
-              <div className="flex flex-wrap gap-2">
-                {DAYS_OF_WEEK.map((day) => (
-                  <button
-                    key={day}
-                    type="button"
-                    onClick={() => toggleDay(day)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 border ${
-                      availability.includes(day)
-                        ? "bg-emerald-600 border-emerald-500 text-white"
-                        : "bg-slate-900/40 border-slate-700/50 text-slate-400 hover:border-slate-600 hover:text-slate-300"
-                    }`}
-                  >
-                    {day}
-                  </button>
-                ))}
+              <div className="flex flex-col gap-3">
+                {DAYS_OF_WEEK.map((day) => {
+                  const slot = availability.find((s) => s.day === day);
+                  const isSelected = !!slot;
+
+                  return (
+                    <div
+                      key={day}
+                      className={`flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl border transition-all ${
+                        isSelected
+                          ? "bg-slate-900/80 border-emerald-500/50"
+                          : "bg-slate-900/40 border-slate-800"
+                      }`}
+                    >
+                      <label className="flex items-center gap-3 cursor-pointer sm:w-28">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-950"
+                          checked={isSelected}
+                          onChange={() => toggleDay(day)}
+                        />
+                        <span className={`text-sm font-semibold ${isSelected ? "text-emerald-400" : "text-slate-400"}`}>
+                          {day}
+                        </span>
+                      </label>
+
+                      {isSelected && slot && (
+                        <div className="flex items-center gap-3 anim-fade-in text-sm">
+                          <input
+                            type="time"
+                            value={slot.start}
+                            onChange={(e) => {
+                              setAvailability(
+                                availability.map((s) => (s.day === day ? { ...s, start: e.target.value } : s)),
+                              );
+                            }}
+                            className="bg-slate-950 border border-slate-700/50 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 text-white"
+                          />
+                          <span className="text-slate-500">—</span>
+                          <input
+                            type="time"
+                            value={slot.end}
+                            onChange={(e) => {
+                              setAvailability(
+                                availability.map((s) => (s.day === day ? { ...s, end: e.target.value } : s)),
+                              );
+                            }}
+                            className="bg-slate-950 border border-slate-700/50 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 text-white"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
