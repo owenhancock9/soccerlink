@@ -110,11 +110,19 @@ export default function EditCoachProfile() {
       setLoading(false);
     }
     loadProfile();
+
+    // Check for return from Stripe
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("setup") === "success") {
+       refreshStripeStatus();
+       // Clear URL
+       window.history.replaceState({}, "", window.location.pathname);
+    }
   }, []);
 
   async function handleStripeConnect() {
     setConnectingStripe(true);
-    const res = await createStripeConnectAccount();
+    const res = await createStripeConnectAccount(window.location.origin);
     if (res?.url) {
       window.location.href = res.url;
     } else {
