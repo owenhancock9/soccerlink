@@ -12,12 +12,10 @@ export async function createStripeConnectAccount(rootUrl?: string) {
         : process.env.NEXT_PUBLIC_SITE_URL;
     }
     
-    // Deployment URL from Vercel
     if (process.env.VERCEL_URL) {
       return `https://${process.env.VERCEL_URL}`;
     }
 
-    // Default for local development
     return "http://localhost:3000";
   };
 
@@ -25,49 +23,54 @@ export async function createStripeConnectAccount(rootUrl?: string) {
   const stripe = getStripe();
 
   if (!stripe) {
-    return { error: "CRITICAL_CONFIG_ERROR: Stripe Secret Key is missing in your Vercel Dashboard. Please add STRIPE_SECRET_KEY to your Environment Variables." };
+    return { error: "Stripe configuration missing. Ensure STRIPE_SECRET_KEY is set." };
   }
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
   try {
-    // 1. Check if coach already has a Stripe Account ID
+    // 1. Find or sync existing account
     const { data: profile } = await supabase
       .from("coach_profiles")
-      .select("stripe_account_id")
+      .select("stripe_account_id, stripe_onboarding_complete")
       .eq("id", user.id)
       .single();
 
     let accountId = profile?.stripe_account_id;
 
-    // 2. If not, create a new Express account
+    if (accountId) {
+      // Periodic Sync Check
+      const account = await stripe.accounts.retrieve(accountId);
+      const isComplete = !!(account.details_submitted || account.charges_enabled);
+      
+      if (isComplete && !profile?.stripe_onboarding_complete) {
+        await supabase.from("coach_profiles").update({ stripe_onboarding_complete: true }).eq("id", user.id);
+        return { success: true, alreadyComplete: true };
+      }
+      
+      if (isComplete) return { success: true, alreadyComplete: true };
+    }
+
+    // 2. Create if missing
     if (!accountId) {
       const account = await stripe.accounts.create({
         type: "express",
-        capabilities: {
-          transfers: { requested: true },
-        },
+        capabilities: { transfers: { requested: true } },
+        metadata: { supabase_user_id: user.id }
       });
       accountId = account.id;
 
-      // Save ID to database (using upsert to handle cases where profile doesn't exist yet)
-      await supabase
-        .from("coach_profiles")
-        .upsert({ 
-          id: user.id, 
-          stripe_account_id: accountId 
-        });
+      await supabase.from("coach_profiles").upsert({ 
+        id: user.id, 
+        stripe_account_id: accountId,
+        stripe_onboarding_complete: false
+      });
     }
 
-    // 3. Create an onboarding link
+    // 3. Generate Link
     const returnPath = `${baseUrl}?setup=success`;
-    console.log(`[Stripe Onboarding] Generating link for ${user.id} | Return Path: ${returnPath}`);
-    
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
       refresh_url: `${baseUrl}`,
@@ -77,7 +80,7 @@ export async function createStripeConnectAccount(rootUrl?: string) {
 
     return { url: accountLink.url };
   } catch (err: unknown) {
-    console.error("Stripe Connect Error:", err);
-    return { error: err instanceof Error ? err.message : "Failed to initialize Stripe Connect." };
+    console.error("Stripe Action Error:", err);
+    return { error: err instanceof Error ? err.message : "Stripe initialization failed." };
   }
 }

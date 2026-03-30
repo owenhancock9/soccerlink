@@ -9,8 +9,7 @@ export async function getCoaches() {
 
   const { data, error } = await supabase
     .from("coach_profiles")
-    .select(
-      `
+    .select(`
       id,
       style,
       specialty,
@@ -27,8 +26,7 @@ export async function getCoaches() {
         full_name,
         avatar_url
       )
-    `,
-    )
+    `)
     .eq("stripe_onboarding_complete", true)
     .or("banned.is.null,banned.eq.false")
     .order("rating", { ascending: false });
@@ -59,12 +57,12 @@ export async function getCoaches() {
   });
 }
 
+/** 
+ * Retrieves the current user's profile and syncs Stripe status if needed. 
+ */
 export async function getMyCoachProfile() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
   const { data, error } = await supabase
@@ -73,42 +71,30 @@ export async function getMyCoachProfile() {
     .eq("id", user.id)
     .single();
 
-  if (error && error.code !== "PGRST116") { // Skip "No rows found" as we'll handle it
-    console.error("Supabase Error in getMyCoachProfile:", error);
+  if (error && error.code !== "PGRST116") {
+    console.error("Supabase error in getMyCoachProfile:", error);
     return null;
   }
   
   const currentData = data || { id: user.id, stripe_onboarding_complete: false };
-  
-  // Sync Stripe status if account exists but isn't marked as complete
-  if (currentData.stripe_account_id && !currentData.stripe_onboarding_complete) {
+  const stripe = getStripe();
+
+  // If we have an account ID but it's not marked as complete, sync it once.
+  if (currentData.stripe_account_id && !currentData.stripe_onboarding_complete && stripe) {
     try {
-      const stripe = getStripe();
-      if (!stripe) return currentData;
       const account = await stripe.accounts.retrieve(currentData.stripe_account_id);
-      
-      // We check for charges_enabled or payouts_enabled as a fallback to details_submitted
-      const isComplete = account.details_submitted || account.charges_enabled || account.payouts_enabled;
-      
-      console.log(`[Stripe Sync] Coach: ${user.id} | Complete: ${isComplete} | Detail Sub: ${account.details_submitted}`);
+      const isComplete = !!(account.details_submitted || account.charges_enabled);
 
       if (isComplete) {
-        const { error: upsertErr } = await supabase
+        // Use a targeted update to avoid any risk of field loss
+        await supabase
           .from("coach_profiles")
-          .upsert({ 
-            id: user.id, 
-            stripe_onboarding_complete: true 
-          });
-        
-        if (upsertErr) {
-          console.error("[Stripe Sync Error] Supabase Upsert Failed:", upsertErr);
-        } else {
-          currentData.stripe_onboarding_complete = true;
-          console.log("[Stripe Sync] Success: Coach status updated to complete.");
-        }
+          .update({ stripe_onboarding_complete: true })
+          .eq("id", user.id);
+        currentData.stripe_onboarding_complete = true;
       }
     } catch (err) {
-      console.error("[Stripe Sync Error] Stripe API Call Failed:", err);
+      console.error("[Stripe Sync Alert] Couldn't fetch account status:", err);
     }
   }
 
@@ -117,158 +103,75 @@ export async function getMyCoachProfile() {
 
 export async function updateCoachProfile(formData: FormData) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
-
-  const style = formData.get("style") as string;
-  const specialty = formData.get("specialty") as string;
-  const rate = parseInt(formData.get("rate") as string) || 50;
-  const bio = formData.get("bio") as string;
-  const experience = formData.get("experience") as string;
-  const highlight_reel_url = formData.get("highlight_reel_url") as string;
-  const availabilityText = formData.get("availability") as string;
-
-  let availability: { day: string; start: string; end: string }[] = [];
-  try {
-    availability = JSON.parse(availabilityText || "[]");
-  } catch {
-    // Fallback for malformed JSON
-  }
 
   const { error } = await supabase.from("coach_profiles").upsert({
     id: user.id,
-    style,
-    specialty,
-    rate,
-    bio,
-    experience,
-    highlight_reel_url,
-    availability,
+    style: formData.get("style"),
+    specialty: formData.get("specialty"),
+    rate: parseInt(formData.get("rate") as string) || 50,
+    bio: formData.get("bio"),
+    experience: formData.get("experience"),
+    highlight_reel_url: formData.get("highlight_reel_url"),
+    availability: JSON.parse((formData.get("availability") as string) || "[]"),
   });
 
   if (error) {
-    console.error("Error updating coach profile:", error);
+    console.error("Profile update failed:", error);
     return { error: error.message };
   }
 
   return { success: true };
 }
 
-/* ── Admin: Get ALL coaches (including banned) ── */
 export async function getAllCoachesAdmin() {
   const supabase = await createClient();
-
-  // Verify calling user is admin
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") return [];
 
   const { data, error } = await supabase
     .from("coach_profiles")
-    .select(`
-      id,
-      style,
-      specialty,
-      rate,
-      bio,
-      verified,
-      rating,
-      review_count,
-      banned,
-      availability,
-      stripe_account_id,
-      stripe_onboarding_complete,
-      profiles!inner (
-        full_name,
-        avatar_url,
-        email
-      )
-    `)
+    .select("*, profiles!inner(full_name, avatar_url, email)")
     .order("rating", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching admin coaches:", error);
-    return [];
-  }
+  if (error) return [];
 
   return (data || []).map((coach: Record<string, unknown>) => {
-    const profile = coach.profiles as Record<string, unknown> | null;
+    const p = coach.profiles as Record<string, unknown> | null;
     return {
-      id: coach.id as string,
-      name: (profile?.full_name as string) || "Coach",
-      email: (profile?.email as string) || "",
-      style: (coach.style as string) || "General",
-      role: (coach.specialty as string) || "All Positions",
-      rate: (coach.rate as number) || 50,
-      verified: (coach.verified as boolean) || false,
-      banned: (coach.banned as boolean) || false,
+      id: coach.id,
+      name: p?.full_name || "Coach",
+      email: p?.email || "",
+      style: coach.style,
+      role: coach.specialty,
+      rate: coach.rate,
+      verified: coach.verified,
+      banned: coach.banned,
       rating: Number(coach.rating) || 0,
-      reviews: (coach.review_count as number) || 0,
-      bio: (coach.bio as string) || "No bio yet.",
-      avatar: (profile?.full_name as string)?.charAt(0)?.toUpperCase() || "C",
+      reviews: coach.review_count || 0,
+      avatar: (p?.full_name as string)?.charAt(0)?.toUpperCase() || "C",
       gradient: getGradient(coach.id as string),
       stripeConnected: !!(coach.stripe_onboarding_complete),
     };
   });
 }
 
-/* ── Admin: Ban a Coach ── */
 export async function banCoach(coachId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Not authenticated" };
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "admin") return { error: "Unauthorized" };
-
-  const { error } = await supabase
-    .from("coach_profiles")
-    .update({ banned: true })
-    .eq("id", coachId);
-
-  if (error) return { error: error.message };
+  await supabase.from("coach_profiles").update({ banned: true }).eq("id", coachId);
   return { success: true };
 }
 
-/* ── Admin: Unban a Coach ── */
 export async function unbanCoach(coachId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Not authenticated" };
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "admin") return { error: "Unauthorized" };
-
-  const { error } = await supabase
-    .from("coach_profiles")
-    .update({ banned: false })
-    .eq("id", coachId);
-
-  if (error) return { error: error.message };
+  await supabase.from("coach_profiles").update({ banned: false }).eq("id", coachId);
   return { success: true };
 }
 
-// Generate consistent gradient based on ID
 function getGradient(id: string): string {
   const gradients = [
     "from-indigo-600 to-violet-700",
@@ -279,8 +182,6 @@ function getGradient(id: string): string {
     "from-fuchsia-500 to-purple-600",
   ];
   let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   return gradients[Math.abs(hash) % gradients.length];
 }
