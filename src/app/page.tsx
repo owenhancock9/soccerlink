@@ -1350,13 +1350,17 @@ export default function SoccerPlatform() {
                             window.location.href = res.url;
                           } else if (res?.alreadyComplete) {
                             setStripeOnboarded(true);
+                            window.alert("Your Stripe account is already connected! Refreshing...");
                             setBookingMessage({ type: "success", text: "Stripe Connection Verified! You are now live." });
                           } else if (res?.error) {
+                            window.alert("Stripe Error: " + res.error);
                             setBookingMessage({ type: "error", text: `Stripe Alert: ${res.error}` });
                           } else {
+                            window.alert("Stripe connection failed for an unknown reason.");
                             setBookingMessage({ type: "error", text: "Stripe connection failed for an unknown reason. Please check your credentials." });
                           }
-                        } catch {
+                        } catch (err: any) {
+                          window.alert("Critical Stripe Error: " + (err?.message || "Network failure"));
                           setBookingMessage({ type: "error", text: "A critical network error occurred while initializing Stripe." });
                         } finally {
                           setIsInitiatingStripe(false);
