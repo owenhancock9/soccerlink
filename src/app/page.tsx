@@ -4,67 +4,13 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { createClient } from "@/app/lib/supabase/client";
 import { signOut } from "@/app/actions/auth";
-import { getCoaches, getMyCoachProfile } from "@/app/actions/coaches";
+import { getCoaches, getMyCoachProfile, getAllCoachesAdmin, banCoach, unbanCoach } from "@/app/actions/coaches";
 import { createBooking, getCoachBookings, getMyBookings, updateBookingStatus } from "@/app/actions/bookings";
 import { createStripeConnectAccount } from "@/app/actions/stripe";
 import { uploadVodForBooking } from "@/app/actions/upload";
 import { releaseFundsToCoach } from "@/app/actions/payouts";
 
-/* ─── Mock Data ─── */
-const COACHES = [
-  {
-    id: 1,
-    name: "Coach Ricardo",
-    style: "Tiki-Taka",
-    role: "Midfield",
-    rate: 60,
-    verified: true,
-    rating: 4.9,
-    reviews: 124,
-    bio: "Ex-Academy coach. Focus on vision, scanning, and first touch.",
-    avatar: "R",
-    gradient: "from-indigo-500 to-violet-600",
-  },
-  {
-    id: 2,
-    name: "Coach Marco",
-    style: "Gegenpressing",
-    role: "Tactical",
-    rate: 45,
-    verified: true,
-    rating: 4.7,
-    reviews: 89,
-    bio: "High intensity fitness, pressing triggers, and transition play.",
-    avatar: "M",
-    gradient: "from-cyan-500 to-blue-600",
-  },
-  {
-    id: 3,
-    name: "Coach Sarah",
-    style: "Target Man",
-    role: "Striker",
-    rate: 55,
-    verified: false,
-    rating: 4.5,
-    reviews: 42,
-    bio: "Finishing specialist. Aerial duels and hold-up play.",
-    avatar: "S",
-    gradient: "from-rose-500 to-pink-600",
-  },
-  {
-    id: 4,
-    name: "Coach Diego",
-    style: "Catenaccio",
-    role: "Defense",
-    rate: 50,
-    verified: true,
-    rating: 5.0,
-    reviews: 210,
-    bio: "Master the art of defending. Positioning, 1v1s, and clearing lines.",
-    avatar: "D",
-    gradient: "from-emerald-500 to-teal-600",
-  },
-];
+/* ─── Constants ─── */
 
 const PLAYER_STATS = { technical: 88, tactical: 75, physical: 92, mental: 81 };
 const PLATFORM_CUT = 0.13;
@@ -138,131 +84,23 @@ const MY_PLAYERS = [
   },
 ];
 
-/* ─── Admin: Coach Session Data ─── */
-const COACH_SESSIONS = [
-  {
-    coachId: 1,
-    name: "Coach Ricardo",
-    avatar: "R",
-    gradient: "from-indigo-500 to-violet-600",
-    verified: true,
-    rating: 4.9,
-    totalSessions: 124,
-    activePlayers: 8,
-    totalEarnings: 7440,
-    platformFees: 967.2,
-    schedule: [
-      {
-        day: "Mon",
-        time: "10:00 AM",
-        player: "Alex Rivera",
-        status: "confirmed" as const,
-      },
-      {
-        day: "Wed",
-        time: "2:00 PM",
-        player: "Liam Chen",
-        status: "confirmed" as const,
-      },
-      {
-        day: "Fri",
-        time: "6:30 PM",
-        player: "Sofia Reyes",
-        status: "pending" as const,
-      },
-    ],
-  },
-  {
-    coachId: 2,
-    name: "Coach Marco",
-    avatar: "M",
-    gradient: "from-cyan-500 to-blue-600",
-    verified: true,
-    rating: 4.7,
-    totalSessions: 89,
-    activePlayers: 5,
-    totalEarnings: 4005,
-    platformFees: 520.65,
-    schedule: [
-      {
-        day: "Tue",
-        time: "10:00 AM",
-        player: "Jordan Mills",
-        status: "confirmed" as const,
-      },
-      {
-        day: "Thu",
-        time: "2:00 PM",
-        player: "Marcus Johnson",
-        status: "confirmed" as const,
-      },
-    ],
-  },
-  {
-    coachId: 3,
-    name: "Coach Sarah",
-    avatar: "S",
-    gradient: "from-rose-500 to-pink-600",
-    verified: false,
-    rating: 4.5,
-    totalSessions: 42,
-    activePlayers: 3,
-    totalEarnings: 2310,
-    platformFees: 300.3,
-    schedule: [
-      {
-        day: "Mon",
-        time: "6:30 PM",
-        player: "Alex Rivera",
-        status: "disputed" as const,
-      },
-      {
-        day: "Sat",
-        time: "10:00 AM",
-        player: "Jordan Mills",
-        status: "pending" as const,
-      },
-    ],
-  },
-  {
-    coachId: 4,
-    name: "Coach Diego",
-    avatar: "D",
-    gradient: "from-emerald-500 to-teal-600",
-    verified: true,
-    rating: 5.0,
-    totalSessions: 210,
-    activePlayers: 12,
-    totalEarnings: 10500,
-    platformFees: 1365,
-    schedule: [
-      {
-        day: "Mon",
-        time: "10:00 AM",
-        player: "Liam Chen",
-        status: "confirmed" as const,
-      },
-      {
-        day: "Tue",
-        time: "6:30 PM",
-        player: "Marcus Johnson",
-        status: "confirmed" as const,
-      },
-      {
-        day: "Wed",
-        time: "10:00 AM",
-        player: "Sofia Reyes",
-        status: "confirmed" as const,
-      },
-      {
-        day: "Fri",
-        time: "2:00 PM",
-        player: "Alex Rivera",
-        status: "pending" as const,
-      },
-    ],
-  },
-];
+/* ─── Admin Coach type ─── */
+interface AdminCoach {
+  id: string;
+  name: string;
+  email: string;
+  style: string;
+  role: string;
+  rate: number;
+  verified: boolean;
+  banned: boolean;
+  rating: number;
+  reviews: number;
+  bio: string;
+  avatar: string;
+  gradient: string;
+  stripeConnected: boolean;
+}
 
 /* ─── Star Renderer ─── */
 function Stars({ rating }: { rating: number }) {
@@ -484,17 +322,31 @@ export default function SoccerPlatform() {
   const [uploadingVod, setUploadingVod] = useState<string | null>(null);
   const [releasingFunds, setReleasingFunds] = useState<string | null>(null);
 
+  /* ── Admin State ── */
+  const [adminCoaches, setAdminCoaches] = useState<AdminCoach[]>([]);
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [banningCoach, setBanningCoach] = useState<string | null>(null);
+
   /* ── Fetch Coaches from DB ── */
   useEffect(() => {
     async function loadCoaches() {
       const coaches = await getCoaches();
-      if (coaches.length > 0) {
-        setDbCoaches(coaches as unknown as Coach[]);
-      }
+      setDbCoaches(coaches as unknown as Coach[]);
       setCoachesLoaded(true);
     }
     loadCoaches();
   }, []);
+
+  /* ── Fetch Admin Coaches ── */
+  useEffect(() => {
+    if (currentUser.role === "admin" && currentUser.isAuthenticated) {
+      setAdminLoading(true);
+      getAllCoachesAdmin().then((coaches) => {
+        setAdminCoaches(coaches as unknown as AdminCoach[]);
+        setAdminLoading(false);
+      });
+    }
+  }, [currentUser.role, currentUser.isAuthenticated]);
 
   /* ── Fetch Coach Bookings & Details (for coach dashboard) ── */
   useEffect(() => {
@@ -564,8 +416,7 @@ export default function SoccerPlatform() {
   }, []);
 
   /* ── Derived ── */
-  const allCoaches =
-    coachesLoaded && dbCoaches.length > 0 ? dbCoaches : COACHES;
+  const allCoaches = dbCoaches;
   const filteredCoaches = allCoaches.filter((c) => {
     const q = search.toLowerCase();
     const matchesSearch =
@@ -1249,7 +1100,25 @@ export default function SoccerPlatform() {
               ))}
             </div>
 
-            {filteredCoaches.length === 0 && (
+            {filteredCoaches.length === 0 && allCoaches.length === 0 && coachesLoaded && (
+              <div className="text-center py-20 anim-fade-in">
+                <p className="text-6xl mb-6">🏟️</p>
+                <h3 className="text-xl font-bold text-white mb-3">No Coaches Yet</h3>
+                <p className="text-slate-400 max-w-md mx-auto leading-relaxed">
+                  Be the first to join CoachMatching! Sign up as a coach to start offering your expertise to players worldwide.
+                </p>
+                {!currentUser.isAuthenticated && (
+                  <Link
+                    href="/signup"
+                    className="inline-block mt-6 bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-6 py-3 rounded-xl font-semibold text-sm hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-300"
+                  >
+                    Sign Up as a Coach →
+                  </Link>
+                )}
+              </div>
+            )}
+
+            {filteredCoaches.length === 0 && allCoaches.length > 0 && (
               <div className="text-center py-20 anim-fade-in">
                 <p className="text-slate-500 text-lg font-medium">
                   No coaches found matching your criteria.
@@ -1650,30 +1519,27 @@ export default function SoccerPlatform() {
                 {[
                   {
                     label: "Total Coaches",
-                    val: COACH_SESSIONS.length.toString(),
+                    val: adminCoaches.length.toString(),
                     color: "text-indigo-400",
                     icon: "⚽",
                   },
                   {
-                    label: "Total Sessions",
-                    val: COACH_SESSIONS.reduce(
-                      (a, c) => a + c.totalSessions,
-                      0,
-                    ).toString(),
-                    color: "text-white",
-                    icon: "📊",
-                  },
-                  {
-                    label: "Revenue (Fees)",
-                    val: `$${COACH_SESSIONS.reduce((a, c) => a + c.platformFees, 0).toFixed(0)}`,
+                    label: "Active",
+                    val: adminCoaches.filter((c: AdminCoach) => !c.banned).length.toString(),
                     color: "text-emerald-400",
-                    icon: "💰",
+                    icon: "✓",
                   },
                   {
-                    label: "Active Disputes",
-                    val: "1",
+                    label: "Banned",
+                    val: adminCoaches.filter((c: AdminCoach) => c.banned).length.toString(),
                     color: "text-rose-400",
-                    icon: "⚠️",
+                    icon: "🚫",
+                  },
+                  {
+                    label: "Stripe Connected",
+                    val: adminCoaches.filter((c: AdminCoach) => c.stripeConnected).length.toString(),
+                    color: "text-white",
+                    icon: "💳",
                   },
                 ].map((stat, i) => (
                   <div key={i} className="glass-card p-4 md:p-5">
@@ -1693,173 +1559,113 @@ export default function SoccerPlatform() {
               </div>
             </div>
 
-            {/* ── Coach Roster & Sessions ── */}
+            {/* ── Coach Roster ── */}
             <div>
               <h3 className="text-base font-bold mb-4 text-slate-300 flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                Coach Roster & Sessions
+                Coach Roster
               </h3>
-              <div className="space-y-5 stagger-children">
-                {COACH_SESSIONS.map((coach) => (
-                  <div
-                    key={coach.coachId}
-                    className="glass-card overflow-hidden hover:transform-none"
-                  >
-                    {/* Coach Header Row */}
-                    <div className="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/40">
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-bold text-base shadow-lg shrink-0`}
-                        >
-                          {coach.avatar}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <h4 className="font-bold text-white">
-                              {coach.name}
-                            </h4>
-                            {coach.verified ? (
-                              <span className="text-[9px] bg-indigo-500/15 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/25 font-semibold">
-                                ✓ VERIFIED
-                              </span>
-                            ) : (
-                              <span className="text-[9px] bg-rose-500/15 text-rose-400 px-2 py-0.5 rounded-full border border-rose-500/25 font-semibold">
-                                ✗ UNVERIFIED
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 text-xs text-slate-500">
-                            <Stars rating={coach.rating} />
-                            <span className="font-medium">{coach.rating}</span>
-                            <span>·</span>
-                            <span>{coach.activePlayers} active players</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-5">
-                        <div className="text-right">
-                          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
-                            Total Sessions
-                          </p>
-                          <p className="font-mono font-bold text-white">
-                            {coach.totalSessions}
-                          </p>
-                        </div>
-                        <div className="h-8 w-px bg-slate-800/60 hidden md:block" />
-                        <div className="text-right">
-                          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
-                            Earnings
-                          </p>
-                          <p className="font-mono font-bold text-emerald-400">
-                            ${coach.totalEarnings.toLocaleString()}
-                          </p>
-                        </div>
-                        <div className="h-8 w-px bg-slate-800/60 hidden md:block" />
-                        <div className="text-right">
-                          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
-                            Fees Collected
-                          </p>
-                          <p className="font-mono font-bold text-slate-500">
-                            ${coach.platformFees.toFixed(0)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Session Schedule */}
-                    <div className="p-5 md:p-6">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
-                        Upcoming Sessions
-                      </p>
-                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                        {coach.schedule.map((session, si) => (
-                          <div
-                            key={si}
-                            className={`flex items-center gap-3 p-3 rounded-xl border transition-colors duration-200 ${
-                              session.status === "confirmed"
-                                ? "bg-emerald-950/15 border-emerald-900/30 hover:border-emerald-700/40"
-                                : session.status === "disputed"
-                                  ? "bg-rose-950/15 border-rose-900/30 hover:border-rose-700/40"
-                                  : "bg-slate-950/40 border-slate-800/40 hover:border-slate-700/50"
-                            }`}
-                          >
-                            <div className="shrink-0">
-                              <span
-                                className={`w-2 h-2 rounded-full block ${
-                                  session.status === "confirmed"
-                                    ? "bg-emerald-500"
-                                    : session.status === "disputed"
-                                      ? "bg-rose-500 animate-pulse"
-                                      : "bg-amber-500"
-                                }`}
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold text-white truncate">
-                                {session.player}
-                              </p>
-                              <p className="text-xs text-slate-500">
-                                <span className="font-mono font-medium text-slate-400">
-                                  {session.day}
-                                </span>{" "}
-                                · {session.time}
-                              </p>
-                            </div>
-                            <span
-                              className={`text-[9px] px-2 py-0.5 rounded-md font-semibold uppercase tracking-wider shrink-0 ${
-                                session.status === "confirmed"
-                                  ? "text-emerald-400 bg-emerald-500/10"
-                                  : session.status === "disputed"
-                                    ? "text-rose-400 bg-rose-500/10"
-                                    : "text-amber-400 bg-amber-500/10"
-                              }`}
-                            >
-                              {session.status}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ── Active Disputes ── */}
-            <div className="bg-rose-950/15 border border-rose-900/30 p-6 md:p-8 rounded-2xl">
-              <h2 className="text-xl font-bold text-rose-400 flex items-center gap-3 mb-6">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.4)]" />
-                Active Disputes
-              </h2>
-              <div className="bg-slate-950/60 rounded-xl border border-slate-800/50 overflow-hidden">
-                <div className="p-5 md:p-7 flex flex-col lg:flex-row justify-between gap-6">
-                  <div className="max-w-xl">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="bg-rose-500/15 text-rose-400 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
-                        Flagged
-                      </span>
-                      <p className="font-bold">Session #88214A</p>
-                    </div>
-                    <p className="text-slate-400 text-sm mb-3">
-                      Coach Sarah vs. Player Alex
-                    </p>
-                    <div className="bg-slate-900/60 p-4 rounded-xl border border-rose-900/20">
-                      <p className="text-sm text-slate-300 italic leading-relaxed">
-                        &quot;Coach requested payment via CashApp before
-                        reviewing the footage.&quot;
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-2.5 w-full lg:w-auto bg-slate-900/40 p-4 rounded-xl border border-slate-800/40">
-                    <button className="bg-slate-800/80 hover:bg-rose-600 text-white px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-[0.97]">
-                      Ban Coach (Circumvention)
-                    </button>
-                    <button className="bg-slate-800/80 hover:bg-slate-700 text-slate-300 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-[0.97]">
-                      Refund Player Escrow
-                    </button>
-                  </div>
+              {adminLoading ? (
+                <div className="glass-card p-12 text-center">
+                  <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-slate-400 text-sm">Loading coaches...</p>
                 </div>
-              </div>
+              ) : adminCoaches.length === 0 ? (
+                <div className="glass-card p-12 text-center">
+                  <p className="text-4xl mb-4">🏟️</p>
+                  <p className="text-slate-300 font-semibold mb-2">No coaches registered yet</p>
+                  <p className="text-slate-500 text-sm">When coaches sign up and create their profiles, they will appear here.</p>
+                </div>
+              ) : (
+                <div className="space-y-4 stagger-children">
+                  {adminCoaches.map((coach: AdminCoach) => (
+                    <div
+                      key={coach.id}
+                      className={`glass-card overflow-hidden hover:transform-none transition-all duration-300 ${coach.banned ? "opacity-60 border-rose-900/40" : ""}`}
+                    >
+                      <div className="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-bold text-base shadow-lg shrink-0 ${coach.banned ? "grayscale" : ""}`}
+                          >
+                            {coach.avatar}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                              <h4 className="font-bold text-white">
+                                {coach.name}
+                              </h4>
+                              {coach.banned ? (
+                                <span className="text-[9px] bg-rose-500/15 text-rose-400 px-2 py-0.5 rounded-full border border-rose-500/25 font-semibold">
+                                  🚫 BANNED
+                                </span>
+                              ) : coach.verified ? (
+                                <span className="text-[9px] bg-indigo-500/15 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/25 font-semibold">
+                                  ✓ VERIFIED
+                                </span>
+                              ) : (
+                                <span className="text-[9px] bg-amber-500/15 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/25 font-semibold">
+                                  UNVERIFIED
+                                </span>
+                              )}
+                              {coach.stripeConnected && (
+                                <span className="text-[9px] bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/25 font-semibold">
+                                  💳 STRIPE
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 text-xs text-slate-500">
+                              <Stars rating={coach.rating} />
+                              <span className="font-medium">{coach.rating}</span>
+                              <span>·</span>
+                              <span>${coach.rate}/session</span>
+                              <span>·</span>
+                              <span className="text-slate-600">{coach.email}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {coach.banned ? (
+                            <button
+                              onClick={async () => {
+                                setBanningCoach(coach.id);
+                                await unbanCoach(coach.id);
+                                const updated = await getAllCoachesAdmin();
+                                setAdminCoaches(updated as unknown as AdminCoach[]);
+                                // Also refresh the public coaches list
+                                const publicCoaches = await getCoaches();
+                                setDbCoaches(publicCoaches as unknown as Coach[]);
+                                setBanningCoach(null);
+                              }}
+                              disabled={banningCoach === coach.id}
+                              className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-[0.97] border border-emerald-500/25 disabled:opacity-50"
+                            >
+                              {banningCoach === coach.id ? "Unbanning..." : "Unban Coach"}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={async () => {
+                                setBanningCoach(coach.id);
+                                await banCoach(coach.id);
+                                const updated = await getAllCoachesAdmin();
+                                setAdminCoaches(updated as unknown as AdminCoach[]);
+                                // Also refresh the public coaches list
+                                const publicCoaches = await getCoaches();
+                                setDbCoaches(publicCoaches as unknown as Coach[]);
+                                setBanningCoach(null);
+                              }}
+                              disabled={banningCoach === coach.id}
+                              className="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-[0.97] border border-rose-500/25 disabled:opacity-50"
+                            >
+                              {banningCoach === coach.id ? "Banning..." : "Ban Coach"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

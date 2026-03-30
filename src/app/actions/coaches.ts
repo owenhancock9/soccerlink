@@ -20,12 +20,14 @@ export async function getCoaches() {
       verified,
       rating,
       review_count,
+      banned,
       profiles!inner (
         full_name,
         avatar_url
       )
     `,
     )
+    .or("banned.is.null,banned.eq.false")
     .order("rating", { ascending: false });
 
   if (error) {
@@ -109,6 +111,116 @@ export async function updateCoachProfile(formData: FormData) {
     return { error: error.message };
   }
 
+  return { success: true };
+}
+
+/* ── Admin: Get ALL coaches (including banned) ── */
+export async function getAllCoachesAdmin() {
+  const supabase = await createClient();
+
+  // Verify calling user is admin
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") return [];
+
+  const { data, error } = await supabase
+    .from("coach_profiles")
+    .select(`
+      id,
+      style,
+      specialty,
+      rate,
+      bio,
+      verified,
+      rating,
+      review_count,
+      banned,
+      stripe_account_id,
+      stripe_onboarding_complete,
+      profiles!inner (
+        full_name,
+        avatar_url,
+        email
+      )
+    `)
+    .order("rating", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching admin coaches:", error);
+    return [];
+  }
+
+  return (data || []).map((coach: Record<string, unknown>) => {
+    const profile = coach.profiles as Record<string, unknown> | null;
+    return {
+      id: coach.id as string,
+      name: (profile?.full_name as string) || "Coach",
+      email: (profile?.email as string) || "",
+      style: (coach.style as string) || "General",
+      role: (coach.specialty as string) || "All Positions",
+      rate: (coach.rate as number) || 50,
+      verified: (coach.verified as boolean) || false,
+      banned: (coach.banned as boolean) || false,
+      rating: Number(coach.rating) || 0,
+      reviews: (coach.review_count as number) || 0,
+      bio: (coach.bio as string) || "No bio yet.",
+      avatar: (profile?.full_name as string)?.charAt(0)?.toUpperCase() || "C",
+      gradient: getGradient(coach.id as string),
+      stripeConnected: !!(coach.stripe_onboarding_complete),
+    };
+  });
+}
+
+/* ── Admin: Ban a Coach ── */
+export async function banCoach(coachId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") return { error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("coach_profiles")
+    .update({ banned: true })
+    .eq("id", coachId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+/* ── Admin: Unban a Coach ── */
+export async function unbanCoach(coachId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") return { error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("coach_profiles")
+    .update({ banned: false })
+    .eq("id", coachId);
+
+  if (error) return { error: error.message };
   return { success: true };
 }
 
