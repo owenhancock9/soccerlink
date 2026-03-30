@@ -1323,7 +1323,7 @@ export default function SoccerPlatform() {
                       onClick={async () => {
                         setIsInitiatingStripe(true);
                         try {
-                          const res = await createStripeConnectAccount();
+                          const res = await createStripeConnectAccount(window.location.origin);
                           if (res?.url) {
                             window.location.href = res.url;
                           } else if (res?.error) {

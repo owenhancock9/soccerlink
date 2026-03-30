@@ -29,6 +29,7 @@ export async function getCoaches() {
       )
     `,
     )
+    .eq("stripe_onboarding_complete", true)
     .or("banned.is.null,banned.eq.false")
     .order("rating", { ascending: false });
 
@@ -72,14 +73,19 @@ export async function getMyCoachProfile() {
     .eq("id", user.id)
     .single();
 
-  if (error) return null;
+  if (error && error.code !== "PGRST116") { // Skip "No rows found" as we'll handle it
+    console.error("Supabase Error in getMyCoachProfile:", error);
+    return null;
+  }
+  
+  const currentData = data || { id: user.id, stripe_onboarding_complete: false };
   
   // Sync Stripe status if account exists but isn't marked as complete
-  if (data.stripe_account_id && !data.stripe_onboarding_complete) {
+  if (currentData.stripe_account_id && !currentData.stripe_onboarding_complete) {
     try {
       const stripe = getStripe();
-      if (!stripe) return data;
-      const account = await stripe.accounts.retrieve(data.stripe_account_id);
+      if (!stripe) return currentData;
+      const account = await stripe.accounts.retrieve(currentData.stripe_account_id);
       
       // We check for charges_enabled or payouts_enabled as a fallback to details_submitted
       const isComplete = account.details_submitted || account.charges_enabled || account.payouts_enabled;
@@ -87,16 +93,18 @@ export async function getMyCoachProfile() {
       if (isComplete) {
         await supabase
           .from("coach_profiles")
-          .update({ stripe_onboarding_complete: true })
-          .eq("id", user.id);
-        data.stripe_onboarding_complete = true;
+          .upsert({ 
+            id: user.id, 
+            stripe_onboarding_complete: true 
+          });
+        currentData.stripe_onboarding_complete = true;
       }
     } catch (err) {
       console.error("Error syncing Stripe status:", err);
     }
   }
 
-  return data;
+  return currentData;
 }
 
 export async function updateCoachProfile(formData: FormData) {

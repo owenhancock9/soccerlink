@@ -3,8 +3,9 @@
 import { createClient } from "@/app/lib/supabase/server";
 import { getStripe } from "@/app/lib/stripe/server";
 
-export async function createStripeConnectAccount() {
+export async function createStripeConnectAccount(rootUrl?: string) {
   const getBaseUrl = () => {
+    if (rootUrl) return rootUrl;
     if (process.env.NEXT_PUBLIC_SITE_URL) {
       return process.env.NEXT_PUBLIC_SITE_URL.endsWith("/")
         ? process.env.NEXT_PUBLIC_SITE_URL.slice(0, -1)
@@ -16,7 +17,8 @@ export async function createStripeConnectAccount() {
       return `https://${process.env.VERCEL_URL}`;
     }
 
-    return "https://coachingmatch.co";
+    // Default for local development
+    return "http://localhost:3000";
   };
 
   const baseUrl = getBaseUrl();
@@ -53,11 +55,13 @@ export async function createStripeConnectAccount() {
       });
       accountId = account.id;
 
-      // Save ID to database
+      // Save ID to database (using upsert to handle cases where profile doesn't exist yet)
       await supabase
         .from("coach_profiles")
-        .update({ stripe_account_id: accountId })
-        .eq("id", user.id);
+        .upsert({ 
+          id: user.id, 
+          stripe_account_id: accountId 
+        });
     }
 
     // 3. Create an onboarding link
