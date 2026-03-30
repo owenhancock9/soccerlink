@@ -1,9 +1,11 @@
 "use server";
 
 import { createClient } from "@/app/lib/supabase/server";
-import { stripe } from "@/app/lib/stripe/server";
+import { getStripe } from "@/app/lib/stripe/server";
 
 export async function releaseFundsToCoach(bookingId: string) {
+  const stripe = getStripe();
+  if (!stripe) return { error: "Stripe not configured on server" };
   const supabase = await createClient();
   const {
     data: { user },
@@ -38,7 +40,9 @@ export async function releaseFundsToCoach(bookingId: string) {
     // 2. Transfer funds to Coach
     // Rate is what the coach is owed (the total is rate + platform fee)
     const transferAmountCents = Math.round(booking.rate * 100);
-
+    // 4. Create transfer to coach account
+    const stripe = getStripe();
+    if (!stripe) return { error: "Stripe not configured on server" };
     const transfer = await stripe.transfers.create({
       amount: transferAmountCents,
       currency: "usd",

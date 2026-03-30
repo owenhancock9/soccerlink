@@ -1,10 +1,11 @@
 "use server";
 
 import { createClient } from "@/app/lib/supabase/server";
-
-import { stripe } from "@/app/lib/stripe/server";
+import { getStripe } from "@/app/lib/stripe/server";
 
 export async function createBooking(formData: FormData) {
+  const stripe = getStripe();
+  if (!stripe) return { error: "Stripe is not configured on the server." };
   const supabase = await createClient();
   const {
     data: { user },

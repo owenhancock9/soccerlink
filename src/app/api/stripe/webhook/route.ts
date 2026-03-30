@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/app/lib/stripe/server";
+import { getStripe } from "@/app/lib/stripe/server";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature") as string;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  const stripe = getStripe();
+  if (!stripe) {
+    console.error("Stripe Secret Key missing in webhook handler");
+    return NextResponse.json({ error: "Stripe not configured" }, { status: 500 });
+  }
 
   let event;
 

@@ -1,9 +1,10 @@
 "use server";
 
 import { createClient } from "@/app/lib/supabase/server";
-import { stripe } from "@/app/lib/stripe/server";
+import { getStripe } from "@/app/lib/stripe/server";
 
 export async function getCoaches() {
+  const stripe = getStripe();
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -76,6 +77,8 @@ export async function getMyCoachProfile() {
   // Sync Stripe status if account exists but isn't marked as complete
   if (data.stripe_account_id && !data.stripe_onboarding_complete) {
     try {
+      const stripe = getStripe();
+      if (!stripe) return data;
       const account = await stripe.accounts.retrieve(data.stripe_account_id);
       
       // We check for charges_enabled or payouts_enabled as a fallback to details_submitted

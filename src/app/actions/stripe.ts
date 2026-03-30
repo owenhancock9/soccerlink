@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/lib/supabase/server";
-import { stripe } from "@/app/lib/stripe/server";
+import { getStripe } from "@/app/lib/stripe/server";
 
 export async function createStripeConnectAccount() {
   const getBaseUrl = () => {
@@ -18,7 +18,14 @@ export async function createStripeConnectAccount() {
 
     return "https://coachingmatch.co";
   };
+
   const baseUrl = getBaseUrl();
+  const stripe = getStripe();
+
+  if (!stripe) {
+    return { error: "Stripe Secret Key is missing in server environment variables. Please check your Vercel Dashboard." };
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
