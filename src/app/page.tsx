@@ -298,6 +298,10 @@ export default function SoccerPlatform() {
       setStripeOnboarded(!!p.stripe_onboarding_complete);
       if (p.stripe_onboarding_complete) {
         setBookingMessage({ type: "success", text: "Stripe Connection Verified! You are now live." });
+      } else if (p.error) {
+        setBookingMessage({ type: "error", text: `Database Issue: ${p.error}` });
+      } else if (p.stripeDiagnostic) {
+        setBookingMessage({ type: "error", text: `Stripe Alert: ${p.stripeDiagnostic}. Ensure you finished the bank/identity steps.` });
       } else {
         setBookingMessage({ type: "error", text: "Stripe reports onboarding is still incomplete. Please finish all steps in the Stripe dashboard." });
       }

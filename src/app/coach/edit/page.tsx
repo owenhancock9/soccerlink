@@ -71,6 +71,10 @@ export default function EditCoachProfile() {
     if (data?.stripe_onboarding_complete) {
       setStripeOnboarded(true);
       setMessage({ type: "success", text: "Stripe connection verified!" });
+    } else if (data?.error) {
+      setMessage({ type: "error", text: `Database Issue: ${data.error}` });
+    } else if (data?.stripeDiagnostic) {
+      setMessage({ type: "error", text: `Stripe Alert: ${data.stripeDiagnostic}. Ensure you finished the bank/identity steps.` });
     } else {
       setMessage({ 
         type: "error", 
