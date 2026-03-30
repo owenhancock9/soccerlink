@@ -79,6 +79,22 @@ export default function EditCoachProfile() {
 
   const [stripeOnboarded, setStripeOnboarded] = useState(false);
   const [connectingStripe, setConnectingStripe] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  async function refreshStripeStatus() {
+    setIsSyncing(true);
+    const data = await getMyCoachProfile();
+    if (data?.stripe_onboarding_complete) {
+      setStripeOnboarded(true);
+      setMessage({ type: "success", text: "Stripe connection verified!" });
+    } else {
+      setMessage({ 
+        type: "error", 
+        text: "Stripe reports onboarding is still incomplete. Please ensure you've finished all steps in the Stripe dashboard." 
+      });
+    }
+    setIsSyncing(false);
+  }
 
   async function handleStripeConnect() {
     setConnectingStripe(true);
@@ -411,15 +427,32 @@ export default function EditCoachProfile() {
                     <p className="text-xs font-medium text-slate-400 leading-relaxed">You must connect your bank profile via Stripe to receive session payments. All funds are secured in escrow until session completion.</p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  disabled={connectingStripe}
-                  onClick={handleStripeConnect}
-                  className="w-full bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-white py-4 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.3em] transition-all hover:bg-slate-800 disabled:opacity-50 shadow-2xl flex items-center justify-center gap-3 group/stripe"
-                >
-                  {connectingStripe ? "Processing Link..." : "Initialize Stripe Secure Link"}
-                  <svg className="w-4 h-4 transition-transform group-hover/stripe:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                </button>
+                
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    type="button"
+                    disabled={connectingStripe}
+                    onClick={handleStripeConnect}
+                    className="flex-1 bg-white text-black hover:bg-slate-200 py-4 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl flex items-center justify-center gap-3 group/stripe"
+                  >
+                    {connectingStripe ? "Processing Link..." : "Stripe Connection Flow"}
+                    <svg className="w-4 h-4 transition-transform group-hover/stripe:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isSyncing}
+                    onClick={refreshStripeStatus}
+                    className="flex-1 bg-slate-900 border border-slate-800 hover:border-cyan-500/50 text-white py-4 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl flex items-center justify-center gap-3 group/sync"
+                  >
+                    {isSyncing ? (
+                       <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <svg className="w-4 h-4 transition-transform group-hover/sync:rotate-180 duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    )}
+                    Refresh Connection Status
+                  </button>
+                </div>
               </div>
             )}
           </div>

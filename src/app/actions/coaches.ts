@@ -77,7 +77,11 @@ export async function getMyCoachProfile() {
   if (data.stripe_account_id && !data.stripe_onboarding_complete) {
     try {
       const account = await stripe.accounts.retrieve(data.stripe_account_id);
-      if (account.details_submitted) {
+      
+      // We check for charges_enabled or payouts_enabled as a fallback to details_submitted
+      const isComplete = account.details_submitted || account.charges_enabled || account.payouts_enabled;
+      
+      if (isComplete) {
         await supabase
           .from("coach_profiles")
           .update({ stripe_onboarding_complete: true })
