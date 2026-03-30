@@ -119,87 +119,105 @@ function CoachCard({
 }) {
   return (
     <div
-      className="glass-card p-6 flex flex-col justify-between group"
+      className="glass-card p-7 flex flex-col justify-between group overflow-visible relative border-slate-800/60 hover:border-indigo-500/30 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
       style={{ animationDelay: `${index * 80}ms` }}
     >
-      <div>
-        {/* Header */}
-        <div className="flex items-start gap-4 mb-4">
-          <div
-            className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
-          >
-            {coach.avatar}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <h3 className="text-base font-bold text-white truncate">
-                {coach.name}
-              </h3>
-              {coach.verified && (
-                <span className="shrink-0 text-[9px] bg-indigo-500/15 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/25 font-semibold tracking-wide">
-                  ✓ VERIFIED
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <Stars rating={coach.rating} />
-              <span className="text-xs text-slate-400 font-medium tracking-wide">
-                {coach.rating}
-              </span>
-              <span className="text-slate-600">·</span>
-              <span className="text-xs text-slate-400 font-medium">
-                {coach.reviews} reviews
-              </span>
-            </div>
-            {coach.experience && (
-              <div className="mt-2 text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">
-                {coach.experience}
+      {/* Background Glow */}
+      <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${coach.gradient} opacity-[0.02] blur-3xl rounded-full -mr-16 -mt-16 group-hover:opacity-[0.05] transition-all duration-700`} />
+      
+      <div className="relative z-10">
+        {/* Header Section */}
+        <div className="flex justify-between items-start mb-8">
+          <div className="flex items-center gap-5">
+            <div className="relative">
+              <div
+                className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-black text-xl shadow-2xl shrink-0 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 z-10 relative border border-white/10`}
+              >
+                {coach.avatar}
               </div>
-            )}
+              <div className={`absolute inset-0 bg-gradient-to-br ${coach.gradient} blur-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-700 rounded-full scale-125`} />
+            </div>
+            
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-2.5 mb-1.5 flex-wrap">
+                <h3 className="text-xl font-black text-white tracking-tighter leading-none">
+                  {coach.name}
+                </h3>
+                {coach.verified && (
+                  <span className="shrink-0 flex items-center gap-1 text-[9px] bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-lg border border-emerald-500/20 font-black uppercase tracking-[0.1em] shadow-sm shadow-emerald-500/5">
+                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
+                    PRO
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                   <Stars rating={coach.rating} />
+                   <span className="text-[11px] text-white font-black font-mono tracking-tighter">
+                     {coach.rating}
+                   </span>
+                </div>
+                <span className="w-1 h-1 rounded-full bg-slate-800" />
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest opacity-80 decoration-slate-700">
+                  {coach.reviews} REVIEWS
+                </span>
+              </div>
+            </div>
           </div>
-          <span className="text-xl font-extrabold text-white shrink-0">
-            ${coach.rate}
-            <span className="text-[10px] text-slate-500 font-normal">/hr</span>
-          </span>
+          
+          <div className="flex flex-col items-end leading-none">
+            <span className="text-2xl font-black text-white font-mono tracking-tighter">
+              ${coach.rate}
+            </span>
+            <span className="text-[9px] text-slate-600 uppercase font-black tracking-[0.2em] mt-1.5 opacity-60">PER SESSION</span>
+          </div>
         </div>
 
-        {/* Tags */}
-        <div className="flex gap-2 mb-3">
-          <span className="bg-slate-800/80 text-slate-300 text-[10px] px-2.5 py-1 rounded-lg font-semibold uppercase tracking-wider">
+        {/* Tactical Info */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          <span className="bg-slate-950/80 text-slate-300 text-[9px] px-3 py-1.5 rounded-lg font-black uppercase tracking-[0.15em] border border-slate-800/80 shadow-inner">
             {coach.role}
           </span>
-          <span className="text-indigo-400/80 text-[11px] font-mono font-medium bg-indigo-500/5 px-2 py-1 rounded-lg">
+          <span className="text-cyan-400 text-[10px] font-black font-mono uppercase tracking-widest bg-cyan-500/10 px-3 py-1.5 rounded-lg border border-cyan-500/20">
             {coach.style}
           </span>
         </div>
 
-        {/* Bio */}
-        <p className="text-sm text-slate-400 leading-relaxed mb-5 line-clamp-3">
-          {coach.bio}
+        {/* Narrative Bio */}
+        <p className="text-sm text-slate-400/90 leading-relaxed mb-8 line-clamp-2 font-medium tracking-tight h-10 italic">
+          "{coach.bio}"
         </p>
 
+        {/* Digital Availability Rails */}
         {coach.availability && coach.availability.length > 0 && (
-          <div className="mb-5 flex flex-wrap gap-1.5">
-            {coach.availability.map((day, i) => (
-              <span
-                key={i}
-                className="text-[10px] bg-slate-900 border-l-[3px] border-emerald-500/80 text-slate-300 px-2.5 py-1 rounded shadow-sm font-mono whitespace-nowrap"
-              >
-                {day}
-              </span>
-            ))}
+          <div className="mb-8 overflow-hidden relative group/rails">
+            <div className="flex gap-2.5">
+              {coach.availability.map((day, i) => (
+                <div
+                  key={day}
+                  className="flex flex-col items-center bg-slate-950 border border-slate-800/60 rounded-xl px-4 py-2 min-w-[64px] transition-all group-hover/rails:border-indigo-500/20 group-hover/rails:bg-indigo-500/[0.02]"
+                >
+                  <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest mb-1.5">{day.split(" ")[0]}</span>
+                  <span className="text-[10px] text-slate-300 font-black font-mono">{day.split(" ")[1] || "ANY"}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
-      {/* CTA */}
-      <button
-        id={`book-coach-${coach.id}`}
-        onClick={() => onBook(coach)}
-        className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/60 text-slate-300 border border-slate-700/50 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-500 group-hover:shadow-lg group-hover:shadow-indigo-600/20 active:scale-[0.97]"
-      >
-        Check Availability
-      </button>
+      {/* Deployment Trigger (CTA) */}
+      <div className="relative">
+        <button
+          id={`book-coach-${coach.id}`}
+          onClick={() => onBook(coach)}
+          className="relative w-full py-4.5 bg-white text-black hover:bg-slate-200 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] transition-all active:scale-[0.98] overflow-hidden group/btn shadow-[0_15px_30px_rgba(255,255,255,0.1)] hover:-translate-y-1"
+        >
+          {/* Shimmer Effect */}
+          <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite] pointer-events-none" />
+          Reserve Deployment
+        </button>
+      </div>
     </div>
   );
 }
@@ -459,288 +477,276 @@ export default function SoccerPlatform() {
           ═══════════════ */}
       {activeModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
           onClick={closeModal}
         >
           <div
-            className="bg-slate-900/95 backdrop-blur-2xl border border-slate-700/60 p-7 md:p-8 rounded-2xl max-w-md w-full shadow-2xl shadow-black/40 relative anim-scale-in"
+            className="bg-slate-900 border border-slate-800 p-7 md:p-10 rounded-[2.5rem] max-w-5xl w-full shadow-[0_0_100px_rgba(0,0,0,0.8)] relative anim-scale-in overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Background Glows for Modal */}
+            <div className="absolute -top-[20%] -right-[10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
+            <div className="absolute -bottom-[20%] -left-[10%] w-[30%] h-[30%] bg-cyan-500/5 rounded-full blur-[60px] pointer-events-none" />
+
             <button
               id="modal-close"
               onClick={closeModal}
-              className="absolute top-4 right-4 w-8 h-8 rounded-xl bg-slate-800/80 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-colors text-sm"
+              className="absolute top-6 right-6 w-10 h-10 rounded-2xl bg-slate-800/80 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-all z-20 border border-slate-700/50"
             >
-              ✕
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
 
             {/* Schedule Modal */}
             {activeModal === "schedule" && selectedCoach && (
-              <div className="anim-fade-in">
-                <div className="flex gap-4 mb-6">
-                  <div
-                    className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${selectedCoach.gradient} flex items-center justify-center text-white font-black text-2xl shadow-lg shrink-0`}
-                  >
-                    {selectedCoach.avatar}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h2 className="text-xl font-bold text-white">
-                        {selectedCoach.name}
-                      </h2>
-                      {selectedCoach.verified && (
-                        <span className="text-[9px] bg-indigo-500/15 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/25 font-semibold shrink-0">
-                          ✓ VERIFIED
-                        </span>
-                      )}
+              <div className="anim-fade-in flex flex-col md:flex-row gap-10 relative z-10">
+                {/* Left Side: Coach Info */}
+                <div className="flex-1">
+                  <div className="flex gap-6 mb-10">
+                    <div className="relative shrink-0">
+                      <div
+                        className={`w-24 h-24 rounded-[2rem] bg-gradient-to-br ${selectedCoach.gradient} flex items-center justify-center text-white font-black text-4xl shadow-2xl relative z-10 border-2 border-white/10`}
+                      >
+                        {selectedCoach.avatar}
+                      </div>
+                      <div className={`absolute inset-0 bg-gradient-to-br ${selectedCoach.gradient} blur-3xl opacity-40 rounded-full`} />
                     </div>
-
-                    {selectedCoach.experience && (
-                      <p className="text-xs text-emerald-400 font-semibold uppercase tracking-wider mb-2">
-                        {selectedCoach.experience}
-                      </p>
-                    )}
-
-                    <div className="flex items-center gap-2 text-sm text-slate-400">
-                      <Stars rating={selectedCoach.rating} />
-                      <span className="font-medium text-white">
-                        {selectedCoach.rating}
-                      </span>
-                      <span>({selectedCoach.reviews} reviews)</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider mb-6">
-                  <span className="bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700">
-                    {selectedCoach.role}
-                  </span>
-                  <span className="bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700">
-                    {selectedCoach.style}
-                  </span>
-                </div>
-
-                <p className="text-slate-300 text-sm leading-relaxed mb-6 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60">
-                  {selectedCoach.bio}
-                </p>
-
-                {selectedCoach.availability &&
-                  selectedCoach.availability.length > 0 && (
-                    <div className="mb-6">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-2">
-                        Standard Availability
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedCoach.availability.map((day, i) => (
-                          <span
-                            key={i}
-                            className="text-xs bg-slate-900 text-slate-300 px-3 py-1.5 rounded-md border-l-4 border-emerald-500/80 font-mono flex items-center shadow-md whitespace-nowrap"
-                          >
-                            {day}
+                    <div className="flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h2 className="text-3xl font-black text-white tracking-tighter">
+                          {selectedCoach.name}
+                        </h2>
+                        {selectedCoach.verified && (
+                          <span className="flex items-center gap-1.5 text-[10px] bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30 font-black uppercase tracking-widest">
+                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
+                            VERIFIED PRO
                           </span>
-                        ))}
+                        )}
+                      </div>
+
+                      <p className="text-sm text-emerald-400/90 font-bold uppercase tracking-widest mb-3">
+                        {selectedCoach.experience || "ELITE PERFORMANCE COACH"}
+                      </p>
+
+                      <div className="flex items-center gap-3 text-sm">
+                        <Stars rating={selectedCoach.rating} />
+                        <span className="font-extrabold text-white text-lg leading-none">
+                          {selectedCoach.rating}
+                        </span>
+                        <span className="text-slate-500 font-bold uppercase tracking-tighter text-xs">({selectedCoach.reviews} reviews)</span>
                       </div>
                     </div>
-                  )}
-
-                {selectedCoach.highlightUrl && (
-                  <div className="mb-6">
-                    <a
-                      href={selectedCoach.highlightUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center justify-center gap-2 w-full bg-red-600/10 border border-red-500/30 text-red-500 hover:bg-red-600/20 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                    >
-                      <span>▶</span> Watch Highlight Reel
-                    </a>
                   </div>
-                )}
 
-                {/* Calendar Grid */}
-                <div className="grid grid-cols-7 gap-1.5 mb-5 text-center text-sm">
-                  {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                    <div
-                      key={`day-${i}`}
-                      className="text-slate-500 font-semibold text-xs py-1"
-                    >
-                      {d}
-                    </div>
-                  ))}
-                  {Array.from({ length: 14 }).map((_, i) => {
-                    const date = i + 10;
-                    const isSelected = selectedDate === date;
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => setSelectedDate(date)}
-                        className={`p-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                          isSelected
-                            ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105"
-                            : "hover:bg-slate-800 text-slate-400 hover:text-white"
-                        }`}
-                      >
-                        {date}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Time Slots */}
-                {selectedDate && (
-                  <div className="grid grid-cols-3 gap-2.5 mb-7 anim-fade-in-up">
-                    {["10:00 AM", "2:00 PM", "6:30 PM"].map((time) => (
-                      <button
-                        key={time}
-                        onClick={() => setSelectedTime(time)}
-                        className={`py-2.5 rounded-xl text-xs font-semibold border transition-all duration-200 ${
-                          selectedTime === time
-                            ? "bg-indigo-500/15 border-indigo-500 text-indigo-400 shadow-inner"
-                            : "border-slate-700/60 text-slate-400 hover:border-slate-500 hover:text-slate-300"
-                        }`}
-                      >
-                        {time}
-                      </button>
-                    ))}
+                  <div className="flex items-center gap-3 mb-8">
+                    <span className="bg-slate-800/80 text-slate-200 text-[11px] px-4 py-2 rounded-xl font-black uppercase tracking-widest border border-slate-700/50 shadow-lg">
+                      {selectedCoach.role}
+                    </span>
+                    <span className="bg-cyan-500/10 text-cyan-400 text-[11px] px-4 py-2 rounded-xl border border-cyan-500/20 font-black uppercase tracking-widest shadow-lg">
+                      {selectedCoach.style}
+                    </span>
                   </div>
-                )}
 
-                <button
-                  id="continue-to-escrow"
-                  disabled={!selectedDate || !selectedTime}
-                  onClick={() => setActiveModal("checkout")}
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed py-3.5 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg shadow-indigo-600/20 disabled:shadow-none active:scale-[0.97]"
-                >
-                  Continue to Escrow →
-                </button>
-              </div>
-            )}
-
-            {/* Checkout Modal */}
-            {activeModal === "checkout" && selectedCoach && (
-              <div className="anim-fade-in">
-                <h3 className="text-lg font-bold mb-4">Secure Checkout</h3>
-                <div className="bg-slate-800/40 p-4 rounded-xl mb-5 text-sm border border-slate-700/40 space-y-1.5">
-                  <p className="text-slate-300">
-                    Coach:{" "}
-                    <strong className="text-white">{selectedCoach.name}</strong>
+                  <p className="text-slate-300 text-base leading-relaxed mb-10 bg-slate-950/30 p-6 rounded-[2rem] border border-slate-800/50 font-medium whitespace-pre-wrap">
+                    {selectedCoach.bio}
                   </p>
-                  <p className="text-slate-300">
-                    Time:{" "}
-                    <strong className="text-white">
-                      Oct {selectedDate} at {selectedTime}
-                    </strong>
-                  </p>
+
+                  <div className="space-y-6">
+                    {selectedCoach.availability && selectedCoach.availability.length > 0 && (
+                      <div>
+                        <p className="text-[11px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Coach's Weekly Hours
+                        </p>
+                        <div className="flex flex-wrap gap-2.5">
+                          {selectedCoach.availability.map((day, i) => (
+                            <span
+                              key={i}
+                              className="text-xs bg-slate-950 text-slate-200 px-4 py-2.5 rounded-xl border-l-4 border-emerald-500 font-mono font-bold shadow-2xl flex items-center"
+                            >
+                              {day}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedCoach.highlightUrl && (
+                      <a
+                        href={selectedCoach.highlightUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center justify-center gap-4 w-full bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 py-4 rounded-[1.5rem] text-sm font-black uppercase tracking-widest transition-all shadow-xl hover:-translate-y-1 hover:shadow-red-500/10 active:scale-[0.98]"
+                      >
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                        Watch Highlight Reel
+                      </a>
+                    )}
+                  </div>
                 </div>
 
-                <div className="bg-slate-950/60 p-5 rounded-xl border border-slate-800/60 mb-6 font-mono text-sm space-y-3">
-                  <div className="flex justify-between text-slate-300">
-                    <span>Session Rate</span>
-                    <span className="text-white font-medium">
-                      ${selectedCoach.rate}.00
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-slate-500">
-                    <span>Platform Fee</span>
-                    <span>
-                      ${(selectedCoach.rate * PLATFORM_CUT).toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="border-t border-slate-800 pt-3 flex justify-between font-bold text-lg">
-                    <span className="text-slate-200">Total Escrow</span>
-                    <span className="text-emerald-400">
-                      ${selectedCoach.rate}.00
-                    </span>
-                  </div>
-                </div>
-
-                {bookingMessage && (
-                  <div
-                    className={`p-3 rounded-xl text-xs mb-4 border anim-fade-in ${
-                      bookingMessage.type === "success"
-                        ? "bg-emerald-950/30 border-emerald-900/40 text-emerald-400"
-                        : "bg-rose-950/30 border-rose-900/40 text-rose-400"
-                    }`}
-                  >
-                    {bookingMessage.text}
-                  </div>
-                )}
-                <button
-                  id="pay-stripe"
-                  disabled={bookingLoading || !currentUser.isAuthenticated}
-                  onClick={async () => {
-                    if (!currentUser.isAuthenticated) {
-                      setBookingMessage({
-                        type: "error",
-                        text: "Please sign in to book a session.",
-                      });
-                      return;
-                    }
-                    setBookingLoading(true);
-                    setBookingMessage(null);
+                {/* Right Side: Simple Selection & Receipt */}
+                <div className="md:w-[22rem] shrink-0">
+                  <div className="bg-slate-950/80 border border-slate-800 rounded-[2.5rem] p-8 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] relative overflow-hidden group/receipt h-full transition-all hover:border-emerald-500/20">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/[0.03] blur-3xl rounded-full -mr-24 -mt-24 pointer-events-none group-hover/receipt:bg-emerald-500/[0.08] transition-all duration-700" />
                     
-                    if (typeof selectedCoach.id === "number") {
-                      setBookingMessage({
-                        type: "error",
-                        text: "These are just mock profiles! Scroll down or search for the REAL coach account you just created to test booking.",
-                      });
-                      setBookingLoading(false);
-                      return;
-                    }
+                    <h3 className="text-white font-black text-xl mb-8 tracking-tighter flex items-center gap-3">
+                       <span className="w-2 h-7 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+                       Confirm Session
+                    </h3>
 
-                    const formData = new FormData();
-                    formData.set("coachId", String(selectedCoach.id));
-                    formData.set(
-                      "sessionDate",
-                      `2025-10-${String(selectedDate).padStart(2, "0")}`,
-                    );
-                    formData.set("sessionTime", selectedTime || "10:00 AM");
-                    formData.set("rate", String(selectedCoach.rate));
-                    const result = await createBooking(formData);
-                    if (result.error) {
-                      setBookingMessage({ type: "error", text: result.error });
-                      setBookingLoading(false);
-                    } else if (result.url) {
-                      // Redirect to Stripe Checkout
-                      window.location.href = result.url;
-                    } else {
-                      setBookingMessage({
-                        type: "error",
-                        text: "Stripe error: No checkout URL returned.",
-                      });
-                      setBookingLoading(false);
-                    }
-                  }}
-                  className="glow-btn w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 py-3.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/25 relative z-10 active:scale-[0.97]"
-                >
-                  {bookingLoading ? (
-                    <span className="inline-flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Redirecting to Stripe...
-                    </span>
-                  ) : !currentUser.isAuthenticated ? (
-                    "Sign In to Book"
-                  ) : (
-                    "Pay via Stripe →"
-                  )}
-                </button>
+                    <div className="space-y-10">
+                      {/* Step 1: Date Picker */}
+                      <div>
+                        <label className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black block mb-4 ml-1">
+                          1 • Pick a Date
+                        </label>
+                        <div className="grid grid-cols-7 gap-1.5 text-center bg-slate-900/40 p-3 rounded-2xl border border-slate-800/60">
+                          {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+                            <div key={`day-${i}`} className="text-[10px] text-slate-600 font-bold py-2">
+                              {d}
+                            </div>
+                          ))}
+                          {Array.from({ length: 14 }).map((_, i) => {
+                            const dayVal = i + 10;
+                            const isSel = selectedDate === dayVal;
+                            return (
+                              <button
+                                key={i}
+                                onClick={() => setSelectedDate(dayVal)}
+                                className={`h-9 w-9 flex items-center justify-center rounded-xl text-[13px] font-black transition-all ${
+                                  isSel
+                                    ? "bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-110 z-10"
+                                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                                }`}
+                              >
+                                {dayVal}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Step 2: Time Slots */}
+                      <div className={selectedDate ? "anim-fade-in" : "opacity-30 pointer-events-none transition-opacity"}>
+                        <label className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black block mb-4 ml-1">
+                          2 • Preferred Time
+                        </label>
+                        <div className="grid grid-cols-1 gap-2.5">
+                          {["10:00 AM", "2:30 PM", "7:00 PM"].map((t) => (
+                            <button
+                              key={t}
+                              onClick={() => setSelectedTime(t)}
+                              className={`w-full py-3.5 rounded-2xl text-[13px] font-black tracking-wide transition-all border-2 ${
+                                selectedTime === t
+                                  ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[inset_0_0_20px_rgba(16,185,129,0.05)]"
+                                  : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200 shadow-lg"
+                              }`}
+                            >
+                              {t}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Step 3: Receipt */}
+                      {selectedDate && selectedTime ? (
+                        <div className="anim-fade-in pt-8 border-t-2 border-dashed border-slate-800/80">
+                          <div className="space-y-4 mb-8">
+                            <div className="flex justify-between text-sm font-bold">
+                              <span className="text-slate-500 uppercase tracking-widest text-[10px]">Coaching Session</span>
+                              <span className="text-white">${selectedCoach.rate}.00</span>
+                            </div>
+                            <div className="flex justify-between text-sm font-bold">
+                              <span className="text-slate-500 uppercase tracking-widest text-[10px]">Platform Vault Fee</span>
+                              <span className="text-white">$7.00</span>
+                            </div>
+                            <div className="flex justify-between items-end pt-5 border-t border-slate-800/50">
+                              <span className="text-slate-400 font-black uppercase text-[11px] tracking-[0.2em]">TOTAL DUE</span>
+                              <span className="text-white text-3xl font-black tracking-tighter leading-none">${selectedCoach.rate + 7}.00</span>
+                            </div>
+                          </div>
+
+                          {bookingMessage && (
+                            <div className={`p-5 rounded-2xl text-xs font-black mb-6 border-2 flex items-start gap-3 ${
+                              bookingMessage.type === "success" 
+                                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+                                : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                            }`}>
+                              <span className="mt-0.5">{bookingMessage.type === "success" ? "✓" : "!"}</span>
+                              {bookingMessage.text}
+                            </div>
+                          )}
+
+                          <button
+                            id="confirm-pay-btn"
+                            disabled={bookingLoading}
+                            onClick={async () => {
+                              if (!currentUser.isAuthenticated) {
+                                setBookingMessage({ type: "error", text: "Please sign in to proceed." });
+                                return;
+                              }
+                              setBookingLoading(true);
+                              setBookingMessage(null);
+                              
+                              const formData = new FormData();
+                              formData.set("coachId", String(selectedCoach.id));
+                              formData.set("sessionDate", `2025-10-${String(selectedDate).padStart(2, "0")}`);
+                              formData.set("sessionTime", selectedTime || "10:00 AM");
+                              formData.set("rate", String(selectedCoach.rate));
+                              
+                              const result = await createBooking(formData);
+                              if (result.error) {
+                                setBookingMessage({ type: "error", text: result.error });
+                                setBookingLoading(false);
+                              } else if (result.url) {
+                                window.location.href = result.url;
+                              }
+                            }}
+                            className="gradient-btn w-full py-5 text-[15px] uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:shadow-[0_25px_50px_rgba(16,185,129,0.4)] transition-all hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:grayscale group-hover/receipt:scale-[1.02]"
+                          >
+                            {bookingLoading ? "Connecting Securely..." : "Book Now"}
+                          </button>
+                          
+                          <div className="mt-8 flex flex-col items-center gap-3">
+                            <div className="flex items-center gap-4 opacity-40 grayscale hover:grayscale-0 transition-all">
+                               <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-5 brightness-200" />
+                            </div>
+                            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.25em] text-center leading-loose">
+                              Funds Secured in Escrow Vault<br/>
+                              Locked until Review Completed
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="pt-20 text-center opacity-20">
+                          <svg className="w-16 h-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                          <p className="text-[10px] uppercase font-black tracking-widest leading-loose">Complete steps above<br/>to calculate totals</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
             {/* TOS Modal */}
             {activeModal === "tos" && (
-              <div className="anim-fade-in">
-                <h3 className="text-lg font-bold mb-5 gradient-text inline-block">
-                  Terms of Service
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <p className="p-4 bg-slate-950/60 rounded-xl border border-slate-800/50 text-slate-300">
-                    <strong className="text-white">1. Escrow Vault:</strong>{" "}
-                    Funds held until review completion.
-                  </p>
-                  <p className="p-4 bg-rose-950/20 text-rose-200 rounded-xl border border-rose-900/30">
-                    <strong>2. Anti-Circumvention:</strong> Off-platform
-                    payments = IP ban.
-                  </p>
+              <div className="anim-fade-in relative z-10 py-4 max-w-2xl mx-auto">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center text-xl shadow-xl border border-indigo-500/30">📜</div>
+                  <h3 className="text-3xl font-black text-white tracking-tighter">
+                    Terms of <span className="gradient-text-accent">Platform</span>
+                  </h3>
+                </div>
+                <div className="space-y-6">
+                  <div className="p-8 bg-slate-950/60 rounded-[2rem] border border-slate-800 shadow-2xl">
+                    <strong className="text-white text-lg block mb-3 uppercase tracking-tighter">1. The Escrow Vault System</strong>
+                    <p className="text-slate-400 leading-relaxed font-medium">To ensure 100% security for players, your funds are held by CoachMatching's secure vault. Coaches only receive payment once they have uploaded your custom VOD breakdown. If no video is delivered, your funds are returned.</p>
+                  </div>
+                  <div className="p-8 bg-rose-950/10 rounded-[2rem] border border-rose-900/30 shadow-2xl">
+                    <strong className="text-rose-400 text-lg block mb-3 uppercase tracking-tighter">2. Off-Platform Protection</strong>
+                    <p className="text-rose-300/60 leading-relaxed font-medium">Attempting to book coaching sessions outside of CoachMatching is strictly prohibited. This is for your own safety; sessions outside our portal are not protected by our escrow guarantee and will result in immediate permanent account suspension.</p>
+                  </div>
                 </div>
               </div>
             )}
@@ -751,7 +757,7 @@ export default function SoccerPlatform() {
       {/* ═══════════════
           NAVIGATION
           ═══════════════ */}
-      <nav className="max-w-6xl mx-auto flex justify-between items-center bg-slate-900/60 backdrop-blur-2xl p-4 md:px-6 md:rounded-2xl border-b md:border border-slate-800/50 sticky top-0 md:top-4 z-40 md:mt-4">
+      <nav className="max-w-6xl mx-auto flex justify-between items-center nav-glass p-4 md:px-7 md:py-4 md:rounded-full sticky top-0 md:top-6 z-50 transition-all duration-300">
         <h1
           className="text-lg font-black tracking-tighter gradient-text cursor-pointer"
           onClick={() =>
@@ -962,36 +968,46 @@ export default function SoccerPlatform() {
         {/* ── VIEW 1: DISCOVERY ── */}
         {view === "discovery" && currentUser.role === "player" && (
           <section className="anim-fade-in-up">
-            {/* Search Bar */}
-            <div className="mb-10 flex flex-col md:flex-row gap-4 items-end relative z-20">
-              <div className="w-full max-w-md">
-                <h2 className="text-3xl md:text-4xl font-extrabold mb-3 tracking-tight">
-                  Hire a <span className="gradient-text">Pro</span>
-                </h2>
-                <div className="relative group">
+            {/* Hero Section */}
+            <div className="pt-12 md:pt-24 pb-16 relative z-20 overflow-hidden md:overflow-visible">
+              <div className="absolute top-1/2 left-1/4 w-[70vw] md:w-[60vw] h-[70vw] md:h-[60vw] bg-emerald-600/[0.04] blur-[100px] rounded-full -translate-y-1/2 -z-10 animate-pulse pointer-events-none" />
+              <div className="absolute top-1/4 right-1/4 w-[50vw] md:w-[40vw] h-[50vw] md:h-[40vw] bg-cyan-600/[0.03] blur-[120px] rounded-full -translate-y-1/2 -z-10 pointer-events-none" />
+              
+              <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter mb-6 text-white leading-[1.05] drop-shadow-2xl">
+                Elevate Your <br className="hidden md:block"/> <span className="gradient-text-accent">Game.</span>
+              </h1>
+              <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl leading-relaxed mb-12 drop-shadow-sm">
+                Book 1-on-1 video breakdown and tactical review with verified professional players, college athletes, and elite coaches.
+              </p>
+              
+              {/* Search & Filter Bar */}
+              <div className="flex flex-col md:flex-row gap-4 items-center w-full max-w-3xl glass-card p-3 shadow-2xl">
+                <div className="relative w-full group">
                   <input
                     id="coach-search"
                     type="text"
                     placeholder="Search coaches, styles, or roles..."
-                    className="w-full p-4 bg-slate-900/60 border border-slate-700/50 rounded-xl focus:ring-2 ring-indigo-500/50 outline-none text-white shadow-lg placeholder:text-slate-500 transition-all duration-300 focus:bg-slate-900/80 focus:border-indigo-500/30"
+                    className="w-full pl-12 pr-4 py-4 bg-transparent outline-none text-white placeholder:text-slate-500 font-semibold text-lg transition-all"
                     onChange={(e) => setSearch(e.target.value)}
                   />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-                    🔍
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg group-focus-within:text-emerald-400 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
                   </div>
                 </div>
-              </div>
 
-              {/* Filter Dropdown */}
-              <div className="relative w-full md:w-auto">
-                <button
-                  id="filter-toggle"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsFilterOpen(!isFilterOpen);
-                  }}
-                  className="w-full bg-slate-900/60 border border-slate-700/50 px-5 py-4 rounded-xl font-semibold text-sm flex justify-between items-center gap-3 hover:bg-slate-800/80 text-slate-300 transition-all duration-200"
-                >
+                <div className="h-10 w-px bg-slate-800 hidden md:block" />
+
+                <div className="relative w-full md:w-auto md:min-w-[200px] shrink-0">
+                  <button
+                    id="filter-toggle"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsFilterOpen(!isFilterOpen);
+                    }}
+                    className="w-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/50 px-5 py-4 rounded-xl font-bold text-[15px] flex justify-between items-center gap-3 text-slate-200 transition-all duration-300 hover:shadow-lg"
+                  >
                   {activeFilter}
                   <span
                     className="text-xs transition-transform duration-200"
@@ -1030,8 +1046,9 @@ export default function SoccerPlatform() {
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Coach Grid */}
+          {/* Coach Grid */}
             <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-5 relative z-10 stagger-children">
               {filteredCoaches.map((coach, i) => (
                 <CoachCard
@@ -1186,281 +1203,186 @@ export default function SoccerPlatform() {
 
         {/* ── VIEW 3: COACH DASHBOARD ── */}
         {view === "dashboard" && currentUser.role === "coach" && (
-          <div className="anim-fade-in-up">
-            <div className="flex items-center gap-3 mb-7">
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                Welcome back,{" "}
-                <span className="gradient-text">Coach {currentUser.name}</span>
-              </h2>
-              <span className="text-[10px] bg-indigo-500/15 text-indigo-400 px-2.5 py-1 rounded-full border border-indigo-500/20 font-semibold shrink-0">
-                ✓ VERIFIED
-              </span>
-              <Link
-                href="/coach/edit"
-                className="ml-auto bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold px-4 py-2 rounded-xl hover:bg-emerald-600/25 transition-all"
-              >
-                Edit My Profile
-              </Link>
-            </div>
-
-            {/* Stripe Connect Banner (Show if not true) */}
-            {stripeOnboarded !== true && (
-              <div className="glass-card bg-indigo-950/40 border-indigo-500/30 p-5 md:p-8 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 anim-fade-in-up shadow-lg shadow-indigo-600/10">
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
-                    Connect your bank account
-                  </h3>
-                  <p className="text-slate-400 text-sm max-w-lg">
-                    To receive payouts from your coaching sessions, you need to
-                    securely connect a bank account via Stripe Connect.
+          <div className="anim-fade-in-up space-y-12">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4">
+               <div>
+                  <h2 className="text-4xl font-black tracking-tighter text-white mb-2">
+                    COACH <span className="text-emerald-500">TERMINAL</span>
+                  </h2>
+                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">
+                    Mission Control & Performance Tracking
                   </p>
-                </div>
-                <button
-                  disabled={connectingStripe}
-                  onClick={async () => {
-                    setConnectingStripe(true);
-                    const res = await createStripeConnectAccount();
-                    if (res?.url) {
-                      window.location.href = res.url;
-                    } else {
-                      alert(res?.error || "Failed to connect to Stripe.");
-                      setConnectingStripe(false);
-                    }
-                  }}
-                  className="shrink-0 bg-white text-black hover:bg-slate-200 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-[0.97]"
-                >
-                  {connectingStripe ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 rounded-full border-2 border-slate-400/30 border-t-black animate-spin" />
-                      Connecting...
-                    </span>
-                  ) : (
-                    "Setup Payouts →"
-                  )}
-                </button>
-              </div>
-            )}
-
-            {/* Metrics */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 stagger-children">
-              {[
-                {
-                  label: "Escrow Pending",
-                  val: `$${realBookings
-                    .filter((b) => b.status === "completed" && !b.payout_id)
-                    .reduce((sum, b) => sum + Number(b.amount || 0), 0)
-                    .toFixed(2)}`,
-                  color: "text-orange-400",
-                  icon: "🔒",
-                },
-                {
-                  label: "Total Earned",
-                  val: `$${realBookings
-                    .filter((b) => b.payout_id)
-                    .reduce((sum, b) => sum + Number(b.amount || 0) * (1 - PLATFORM_CUT), 0)
-                    .toFixed(2)}`,
-                  color: "text-emerald-400",
-                  icon: "💰",
-                },
-                {
-                  label: "Total Sessions",
-                  val: realBookings.length.toString(),
-                  color: "text-white",
-                  icon: "📹",
-                },
-                {
-                  label: "Platform Fee Paid",
-                  val: `$${realBookings
-                    .filter((b) => b.payout_id)
-                    .reduce((sum, b) => sum + Number(b.amount || 0) * PLATFORM_CUT, 0)
-                    .toFixed(2)}`,
-                  color: "text-slate-500",
-                  icon: "📊",
-                },
-              ].map((stat, i) => (
-                <div key={i} className="glass-card p-4 md:p-5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs">{stat.icon}</span>
-                    <p className="text-[10px] text-slate-500 uppercase font-semibold tracking-wider">
-                      {stat.label}
+               </div>
+               <div className="flex gap-4">
+                  <div className="glass-card px-6 py-3 border-emerald-500/20 bg-emerald-500/5">
+                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Total Career Revenue</p>
+                    <p className="text-xl font-black text-white font-mono">
+                      ${realBookings
+                        .filter((b: any) => b.status === "completed")
+                        .reduce((acc, b: any) => acc + Number(b.amount || 0), 0)
+                        .toFixed(2)}
                     </p>
                   </div>
-                  <p
-                    className={`text-xl md:text-2xl font-mono font-extrabold ${stat.color}`}
+                  <Link
+                    href="/coach/edit"
+                    className="glass-card px-6 py-3 border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 transition-all flex items-center gap-2 group/edit"
                   >
-                    {stat.val}
-                  </p>
+                    <span className="text-[9px] text-indigo-400 font-black uppercase tracking-widest">Edit Lab</span>
+                    <svg className="w-3 h-3 text-indigo-400 group-hover/edit:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                  </Link>
+               </div>
+            </div>
+
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+              {[
+                {
+                  label: "Escrow Locked",
+                  val: `$${realBookings
+                    .filter((b: any) => b.status === "completed" && !b.payout_id)
+                    .reduce((sum, b: any) => sum + Number(b.amount || 0), 0)
+                    .toFixed(2)}`,
+                  color: "text-orange-400",
+                },
+                {
+                  label: "Net Earnings",
+                  val: `$${realBookings
+                    .filter((b: any) => b.payout_id)
+                    .reduce((sum, b: any) => sum + Number(b.amount || 0) * (1 - PLATFORM_CUT), 0)
+                    .toFixed(2)}`,
+                  color: "text-emerald-400",
+                },
+                {
+                  label: "Deployments",
+                  val: realBookings.length.toString(),
+                  color: "text-white",
+                },
+                {
+                  label: "Network Fee",
+                  val: `$${realBookings
+                    .filter((b: any) => b.payout_id)
+                    .reduce((sum, b: any) => sum + Number(b.amount || 0) * PLATFORM_CUT, 0)
+                    .toFixed(2)}`,
+                  color: "text-slate-500",
+                },
+              ].map((stat, i) => (
+                <div key={i} className="glass-card p-6">
+                  <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-3">{stat.label}</p>
+                  <p className={`text-2xl font-black font-mono tracking-tighter ${stat.color}`}>{stat.val}</p>
                 </div>
               ))}
             </div>
 
             {/* Action Queue */}
-            <h3 className="text-base font-bold mb-4 text-slate-300 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-              Action Required
-            </h3>
-            {realBookings.filter(b => b.status === 'completed' && !b.vod_url).length > 0 ? (
-              <div className="glass-card overflow-hidden hover:transform-none">
-                {realBookings.filter(b => b.status === 'completed' && !b.vod_url).map((booking: any) => (
-                  <div key={booking.id} className="p-5 md:p-6 flex flex-col md:flex-row justify-between md:items-center border-b border-slate-800/50 last:border-0 gap-4">
-                    <div>
-                      <div className="flex items-center gap-3 mb-1">
-                        <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.4)]" />
-                        <p className="font-bold">{booking.player_name || (booking.player as any)?.full_name || "Anonymous Player"}</p>
-                        <p className="text-sm text-slate-400 font-mono mt-1">{booking.player_email || "No Email Provided"}</p>
-                      </div>
-                      <p className="text-sm text-slate-400 ml-5">
-                        Session on {new Date(booking.session_date).toLocaleDateString()}. Payment confirmed. Awaiting video review.
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                       <label className="cursor-pointer bg-emerald-600 hover:bg-emerald-500 px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg shadow-emerald-900/20 active:scale-[0.97] shrink-0 text-white">
-                        {uploadingVod === booking.id ? "Uploading..." : "Upload VOD Breakdown"}
-                        <input
-                          type="file"
-                          className="hidden"
-                          accept="video/*"
-                          disabled={!!uploadingVod}
-                          onChange={(e) => handleVodUpload(e, booking.id)}
-                        />
-                      </label>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="glass-card p-8 text-center bg-slate-900/20 border-dashed border-slate-800">
-                <p className="text-slate-500 text-sm">No pending actions. You're all caught up!</p>
-              </div>
-            )}
-
-            {/* ── My Orders & Players ── */}
-            <h3 className="text-base font-bold mb-4 mt-10 text-slate-300 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-              My Orders & Players
-              <span className="text-[10px] bg-slate-800/80 text-slate-500 px-2 py-0.5 rounded-full font-mono ml-1">
-                {realBookings.length}
-              </span>
-            </h3>
-            {realBookings.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
-                {realBookings.map((booking: any) => (
-                  <div
-                    key={booking.id}
-                    className="glass-card p-5 md:p-6 group relative overflow-hidden"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
-
-                    {/* Header */}
-                    <div className="flex items-start gap-4 mb-4 relative z-10">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center font-bold">
-                        {(booking.profiles as any)?.full_name?.charAt(0) || "P"}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-bold text-white truncate">
-                          {booking.player_name || (booking.player as any)?.full_name || "Anonymous Player"}
-                        </h4>
-                        <div className="ml-3 px-2 py-0.5 bg-slate-800 rounded text-xs text-slate-400 font-mono">
-                          {booking.player_email || "No email"}
+            <div>
+              <h3 className="text-sm font-black mb-6 text-slate-400 flex items-center gap-3 uppercase tracking-[0.2em]">
+                <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.6)] animate-pulse" />
+                Critical Actions
+              </h3>
+              {realBookings.filter((b: any) => b.status === 'completed' && !b.vod_url).length > 0 ? (
+                <div className="grid gap-4">
+                  {realBookings.filter((b: any) => b.status === 'completed' && !b.vod_url).map((booking: any) => (
+                    <div key={booking.id} className="glass-card overflow-hidden group/action relative border-l-4 border-l-orange-500">
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-500/[0.03] to-transparent pointer-events-none" />
+                      <div className="p-6 md:p-8 flex flex-col md:flex-row justify-between md:items-center gap-6">
+                        <div className="flex items-center gap-6">
+                           <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 text-xl font-black shadow-2xl">
+                             {booking.player_name?.charAt(0) || "P"}
+                           </div>
+                           <div>
+                              <div className="flex items-center gap-3 mb-1">
+                                <h4 className="text-lg font-black text-white tracking-tight">{booking.player_name || "Premium Athlete"}</h4>
+                                <span className="text-[9px] bg-orange-500/10 text-orange-400 px-2.5 py-1 rounded-full border border-orange-500/30 font-black uppercase tracking-widest">Awaiting VOD</span>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <p className="text-xs text-slate-500 font-bold font-mono tracking-tighter opacity-80">{booking.player_email}</p>
+                                <span className="w-1 h-1 rounded-full bg-slate-800" />
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Session: {new Date(booking.session_date).toLocaleDateString()}</p>
+                              </div>
+                           </div>
                         </div>
-                        <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
-                          Session Date: {new Date(booking.session_date).toLocaleDateString()}
-                        </p>
+                        <label className="cursor-pointer bg-white text-black hover:bg-slate-200 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-[0_15px_30px_rgba(255,255,255,0.1)] hover:-translate-y-1 active:translate-y-0 shrink-0 text-center">
+                          {uploadingVod === booking.id ? "Syncing..." : "Upload Breakdown"}
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="video/*"
+                            disabled={!!uploadingVod}
+                            onChange={(e) => handleVodUpload(e, booking.id)}
+                          />
+                        </label>
                       </div>
                     </div>
-
-                    {/* Stats/Status */}
-                    <div className="space-y-2 mt-4 relative z-10">
-                      <div className="flex justify-between text-[11px]">
-                        <span className="text-slate-500">Status</span>
-                        <span className={`font-bold ${
-                          booking.status === 'completed' ? 'text-emerald-400' : 'text-amber-400'
-                        }`}>
-                          {booking.status.toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-[11px]">
-                        <span className="text-slate-500">Amount</span>
-                        <span className="text-white font-mono">${booking.amount}</span>
-                      </div>
-                    </div>
-
-                    {/* Action Payout */}
-                    {!booking.payout_id && booking.status === 'completed' && booking.vod_url && (
-                      <button
-                        onClick={() => handleReleaseFunds(booking.id)}
-                        disabled={!!releasingFunds}
-                        className="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-lg active:scale-[0.98] disabled:opacity-50"
-                      >
-                        {releasingFunds === booking.id ? "Processing..." : `Release $${(Number(booking.amount) * (1 - PLATFORM_CUT)).toFixed(2)}`}
-                      </button>
-                    )}
-                    {booking.payout_id && (
-                      <div className="w-full mt-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-center py-2 rounded-xl text-[10px] font-bold">
-                        ✓ FUNDS RELEASED
-                      </div>
-                    )}
+                  ))}
+                </div>
+              ) : (
+                <div className="glass-card p-12 text-center border-dashed border-slate-800 bg-slate-900/10 container-blur">
+                  <div className="w-16 h-16 bg-slate-900 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-slate-800 shadow-2xl">
+                    <span className="text-2xl">⚡</span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="glass-card p-12 text-center bg-slate-900/10 border-dashed border-slate-800">
-                <p className="text-4xl mb-4">🛒</p>
-                <p className="text-slate-300 font-semibold mb-2">No players yet</p>
-                <p className="text-slate-500 text-sm">When players book and pay for your sessions, they will appear here.</p>
-              </div>
-            )}
+                  <p className="text-slate-500 text-xs font-black uppercase tracking-widest">No pending operations. System optimal.</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* ── VIEW 4: ADMIN CONSOLE ── */}
         {view === "admin" && currentUser.role === "admin" && (
-          <div className="anim-fade-in-up space-y-10">
-            {/* ── Admin Overview Metrics ── */}
+          <div className="anim-fade-in-up space-y-16">
             <div>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-7">
-                Platform <span className="gradient-text">Admin</span>
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-children">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+                <div>
+                  <h2 className="text-4xl font-black tracking-tighter text-white mb-2">
+                    COMMAND <span className="gradient-text">CENTER</span>
+                  </h2>
+                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] opacity-80">
+                    Platform Governance & System Oversight
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {[
                   {
-                    label: "Total Coaches",
+                    label: "Network Capacity",
                     val: adminCoaches.length.toString(),
                     color: "text-indigo-400",
-                    icon: "⚽",
+                    unit: "COACHES",
+                    desc: "Registered Personnel"
                   },
                   {
-                    label: "Active",
+                    label: "Active Nodes",
                     val: adminCoaches.filter((c: AdminCoach) => !c.banned).length.toString(),
                     color: "text-emerald-400",
-                    icon: "✓",
+                    unit: "OPERATIONAL",
+                    desc: "Live in Marketplace"
                   },
                   {
-                    label: "Banned",
+                    label: "Restricted",
                     val: adminCoaches.filter((c: AdminCoach) => c.banned).length.toString(),
                     color: "text-rose-400",
-                    icon: "🚫",
+                    unit: "OFFLINE",
+                    desc: "Policy Violations"
                   },
                   {
-                    label: "Stripe Connected",
+                    label: "Economic Link",
                     val: adminCoaches.filter((c: AdminCoach) => c.stripeConnected).length.toString(),
                     color: "text-white",
-                    icon: "💳",
+                    unit: "STRIPE",
+                    desc: "Payout Integrated"
                   },
                 ].map((stat, i) => (
-                  <div key={i} className="glass-card p-4 md:p-5">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs">{stat.icon}</span>
-                      <p className="text-[10px] text-slate-500 uppercase font-semibold tracking-wider">
-                        {stat.label}
-                      </p>
-                    </div>
-                    <p
-                      className={`text-xl md:text-2xl font-mono font-extrabold ${stat.color}`}
-                    >
-                      {stat.val}
+                  <div key={i} className="glass-card p-6 relative overflow-hidden group/stat">
+                    <div className={`absolute top-0 right-0 w-24 h-24 blur-3xl rounded-full -mr-12 -mt-12 opacity-10 transition-all group-hover/stat:opacity-20 ${stat.color === 'text-indigo-400' ? 'bg-indigo-500' : stat.color === 'text-emerald-400' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-4">
+                      {stat.label}
                     </p>
+                    <div className="flex items-baseline gap-2 mb-1">
+                       <span className={`text-4xl font-black font-mono tracking-tighter ${stat.color}`}>{stat.val}</span>
+                       <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{stat.unit}</span>
+                    </div>
+                    <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest mt-2">{stat.desc}</p>
                   </div>
                 ))}
               </div>
@@ -1468,86 +1390,84 @@ export default function SoccerPlatform() {
 
             {/* ── Coach Roster ── */}
             <div>
-              <h3 className="text-base font-bold mb-4 text-slate-300 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                Coach Roster
+              <h3 className="text-sm font-black mb-8 text-slate-400 flex items-center gap-4 uppercase tracking-[0.3em]">
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500/30 border border-indigo-500 flex items-center justify-center p-0.5">
+                   <span className="w-full h-full rounded-full bg-indigo-500" />
+                </span>
+                Personnel Registry
               </h3>
+              
               {adminLoading ? (
-                <div className="glass-card p-12 text-center">
-                  <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-slate-400 text-sm">Loading coaches...</p>
+                <div className="glass-card p-24 text-center">
+                  <div className="w-10 h-10 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mx-auto mb-6" />
+                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Accessing Secure Database...</p>
                 </div>
               ) : adminCoaches.length === 0 ? (
-                <div className="glass-card p-12 text-center">
-                  <p className="text-4xl mb-4">🏟️</p>
-                  <p className="text-slate-300 font-semibold mb-2">No coaches registered yet</p>
-                  <p className="text-slate-500 text-sm">When coaches sign up and create their profiles, they will appear here.</p>
+                <div className="glass-card p-20 text-center border-dashed border-slate-800">
+                  <p className="text-5xl mb-6 opacity-30">🏟️</p>
+                  <p className="text-slate-400 font-black uppercase tracking-widest mb-2">Zero Personnel Found</p>
+                  <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">Platform is currently in pre-operational state.</p>
                 </div>
               ) : (
-                <div className="space-y-4 stagger-children">
+                <div className="space-y-4">
                   {adminCoaches.map((coach: AdminCoach) => (
                     <div
                       key={coach.id}
-                      className={`glass-card overflow-hidden hover:transform-none transition-all duration-300 ${coach.banned ? "opacity-60 border-rose-900/40" : ""}`}
+                      className={`glass-card overflow-hidden transition-all duration-500 group/personnel ${coach.banned ? "opacity-60 border-rose-900/40 bg-rose-500/[0.01]" : "hover:border-indigo-500/30"}`}
                     >
-                      <div className="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          <div
-                            className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-bold text-base shadow-lg shrink-0 ${coach.banned ? "grayscale" : ""}`}
-                          >
-                            {coach.avatar}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                              <h4 className="font-bold text-white">
-                                {coach.name}
-                              </h4>
-                              {coach.banned ? (
-                                <span className="text-[9px] bg-rose-500/15 text-rose-400 px-2 py-0.5 rounded-full border border-rose-500/25 font-semibold">
-                                  🚫 BANNED
-                                </span>
-                              ) : coach.verified ? (
-                                <span className="text-[9px] bg-indigo-500/15 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/25 font-semibold">
-                                  ✓ VERIFIED
-                                </span>
-                              ) : (
-                                <span className="text-[9px] bg-amber-500/15 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/25 font-semibold">
-                                  UNVERIFIED
-                                </span>
-                              )}
-                              {coach.stripeConnected && (
-                                <span className="text-[9px] bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/25 font-semibold">
-                                  💳 STRIPE
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-3 text-xs text-slate-500">
-                              <Stars rating={coach.rating} />
-                              <span className="font-medium">{coach.rating}</span>
-                              <span>·</span>
-                              <span>${coach.rate}/session</span>
-                              <span>·</span>
-                              <span className="text-slate-600">{coach.email}</span>
-                            </div>
-                          </div>
+                      <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                        <div className="flex items-center gap-6">
+                           <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-black text-xl shadow-2xl relative z-10 border border-white/10 ${coach.banned ? "grayscale" : ""}`}>
+                             {coach.avatar}
+                           </div>
+                           <div>
+                              <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                <h4 className="text-xl font-black text-white tracking-tighter">
+                                  {coach.name}
+                                </h4>
+                                <div className="flex gap-2">
+                                  {coach.banned ? (
+                                    <span className="text-[9px] bg-rose-500/10 text-rose-400 px-3 py-1 rounded-lg border border-rose-500/20 font-black tracking-widest">DENIED</span>
+                                  ) : (
+                                    <>
+                                      {coach.verified ? (
+                                        <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-lg border border-indigo-500/20 font-black tracking-widest leading-none flex items-center">✓ VERIFIED</span>
+                                      ) : (
+                                        <span className="text-[9px] bg-slate-800 text-slate-500 px-3 py-1 rounded-lg border border-slate-700/50 font-black tracking-widest leading-none flex items-center">PENDING</span>
+                                      )}
+                                      {coach.stripeConnected && (
+                                        <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-lg border border-emerald-500/20 font-black tracking-widest leading-none flex items-center">CREDENTIALED</span>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-5 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                                <span className="flex items-center gap-1.5"><Stars rating={coach.rating} /> {coach.rating}</span>
+                                <span className="w-1 h-1 rounded-full bg-slate-800" />
+                                <span>${coach.rate}/SESSION</span>
+                                <span className="w-1 h-1 rounded-full bg-slate-800" />
+                                <span className="text-slate-600 lowercase font-mono">{coach.email}</span>
+                              </div>
+                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          {coach.banned ? (
+
+                        <div className="flex items-center gap-4">
+                           {coach.banned ? (
                             <button
                               onClick={async () => {
                                 setBanningCoach(coach.id);
                                 await unbanCoach(coach.id);
                                 const updated = await getAllCoachesAdmin();
                                 setAdminCoaches(updated as unknown as AdminCoach[]);
-                                // Also refresh the public coaches list
                                 const publicCoaches = await getCoaches();
                                 setDbCoaches(publicCoaches as unknown as Coach[]);
                                 setBanningCoach(null);
                               }}
                               disabled={banningCoach === coach.id}
-                              className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-[0.97] border border-emerald-500/25 disabled:opacity-50"
+                              className="bg-emerald-500 text-black hover:bg-emerald-400 px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50"
                             >
-                              {banningCoach === coach.id ? "Unbanning..." : "Unban Coach"}
+                              {banningCoach === coach.id ? "RESTORING..." : "RESTORE ACCESS"}
                             </button>
                           ) : (
                             <button
@@ -1556,15 +1476,14 @@ export default function SoccerPlatform() {
                                 await banCoach(coach.id);
                                 const updated = await getAllCoachesAdmin();
                                 setAdminCoaches(updated as unknown as AdminCoach[]);
-                                // Also refresh the public coaches list
                                 const publicCoaches = await getCoaches();
                                 setDbCoaches(publicCoaches as unknown as Coach[]);
                                 setBanningCoach(null);
                               }}
                               disabled={banningCoach === coach.id}
-                              className="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-[0.97] border border-rose-500/25 disabled:opacity-50"
+                              className="bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-rose-500/30 hover:border-transparent disabled:opacity-50"
                             >
-                              {banningCoach === coach.id ? "Banning..." : "Ban Coach"}
+                              {banningCoach === coach.id ? "TERMINATING..." : "REVOKE ACCESS"}
                             </button>
                           )}
                         </div>

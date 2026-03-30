@@ -145,22 +145,23 @@ export default function EditCoachProfile() {
         <div className="absolute -bottom-[30%] -right-[20%] w-[50%] h-[50%] bg-teal-600/[0.03] rounded-full blur-[120px]" />
       </div>
 
-      <div className="max-w-2xl mx-auto relative z-10 anim-fade-in-up">
+      <div className="max-w-3xl mx-auto relative z-10 anim-fade-in-up">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-12">
           <div>
-            <h1 className="text-3xl font-black tracking-tight">
-              Edit <span className="text-emerald-400">Coach Profile</span>
+            <h1 className="text-4xl font-black tracking-tighter text-white mb-2">
+              PROFILE <span className="text-emerald-500">LAB</span>
             </h1>
-            <p className="text-slate-500 text-sm mt-1">
-              This is how players will see you in the marketplace.
+            <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em] opacity-80">
+              Configure your marketplace presence
             </p>
           </div>
           <Link
             href="/"
-            className="bg-slate-800/60 border border-slate-700/50 text-sm font-medium px-4 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all"
+            className="group flex items-center gap-2 bg-slate-900/80 border border-slate-800 text-[10px] font-black uppercase tracking-widest px-5 py-2.5 rounded-2xl text-slate-400 hover:text-white hover:border-slate-700 transition-all shadow-xl"
           >
-            ← Back
+            <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
+            Back to Arena
           </Link>
         </div>
 
@@ -179,143 +180,164 @@ export default function EditCoachProfile() {
             </div>
           )}
 
-          {/* Playing Style */}
-          <div className="glass-card p-6 hover:transform-none">
-            <label className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
-              Playing Style
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {STYLES.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setStyle(s)}
-                  className={`px-3 py-2.5 rounded-lg text-xs font-semibold transition-all duration-200 border ${
-                    style === s
-                      ? "bg-emerald-600/20 border-emerald-500 text-emerald-400 shadow-lg shadow-emerald-900/20"
-                      : "bg-slate-900/40 border-slate-700/50 text-slate-400 hover:border-slate-600 hover:text-slate-300"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
+          {/* Style & Specialty Grid */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Playing Style */}
+            <div className="glass-card p-8 group/card">
+              <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-5 ml-1">
+                Athetic Philosophy
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {STYLES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setStyle(s)}
+                    className={`px-3 py-3 rounded-xl text-[11px] font-black uppercase tracking-tighter transition-all duration-300 border-2 ${
+                      style === s
+                        ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.15)]"
+                        : "bg-slate-950 border-slate-800/60 text-slate-500 hover:border-slate-700 hover:text-slate-300"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Specialty Position */}
-          <div className="glass-card p-6 hover:transform-none">
-            <label className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
-              Specialty Position
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {SPECIALTIES.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setSpecialty(s)}
-                  className={`px-3 py-2.5 rounded-lg text-xs font-semibold transition-all duration-200 border ${
-                    specialty === s
-                      ? "bg-emerald-600/20 border-emerald-500 text-emerald-400 shadow-lg shadow-emerald-900/20"
-                      : "bg-slate-900/40 border-slate-700/50 text-slate-400 hover:border-slate-600 hover:text-slate-300"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
+            {/* Specialty Position */}
+            <div className="glass-card p-8 group/card">
+              <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-5 ml-1">
+                Dominant Specialty
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {SPECIALTIES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSpecialty(s)}
+                    className={`px-3 py-3 rounded-xl text-[11px] font-black uppercase tracking-tighter transition-all duration-300 border-2 ${
+                      specialty === s
+                        ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.15)]"
+                        : "bg-slate-950 border-slate-800/60 text-slate-500 hover:border-slate-700 hover:text-slate-300"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Hourly Rate */}
-          <div className="glass-card p-6 hover:transform-none">
-            <label className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
-              Hourly Rate
-            </label>
-            <div className="flex items-center gap-4">
-              <span className="text-3xl font-black text-emerald-400 font-mono">
-                ${rate}
-              </span>
-              <span className="text-slate-600 text-sm">/hr</span>
-            </div>
-            <input
-              type="range"
-              min="1"
-              max="200"
-              step="1"
-              value={rate}
-              onChange={(e) => setRate(parseInt(e.target.value))}
-              className="w-full mt-4 accent-emerald-500 h-2 bg-slate-800 rounded-full appearance-none cursor-pointer"
-            />
-            <div className="flex justify-between text-[10px] text-slate-600 mt-1">
-              <span>$1</span>
-              <span>$200</span>
-            </div>
-          </div>
-
-          {/* Bio */}
-          <div className="glass-card p-6 hover:transform-none">
-            <label
-              htmlFor="bio"
-              className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3"
-            >
-              Bio & Experience Details
-            </label>
-            <textarea
-              id="bio"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              rows={4}
-              maxLength={300}
-              placeholder="Describe your coaching experience and what players can expect..."
-              className="w-full p-4 bg-slate-950/60 border border-slate-700/50 rounded-xl focus:ring-2 ring-emerald-500/50 outline-none text-white placeholder:text-slate-600 transition-all duration-300 focus:bg-slate-900/80 focus:border-emerald-500/30 text-sm resize-none"
-            />
-            <p className="text-[10px] text-slate-600 mt-1 text-right">
-              {bio.length}/300
-            </p>
-          </div>
-
-          {/* New Customizations: Experience, Availability, Highlight */}
-          <div className="glass-card p-6 hover:transform-none space-y-6">
-            <div>
-              <label className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
-                Experience Level
+          <div className="glass-card p-8 group/card overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
+            <div className="flex justify-between items-center mb-6">
+              <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black ml-1">
+                Contract Rate
               </label>
-              <select
-                value={experience}
-                onChange={(e) => setExperience(e.target.value)}
-                className="w-full p-3 bg-slate-950/60 border border-slate-700/50 rounded-xl focus:ring-2 ring-emerald-500/50 outline-none text-white text-sm"
-              >
-                <option value="">Select your experience...</option>
-                <option value="Pro/Semi-Pro Player">
-                  Played Pro / Semi-Pro
-                </option>
-                <option value="College Player (D1/D2/D3)">
-                  Played College
-                </option>
-                <option value="Certified Youth Coach">
-                  Certified Youth Coach
-                </option>
-                <option value="High School Varsity">Played Varsity</option>
-              </select>
+              <div className="flex items-center gap-1.5">
+                <span className="text-3xl font-black text-white tracking-tighter">
+                  ${rate}.00
+                </span>
+                <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest">/ HR</span>
+              </div>
             </div>
-
-            <div>
-              <label className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
-                Highlight Reel URL
-              </label>
+            <div className="relative h-12 flex items-center">
               <input
-                type="url"
-                value={highlightUrl}
-                onChange={(e) => setHighlightUrl(e.target.value)}
-                placeholder="https://youtube.com/watch?v=..."
-                className="w-full p-3 bg-slate-950/60 border border-slate-700/50 rounded-xl focus:ring-2 ring-emerald-500/50 outline-none text-white text-sm placeholder:text-slate-600"
+                type="range"
+                min="20"
+                max="250"
+                step="5"
+                value={rate}
+                onChange={(e) => setRate(parseInt(e.target.value))}
+                className="w-full h-1.5 bg-slate-950 rounded-full appearance-none cursor-pointer accent-emerald-500 ring-1 ring-slate-800/50 shadow-inner"
               />
             </div>
+            <div className="flex justify-between text-[9px] text-slate-600 font-bold uppercase tracking-widest mt-2 px-1">
+              <span>Min $20</span>
+              <span>Academy Standard</span>
+              <span>Max $250</span>
+            </div>
+          </div>
 
+          {/* Bio & Details */}
+          <div className="glass-card p-8 space-y-10">
+            {/* Bio */}
             <div>
-              <label className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
-                General Availability
+              <label
+                htmlFor="bio"
+                className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 ml-1"
+              >
+                Mission Statement & Bio
               </label>
-              <div className="flex flex-col gap-3">
+              <textarea
+                id="bio"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                rows={4}
+                maxLength={300}
+                placeholder="What defines your coaching style? (e.g. Focus on ball mastery and tactical awareness)"
+                className="w-full p-5 bg-slate-950/80 border border-slate-800 rounded-2xl focus:ring-2 ring-emerald-500/20 outline-none text-white text-[15px] leading-relaxed placeholder:text-slate-700 transition-all duration-300 focus:border-emerald-500/30 resize-none"
+              />
+              <div className="flex justify-between items-center mt-2 px-1">
+                <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">Maximum Impact: 300 Characters</span>
+                <span className={`text-[10px] font-black ${bio.length > 250 ? 'text-emerald-400' : 'text-slate-600'}`}>
+                  {bio.length}/300
+                </span>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Experience */}
+              <div>
+                <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 ml-1">
+                  Professional Pedigree
+                </label>
+                <div className="relative group/select">
+                  <select
+                    value={experience}
+                    onChange={(e) => setExperience(e.target.value)}
+                    className="w-full p-4 bg-slate-950 border border-slate-800 rounded-[1.25rem] appearance-none focus:ring-2 ring-emerald-500/20 outline-none text-white text-sm font-bold tracking-tight cursor-pointer"
+                  >
+                    <option value="" className="bg-slate-900">Select Credentials...</option>
+                    <option value="Pro/Semi-Pro Player" className="bg-slate-900">Elite: Pro / Semi-Pro</option>
+                    <option value="College Player (D1/D2/D3)" className="bg-slate-900">High Level Collegiate</option>
+                    <option value="Certified Youth Coach" className="bg-slate-900">Tactical: Certified Coach</option>
+                    <option value="High School Varsity" className="bg-slate-900">Varsity Veteran</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 group-hover/select:text-emerald-400 transition-colors">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Highlight URL */}
+              <div>
+                <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 ml-1">
+                  Reel Evidence (URL)
+                </label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                  </div>
+                  <input
+                    type="url"
+                    value={highlightUrl}
+                    onChange={(e) => setHighlightUrl(e.target.value)}
+                    placeholder="https://youtube.com/..."
+                    className="w-full p-4 pl-12 bg-slate-950 border border-slate-800 rounded-[1.25rem] focus:ring-2 ring-emerald-500/20 outline-none text-white text-sm font-medium transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Availability */}
+            <div>
+              <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-6 ml-1">
+                 Weekly Operation Schedule
+              </label>
+              <div className="grid gap-3">
                 {DAYS_OF_WEEK.map((day) => {
                   const slot = availability.find((s) => s.day === day);
                   const isSelected = !!slot;
@@ -323,26 +345,29 @@ export default function EditCoachProfile() {
                   return (
                     <div
                       key={day}
-                      className={`flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl border transition-all ${
+                      className={`flex flex-col sm:flex-row sm:items-center gap-5 p-5 rounded-2xl border transition-all duration-500 ${
                         isSelected
-                          ? "bg-slate-900/80 border-emerald-500/50"
-                          : "bg-slate-900/40 border-slate-800"
+                          ? "bg-slate-950/80 border-emerald-500/40 shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
+                          : "bg-slate-950/20 border-slate-900 opacity-60 hover:opacity-100"
                       }`}
                     >
-                      <label className="flex items-center gap-3 cursor-pointer sm:w-28">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-950"
-                          checked={isSelected}
-                          onChange={() => toggleDay(day)}
-                        />
-                        <span className={`text-sm font-semibold ${isSelected ? "text-emerald-400" : "text-slate-400"}`}>
-                          {day}
+                      <button
+                        type="button"
+                        onClick={() => toggleDay(day)}
+                        className="flex items-center gap-4 cursor-pointer sm:w-32 group/toggle"
+                      >
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                          isSelected ? "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]" : "bg-slate-900 text-slate-600 border border-slate-800"
+                        }`}>
+                          <span className="text-[11px] font-black transition-transform group-hover/toggle:scale-110">{day.toUpperCase()}</span>
+                        </div>
+                        <span className={`text-[10px] font-black uppercase tracking-widest hidden sm:block ${isSelected ? "text-emerald-400" : "text-slate-600"}`}>
+                          {isSelected ? "Active" : "Closed"}
                         </span>
-                      </label>
+                      </button>
 
                       {isSelected && slot && (
-                        <div className="flex items-center gap-3 anim-fade-in text-sm">
+                        <div className="flex items-center gap-4 anim-fade-in text-sm ml-auto sm:ml-0">
                           <input
                             type="time"
                             value={slot.start}
@@ -351,9 +376,9 @@ export default function EditCoachProfile() {
                                 availability.map((s) => (s.day === day ? { ...s, start: e.target.value } : s)),
                               );
                             }}
-                            className="bg-slate-950 border border-slate-700/50 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 text-white"
+                            className="bg-slate-900 border border-slate-800 rounded-[0.75rem] px-4 py-2.5 outline-none focus:border-emerald-500/50 text-white font-mono font-bold text-xs transition-all shadow-inner"
                           />
-                          <span className="text-slate-500">—</span>
+                          <span className="text-slate-700 font-bold">—</span>
                           <input
                             type="time"
                             value={slot.end}
@@ -362,7 +387,7 @@ export default function EditCoachProfile() {
                                 availability.map((s) => (s.day === day ? { ...s, end: e.target.value } : s)),
                               );
                             }}
-                            className="bg-slate-950 border border-slate-700/50 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 text-white"
+                            className="bg-slate-900 border border-slate-800 rounded-[0.75rem] px-4 py-2.5 outline-none focus:border-emerald-500/50 text-white font-mono font-bold text-xs transition-all shadow-inner"
                           />
                         </div>
                       )}
@@ -374,73 +399,79 @@ export default function EditCoachProfile() {
           </div>
 
           {/* Stripe Payouts */}
-          <div className="glass-card p-6 border-indigo-500/20 bg-indigo-500/[0.02] hover:transform-none">
-            <label className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
-              Payout & Banking Status
+          <div className="glass-card p-8 border-cyan-500/20 bg-cyan-500/[0.02] relative overflow-hidden group/payout">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
+            <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-5 ml-1">
+              Escrow & Payout Integration
             </label>
             {stripeOnboarded ? (
-              <div className="flex items-center gap-3 text-emerald-400 bg-emerald-400/10 p-4 rounded-xl border border-emerald-500/20">
-                <span className="text-xl">✅</span>
+              <div className="flex items-center gap-5 text-emerald-400 bg-emerald-500/5 p-6 rounded-[1.5rem] border border-emerald-500/20 shadow-xl">
+                <div className="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center text-xl">✅</div>
                 <div>
-                  <p className="font-bold text-sm">Stripe Account Connected</p>
-                  <p className="text-[10px] opacity-80">You are ready to receive payouts for your coaching sessions.</p>
+                  <p className="font-black text-base tracking-tight text-white">Stripe Vault Connected</p>
+                  <p className="text-[10px] uppercase font-bold tracking-widest text-emerald-400/60 mt-1">Operational & Ready for Deposits</p>
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 text-amber-400 bg-amber-400/10 p-4 rounded-xl border border-amber-500/20">
-                  <span className="text-xl">⚠️</span>
+              <div className="space-y-6">
+                <div className="flex items-start gap-5 text-amber-400 bg-amber-500/5 p-6 rounded-[1.5rem] border border-amber-500/20">
+                  <div className="w-12 h-12 bg-amber-500/20 rounded-2xl flex items-center justify-center text-xl shrink-0">⚠️</div>
                   <div>
-                    <p className="font-bold text-sm">Payouts Not Configured</p>
-                    <p className="text-[10px] opacity-80">Connect your bank account via Stripe to receive payments from players.</p>
+                    <p className="font-black text-base tracking-tight text-white mb-1">Financial Link Missing</p>
+                    <p className="text-xs font-medium text-slate-400 leading-relaxed">You must connect your bank profile via Stripe to receive session payments. All funds are secured in escrow until session completion.</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   disabled={connectingStripe}
                   onClick={handleStripeConnect}
-                  className="glow-btn w-full bg-white text-black hover:bg-slate-200 px-6 py-3.5 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-[0.97] flex items-center justify-center gap-2"
+                  className="w-full bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-white py-4 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.3em] transition-all hover:bg-slate-800 disabled:opacity-50 shadow-2xl flex items-center justify-center gap-3 group/stripe"
                 >
-                  {connectingStripe ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-slate-400 border-t-black rounded-full animate-spin" />
-                      Connecting...
-                    </>
-                  ) : (
-                    "Setup Stripe Payouts →"
-                  )}
+                  {connectingStripe ? "Processing Link..." : "Initialize Stripe Secure Link"}
+                  <svg className="w-4 h-4 transition-transform group-hover/stripe:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </button>
               </div>
             )}
           </div>
 
           {/* Live Preview */}
-          <div className="glass-card p-6 hover:transform-none">
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-4">
-              Live Preview
-            </p>
-            <div className="glass-card p-5">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-emerald-900/30">
-                    C
+          <div className="glass-card p-10 group/preview relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/[0.02] blur-3xl rounded-full -mr-32 -mt-32 pointer-events-none" />
+            
+            <div className="flex items-center gap-3 mb-8">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-[10px] text-slate-500 uppercase tracking-[0.4em] font-black">
+                Marketplace Preview
+              </p>
+            </div>
+
+            <div className="bg-slate-950/80 border border-slate-800/80 rounded-[2.5rem] p-8 shadow-2xl relative">
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex items-center gap-5">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-emerald-500/10">
+                    {style?.[0] || specialty?.[0] || "?"}
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm">Coach You</h3>
-                    <div className="text-[10px] text-slate-500">
-                      {specialty || "Position"} · {style || "Style"}
+                    <h3 className="font-black text-xl tracking-tighter text-white mb-1.5">Coach You</h3>
+                    <div className="flex items-center gap-2">
+                       <span className="text-[9px] bg-slate-900 text-slate-400 px-3 py-1 rounded-full border border-slate-800 font-bold uppercase tracking-widest leading-none">
+                         {specialty || "POSITION"}
+                       </span>
+                       <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 font-bold uppercase tracking-widest leading-none">
+                         {style || "STYLE"}
+                       </span>
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-xl font-black font-mono text-white">
+                  <div className="text-2xl font-black text-white tracking-widest leading-none mb-1">
                     ${rate}
-                  </span>
-                  <span className="text-[10px] text-slate-500">/hr</span>
+                  </div>
+                  <div className="text-[9px] text-slate-500 font-black uppercase tracking-tighter">PER HOUR</div>
                 </div>
               </div>
-              <p className="text-slate-400 text-xs leading-relaxed">
-                {bio || "Your bio will appear here..."}
+              <p className="text-slate-400 text-sm leading-relaxed font-medium italic opacity-80 border-l-2 border-emerald-500/30 pl-4 py-1">
+                {bio || "Your mission statement will be displayed here for all prospective athletes..."}
               </p>
             </div>
           </div>
@@ -448,13 +479,13 @@ export default function EditCoachProfile() {
           {/* Submit */}
           <button
             type="submit"
-            disabled={saving || !style || !specialty}
-            className="glow-btn w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 py-4 rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/25 active:scale-[0.97]"
+            disabled={saving}
+            className="gradient-btn w-full py-6 text-base uppercase tracking-[0.4em] shadow-[0_20px_50px_rgba(16,185,129,0.3)] hover:shadow-[0_30px_70px_rgba(16,185,129,0.4)] transition-all hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:grayscale mb-20"
           >
             {saving ? (
-              <span className="inline-flex items-center gap-2">
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Saving...
+              <span className="flex items-center justify-center gap-4">
+                <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                Encrypting Profile...
               </span>
             ) : (
               "Save Profile & Go Live"
