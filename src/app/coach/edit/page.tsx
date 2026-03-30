@@ -134,18 +134,13 @@ export default function EditCoachProfile() {
       if (res?.url) {
         window.location.href = res.url;
       } else if (res?.alreadyComplete) {
-        window.alert("Your Stripe account is already fully connected! Refreshing...");
         window.location.reload();
       } else {
-        const errMsg = res?.error || "Failed to initialize Stripe Connect.";
-        window.alert("Stripe Error: " + errMsg);
-        setMessage({ type: "error", text: errMsg });
+        setMessage({ type: "error", text: res?.error || "Failed to initialize Stripe Connect." });
         setConnectingStripe(false);
       }
     } catch (err: any) {
-      const errMsg = err?.message || "Unknown error connecting to Stripe";
-      window.alert("Stripe Connection Error: " + errMsg);
-      setMessage({ type: "error", text: errMsg });
+      setMessage({ type: "error", text: err?.message || "Unknown error connecting to Stripe" });
       setConnectingStripe(false);
     }
   }
