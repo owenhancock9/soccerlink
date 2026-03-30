@@ -18,8 +18,8 @@ export async function sendEmail(to: string, subject: string, html: string) {
       html,
     });
     return { success: true, data };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Resend Error:", error);
-    return { error: error.message };
+    return { error: error instanceof Error ? error.message : "An unknown error occurred" };
   }
 }

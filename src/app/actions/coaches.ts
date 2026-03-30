@@ -115,7 +115,9 @@ export async function updateCoachProfile(formData: FormData) {
   let availability = [];
   try {
     availability = JSON.parse(availabilityText || "[]");
-  } catch (e) {}
+  } catch {
+    // Fallback for malformed JSON
+  }
 
   const { error } = await supabase.from("coach_profiles").upsert({
     id: user.id,

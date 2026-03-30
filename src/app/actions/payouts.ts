@@ -58,8 +58,8 @@ export async function releaseFundsToCoach(bookingId: string) {
     }
 
     return { success: true, transferId: transfer.id };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Stripe Transfer Error:", err);
-    return { error: err.message || "Failed to release funds." };
+    return { error: err instanceof Error ? err.message : "Failed to release funds." };
   }
 }

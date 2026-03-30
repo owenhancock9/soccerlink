@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { createClient } from "@/app/lib/supabase/client";
 import { updateCoachProfile, getMyCoachProfile } from "@/app/actions/coaches";
 import { createStripeConnectAccount } from "@/app/actions/stripe";
 
@@ -45,6 +44,10 @@ export default function EditCoachProfile() {
   type TimeSlot = { day: string; start: string; end: string };
   const [availability, setAvailability] = useState<TimeSlot[]>([]);
 
+  const [stripeOnboarded, setStripeOnboarded] = useState(false);
+  const [connectingStripe, setConnectingStripe] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
   const toggleDay = (day: string) => {
     setAvailability((prev) => {
       const exists = prev.find((s) => s.day === day);
@@ -52,6 +55,21 @@ export default function EditCoachProfile() {
       return [...prev, { day, start: "09:00", end: "17:00" }];
     });
   };
+
+  async function refreshStripeStatus() {
+    setIsSyncing(true);
+    const data = await getMyCoachProfile();
+    if (data?.stripe_onboarding_complete) {
+      setStripeOnboarded(true);
+      setMessage({ type: "success", text: "Stripe connection verified!" });
+    } else {
+      setMessage({ 
+        type: "error", 
+        text: "Stripe reports onboarding is still incomplete. Please ensure you've finished all steps in the Stripe dashboard." 
+      });
+    }
+    setIsSyncing(false);
+  }
 
   useEffect(() => {
     async function loadProfile() {
@@ -70,31 +88,12 @@ export default function EditCoachProfile() {
           return { day: slot, start: "09:00", end: "17:00" };
         });
         setAvailability(parsedSlots);
-        setStripeOnboarded(data.stripe_onboarding_complete);
+        setStripeOnboarded(data.stripe_onboarding_complete || false);
       }
       setLoading(false);
     }
     loadProfile();
   }, []);
-
-  const [stripeOnboarded, setStripeOnboarded] = useState(false);
-  const [connectingStripe, setConnectingStripe] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  async function refreshStripeStatus() {
-    setIsSyncing(true);
-    const data = await getMyCoachProfile();
-    if (data?.stripe_onboarding_complete) {
-      setStripeOnboarded(true);
-      setMessage({ type: "success", text: "Stripe connection verified!" });
-    } else {
-      setMessage({ 
-        type: "error", 
-        text: "Stripe reports onboarding is still incomplete. Please ensure you've finished all steps in the Stripe dashboard." 
-      });
-    }
-    setIsSyncing(false);
-  }
 
   async function handleStripeConnect() {
     setConnectingStripe(true);

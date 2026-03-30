@@ -18,9 +18,10 @@ export async function POST(req: Request) {
     } else {
       event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
     }
-  } catch (err: any) {
-    console.error("Webhook error:", err.message);
-    return NextResponse.json({ error: err.message }, { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Webhook error";
+    console.error("Webhook error:", message);
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 
   // Handle successful checkout

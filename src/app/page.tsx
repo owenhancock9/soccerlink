@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/app/lib/supabase/client";
 import { signOut } from "@/app/actions/auth";
 import { getCoaches, getMyCoachProfile, getAllCoachesAdmin, banCoach, unbanCoach } from "@/app/actions/coaches";
-import { createBooking, getCoachBookings, getMyBookings, updateBookingStatus } from "@/app/actions/bookings";
+import { createBooking, getCoachBookings, getMyBookings } from "@/app/actions/bookings";
 import { createStripeConnectAccount } from "@/app/actions/stripe";
 import { uploadVodForBooking } from "@/app/actions/upload";
 import { releaseFundsToCoach } from "@/app/actions/payouts";
@@ -33,6 +33,22 @@ interface AdminCoach {
   stripeConnected: boolean;
 }
 
+/* ─── Booking type ─── */
+interface Booking {
+  id: string;
+  status: string;
+  amount: number;
+  total: number;
+  session_date: string;
+  session_time: string;
+  coach?: { full_name: string };
+  player_name?: string;
+  player_email?: string;
+  vod_url?: string;
+  payout_id?: string;
+  [key: string]: unknown; // Index signature for safety with dynamic properties
+}
+
 /* ─── Star Renderer ─── */
 function Stars({ rating }: { rating: number }) {
   const full = Math.floor(rating);
@@ -48,47 +64,7 @@ function Stars({ rating }: { rating: number }) {
 }
 
 /* ─── Animated Stat Bar ─── */
-function StatBar({
-  label,
-  value,
-  color,
-  delay = 0,
-}: {
-  label: string;
-  value: number;
-  color: string;
-  delay?: number;
-}) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setMounted(true), delay);
-    return () => clearTimeout(t);
-  }, [delay]);
 
-  return (
-    <div className="mb-4 group cursor-default">
-      <div className="flex justify-between text-xs mb-1.5">
-        <span className="text-slate-400 uppercase tracking-widest font-medium text-[10px]">
-          {label}
-        </span>
-        <span
-          className={`font-mono font-bold text-sm transition-all duration-300 group-hover:scale-110 origin-right ${color.replace("bg-", "text-")}`}
-        >
-          {value}
-        </span>
-      </div>
-      <div className="h-2 bg-slate-800/80 rounded-full overflow-hidden ring-1 ring-slate-700/50">
-        <div
-          className={`h-full ${color} rounded-full transition-all duration-1000`}
-          style={{
-            width: mounted ? `${value}%` : "0%",
-            transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
-          }}
-        />
-      </div>
-    </div>
-  );
-}
 
 /* ─── Coach Card ─── */
 interface Coach {
@@ -185,14 +161,14 @@ function CoachCard({
 
         {/* Narrative Bio */}
         <p className="text-sm text-slate-400/90 leading-relaxed mb-8 line-clamp-2 font-medium tracking-tight h-10 italic">
-          "{coach.bio}"
+          &quot;{coach.bio}&quot;
         </p>
 
         {/* Digital Availability Rails */}
         {coach.availability && coach.availability.length > 0 && (
           <div className="mb-8 overflow-hidden relative group/rails">
             <div className="flex gap-2.5">
-              {coach.availability.map((day, i) => (
+              {coach.availability.map((day) => (
                 <div
                   key={day}
                   className="flex flex-col items-center bg-slate-950 border border-slate-800/60 rounded-xl px-4 py-2 min-w-[64px] transition-all group-hover/rails:border-indigo-500/20 group-hover/rails:bg-indigo-500/[0.02]"
@@ -236,7 +212,7 @@ export default function SoccerPlatform() {
     name: "",
     isAuthenticated: false,
   });
-  const [authLoading, setAuthLoading] = useState(true);
+  const [, setAuthLoading] = useState(true);
 
   const [view, setView] = useState("discovery");
   const [search, setSearch] = useState("");
@@ -259,13 +235,12 @@ export default function SoccerPlatform() {
     type: "success" | "error";
     text: string;
   } | null>(null);
-  const [realBookings, setRealBookings] = useState<Record<string, unknown>[]>(
+  const [realBookings, setRealBookings] = useState<Booking[]>(
     [],
   );
 
   /* ── Coach Context ── */
   const [stripeOnboarded, setStripeOnboarded] = useState<boolean | null>(null);
-  const [connectingStripe, setConnectingStripe] = useState(false);
 
   const [isSyncingStripe, setIsSyncingStripe] = useState(false);
 
@@ -273,8 +248,9 @@ export default function SoccerPlatform() {
     setIsSyncingStripe(true);
     const profile = await getMyCoachProfile();
     if (profile) {
-      setStripeOnboarded(profile.stripe_onboarding_complete);
-      if (profile.stripe_onboarding_complete) {
+      const p = profile as Record<string, unknown>;
+      setStripeOnboarded(!!p.stripe_onboarding_complete);
+      if (p.stripe_onboarding_complete) {
         setBookingMessage({ type: "success", text: "Stripe Connection Verified! You are now live." });
       } else {
         setBookingMessage({ type: "error", text: "Stripe reports onboarding is still incomplete. Please finish all steps in the Stripe dashboard." });
@@ -287,8 +263,11 @@ export default function SoccerPlatform() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("setup") === "success" && currentUser.role === "coach") {
-      getMyCoachProfile().then((profile: any) => {
-        if (profile) setStripeOnboarded(profile.stripe_onboarding_complete);
+      getMyCoachProfile().then((profile) => {
+        const p = profile as Record<string, unknown>;
+        if (p?.stripe_onboarding_complete) {
+          setStripeOnboarded(true);
+        }
       });
       // Clear URL param
       window.history.replaceState({}, "", window.location.pathname);
@@ -317,7 +296,6 @@ export default function SoccerPlatform() {
   /* ── Fetch Admin Coaches ── */
   useEffect(() => {
     if (currentUser.role === "admin" && currentUser.isAuthenticated) {
-      setAdminLoading(true);
       getAllCoachesAdmin().then((coaches) => {
         setAdminCoaches(coaches as unknown as AdminCoach[]);
         setAdminLoading(false);
@@ -328,17 +306,18 @@ export default function SoccerPlatform() {
   /* ── Fetch Coach Bookings & Details (for coach dashboard) ── */
   useEffect(() => {
     if (currentUser.role === "coach" && currentUser.isAuthenticated) {
-      getCoachBookings().then((bookings: Record<string, unknown>[]) => {
-        setRealBookings(bookings);
+      getCoachBookings().then((bookings) => {
+        setRealBookings(bookings as unknown as Booking[]);
       });
-      getMyCoachProfile().then((profile: any) => {
-        if (profile) {
-          setStripeOnboarded(profile.stripe_onboarding_complete);
+      getMyCoachProfile().then((profile) => {
+        const p = profile as Record<string, unknown>;
+        if (p?.stripe_onboarding_complete) {
+          setStripeOnboarded(true);
         }
       });
     } else if (currentUser.role === "player" && currentUser.isAuthenticated) {
-      getMyBookings().then((bookings: Record<string, unknown>[]) => {
-        setRealBookings(bookings);
+      getMyBookings().then((bookings) => {
+        setRealBookings(bookings as unknown as Booking[]);
       });
     }
   }, [currentUser.role, currentUser.isAuthenticated]);
@@ -571,7 +550,7 @@ export default function SoccerPlatform() {
                       <div>
                         <p className="text-[11px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 flex items-center gap-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          Coach's Weekly Hours
+                          Coach&apos;s Weekly Hours
                         </p>
                         <div className="flex flex-wrap gap-2.5">
                           {selectedCoach.availability.map((day, i) => (
@@ -757,7 +736,7 @@ export default function SoccerPlatform() {
                 <div className="space-y-6">
                   <div className="p-8 bg-slate-950/60 rounded-[2rem] border border-slate-800 shadow-2xl">
                     <strong className="text-white text-lg block mb-3 uppercase tracking-tighter">1. The Escrow Vault System</strong>
-                    <p className="text-slate-400 leading-relaxed font-medium">To ensure 100% security for players, your funds are held by CoachMatching's secure vault. Coaches only receive payment once they have uploaded your custom VOD breakdown. If no video is delivered, your funds are returned.</p>
+                    <p className="text-slate-400 leading-relaxed font-medium">To ensure 100% security for players, your funds are held by CoachMatching&apos;s secure vault. Coaches only receive payment once they have uploaded your custom VOD breakdown. If no video is delivered, your funds are returned.</p>
                   </div>
                   <div className="p-8 bg-rose-950/10 rounded-[2rem] border border-rose-900/30 shadow-2xl">
                     <strong className="text-rose-400 text-lg block mb-3 uppercase tracking-tighter">2. Off-Platform Protection</strong>
@@ -1130,7 +1109,7 @@ export default function SoccerPlatform() {
               </div>
             )}
             
-            {realBookings.map((b: any) => (
+            {realBookings.map((b: Booking) => (
               <div key={b.id} className="glass-card p-6 md:p-8 relative hover:transform-none">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                   
@@ -1191,7 +1170,7 @@ export default function SoccerPlatform() {
                     )}
                     
                     {/* Release Funds (Only if reviewed or actually wanted by player) */}
-                    {(b.status === "reviewed" || b.status === "vod_submitted" || b.status === "confirmed") && b.status !== "completed" && (
+                    {(b.status === "reviewed" || b.status === "vod_submitted" || b.status === "confirmed") && (
                       <button 
                         onClick={() => handleReleaseFunds(b.id)}
                         disabled={releasingFunds === b.id}
@@ -1208,7 +1187,7 @@ export default function SoccerPlatform() {
             
             {realBookings.length === 0 && (
               <div className="text-center py-20 glass-card">
-                <p className="text-slate-400 mb-4">You haven't booked any sessions yet.</p>
+                <p className="text-slate-400 mb-4">You haven&apos;t booked any sessions yet.</p>
                 <button onClick={() => setView("discovery")} className="text-indigo-400 font-semibold hover:text-indigo-300">
                   Find a Coach →
                 </button>
@@ -1266,8 +1245,8 @@ export default function SoccerPlatform() {
                     <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Total Career Revenue</p>
                     <p className="text-xl font-black text-white font-mono">
                       ${realBookings
-                        .filter((b: any) => b.status === "completed")
-                        .reduce((acc, b: any) => acc + Number(b.amount || 0), 0)
+                        .filter((b: Booking) => b.status === "completed")
+                        .reduce((acc: number, b: Booking) => acc + Number(b.amount || 0), 0)
                         .toFixed(2)}
                     </p>
                   </div>
@@ -1287,16 +1266,16 @@ export default function SoccerPlatform() {
                 {
                   label: "Escrow Locked",
                   val: `$${realBookings
-                    .filter((b: any) => b.status === "completed" && !b.payout_id)
-                    .reduce((sum, b: any) => sum + Number(b.amount || 0), 0)
+                    .filter((b: Booking) => b.status === "completed" && !b.payout_id)
+                    .reduce((sum, b: Booking) => sum + Number(b.amount || 0), 0)
                     .toFixed(2)}`,
                   color: "text-orange-400",
                 },
                 {
                   label: "Net Earnings",
                   val: `$${realBookings
-                    .filter((b: any) => b.payout_id)
-                    .reduce((sum, b: any) => sum + Number(b.amount || 0) * (1 - PLATFORM_CUT), 0)
+                    .filter((b: Booking) => !!b.payout_id)
+                    .reduce((sum: number, b: Booking) => sum + Number(b.amount || 0) * (1 - PLATFORM_CUT), 0)
                     .toFixed(2)}`,
                   color: "text-emerald-400",
                 },
@@ -1308,8 +1287,8 @@ export default function SoccerPlatform() {
                 {
                   label: "Network Fee",
                   val: `$${realBookings
-                    .filter((b: any) => b.payout_id)
-                    .reduce((sum, b: any) => sum + Number(b.amount || 0) * PLATFORM_CUT, 0)
+                    .filter((b: Booking) => b.payout_id)
+                    .reduce((sum, b: Booking) => sum + Number(b.amount || 0) * PLATFORM_CUT, 0)
                     .toFixed(2)}`,
                   color: "text-slate-500",
                 },
@@ -1327,9 +1306,9 @@ export default function SoccerPlatform() {
                 <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.6)] animate-pulse" />
                 Critical Actions
               </h3>
-              {realBookings.filter((b: any) => b.status === 'completed' && !b.vod_url).length > 0 ? (
+              {realBookings.filter((b: Booking) => b.status === 'completed' && !b.vod_url).length > 0 ? (
                 <div className="grid gap-4">
-                  {realBookings.filter((b: any) => b.status === 'completed' && !b.vod_url).map((booking: any) => (
+                  {realBookings.filter((b: Booking) => b.status === 'completed' && !b.vod_url).map((booking: Booking) => (
                     <div key={booking.id} className="glass-card overflow-hidden group/action relative border-l-4 border-l-orange-500">
                       <div className="absolute inset-0 bg-gradient-to-r from-orange-500/[0.03] to-transparent pointer-events-none" />
                       <div className="p-6 md:p-8 flex flex-col md:flex-row justify-between md:items-center gap-6">

@@ -36,6 +36,7 @@ export async function createBooking(formData: FormData) {
       session_time: sessionTime,
       rate,
       platform_fee: platformFee,
+      platformFee,
       total,
       status: "pending",
     })
@@ -78,7 +79,7 @@ export async function createBooking(formData: FormData) {
     });
 
     return { success: true, booking: data, url: session.url };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Stripe Checkout Error:", err);
     return { error: "Failed to create payment session." };
   }
