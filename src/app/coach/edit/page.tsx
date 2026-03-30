@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/app/lib/supabase/client";
-import { updateCoachProfile } from "@/app/actions/coaches";
+import { updateCoachProfile, getMyCoachProfile } from "@/app/actions/coaches";
 import { createStripeConnectAccount } from "@/app/actions/stripe";
 
 const STYLES = [
@@ -55,17 +55,7 @@ export default function EditCoachProfile() {
 
   useEffect(() => {
     async function loadProfile() {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from("coach_profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+      const data = await getMyCoachProfile();
 
       if (data) {
         setStyle(data.style || "");
