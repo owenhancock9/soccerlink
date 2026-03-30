@@ -248,6 +248,18 @@ export default function SoccerPlatform() {
   /* ── Coach Context ── */
   const [stripeOnboarded, setStripeOnboarded] = useState<boolean | null>(null);
   const [connectingStripe, setConnectingStripe] = useState(false);
+
+  /* ── Detect Stripe Setup Success ── */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("setup") === "success" && currentUser.role === "coach") {
+      getMyCoachProfile().then((profile: any) => {
+        if (profile) setStripeOnboarded(profile.stripe_onboarding_complete);
+      });
+      // Clear URL param
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [currentUser.role]);
   
   /* ── File Upload State ── */
   const [uploadingVod, setUploadingVod] = useState<string | null>(null);
@@ -1191,9 +1203,9 @@ export default function SoccerPlatform() {
               </Link>
             </div>
 
-            {/* Stripe Connect Banner */}
-            {stripeOnboarded === false && (
-              <div className="glass-card bg-indigo-950/30 border-indigo-900/40 p-5 md:p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 anim-fade-in-up">
+            {/* Stripe Connect Banner (Show if not true) */}
+            {stripeOnboarded !== true && (
+              <div className="glass-card bg-indigo-950/40 border-indigo-500/30 p-5 md:p-8 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 anim-fade-in-up shadow-lg shadow-indigo-600/10">
                 <div>
                   <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.6)]" />

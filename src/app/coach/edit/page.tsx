@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/app/lib/supabase/client";
 import { updateCoachProfile } from "@/app/actions/coaches";
+import { createStripeConnectAccount } from "@/app/actions/stripe";
 
 const STYLES = [
   "Tiki-Taka",
@@ -71,11 +72,26 @@ export default function EditCoachProfile() {
         setExperience(data.experience || "");
         setHighlightUrl(data.highlight_reel_url || "");
         setAvailability(data.availability || []);
+        setStripeOnboarded(data.stripe_onboarding_complete);
       }
       setLoading(false);
     }
     loadProfile();
   }, []);
+
+  const [stripeOnboarded, setStripeOnboarded] = useState(false);
+  const [connectingStripe, setConnectingStripe] = useState(false);
+
+  async function handleStripeConnect() {
+    setConnectingStripe(true);
+    const res = await createStripeConnectAccount();
+    if (res?.url) {
+      window.location.href = res.url;
+    } else {
+      setMessage({ type: "error", text: "Failed to initialize Stripe Connect." });
+      setConnectingStripe(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -307,6 +323,47 @@ export default function EditCoachProfile() {
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* Stripe Payouts */}
+          <div className="glass-card p-6 border-indigo-500/20 bg-indigo-500/[0.02] hover:transform-none">
+            <label className="block text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
+              Payout & Banking Status
+            </label>
+            {stripeOnboarded ? (
+              <div className="flex items-center gap-3 text-emerald-400 bg-emerald-400/10 p-4 rounded-xl border border-emerald-500/20">
+                <span className="text-xl">✅</span>
+                <div>
+                  <p className="font-bold text-sm">Stripe Account Connected</p>
+                  <p className="text-[10px] opacity-80">You are ready to receive payouts for your coaching sessions.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 text-amber-400 bg-amber-400/10 p-4 rounded-xl border border-amber-500/20">
+                  <span className="text-xl">⚠️</span>
+                  <div>
+                    <p className="font-bold text-sm">Payouts Not Configured</p>
+                    <p className="text-[10px] opacity-80">Connect your bank account via Stripe to receive payments from players.</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={connectingStripe}
+                  onClick={handleStripeConnect}
+                  className="glow-btn w-full bg-white text-black hover:bg-slate-200 px-6 py-3.5 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-[0.97] flex items-center justify-center gap-2"
+                >
+                  {connectingStripe ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-slate-400 border-t-black rounded-full animate-spin" />
+                      Connecting...
+                    </>
+                  ) : (
+                    "Setup Stripe Payouts →"
+                  )}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Live Preview */}

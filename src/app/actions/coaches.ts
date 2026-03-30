@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/lib/supabase/server";
+import { stripe } from "@/app/lib/stripe/server";
 
 export async function getCoaches() {
   const supabase = await createClient();
@@ -71,6 +72,23 @@ export async function getMyCoachProfile() {
     .single();
 
   if (error) return null;
+  
+  // Sync Stripe status if account exists but isn't marked as complete
+  if (data.stripe_account_id && !data.stripe_onboarding_complete) {
+    try {
+      const account = await stripe.accounts.retrieve(data.stripe_account_id);
+      if (account.details_submitted) {
+        await supabase
+          .from("coach_profiles")
+          .update({ stripe_onboarding_complete: true })
+          .eq("id", user.id);
+        data.stripe_onboarding_complete = true;
+      }
+    } catch (err) {
+      console.error("Error syncing Stripe status:", err);
+    }
+  }
+
   return data;
 }
 
