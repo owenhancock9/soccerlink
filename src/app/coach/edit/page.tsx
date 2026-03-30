@@ -112,8 +112,8 @@ export default function EditCoachProfile() {
           setAvailability(slots);
         }
         setStripeOnboarded(data.stripe_onboarding_complete || false);
-        setProfileData(data);
       }
+      setProfileData(data);
       setLoading(false);
     }
     loadProfile();
