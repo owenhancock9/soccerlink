@@ -288,6 +288,7 @@ export default function SoccerPlatform() {
   const [stripeOnboarded, setStripeOnboarded] = useState<boolean | null>(null);
 
   const [isSyncingStripe, setIsSyncingStripe] = useState(false);
+  const [isInitiatingStripe, setIsInitiatingStripe] = useState(false);
 
   async function refreshStripeStatus() {
     setIsSyncingStripe(true);
@@ -714,26 +715,16 @@ export default function SoccerPlatform() {
                             </div>
                           </div>
 
-                          {bookingMessage && (
-                            <div className={`p-5 rounded-2xl text-xs font-black mb-6 border-2 flex items-start gap-3 ${
-                              bookingMessage.type === "success" 
-                                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
-                                : "bg-rose-500/10 border-rose-500/20 text-rose-400"
-                            }`}>
-                              <span className="mt-0.5">{bookingMessage.type === "success" ? "✓" : "!"}</span>
-                              {bookingMessage.text}
-                            </div>
-                          )}
-
                           <button
                             id="confirm-pay-btn"
-                            disabled={bookingLoading}
+                            disabled={bookingLoading || isInitiatingStripe}
                             onClick={async () => {
                               if (!currentUser.isAuthenticated) {
                                 setBookingMessage({ type: "error", text: "Please sign in to proceed." });
                                 return;
                               }
                               setBookingLoading(true);
+                              setIsInitiatingStripe(true);
                               setBookingMessage(null);
                               
                               const formData = new FormData();
@@ -746,6 +737,7 @@ export default function SoccerPlatform() {
                               if (result.error) {
                                 setBookingMessage({ type: "error", text: result.error });
                                 setBookingLoading(false);
+                                setIsInitiatingStripe(false);
                               } else if (result.url) {
                                 window.location.href = result.url;
                               }
@@ -1013,6 +1005,28 @@ export default function SoccerPlatform() {
         key={viewKey}
         className="max-w-6xl mx-auto min-h-[60vh] px-4 md:px-6 mt-8 relative z-10"
       >
+        {/* Global Alert System */}
+      {bookingMessage && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-xl px-4 anim-fade-in">
+          <div className={`glass-card p-4 border flex items-center justify-between gap-4 shadow-2xl ${
+            bookingMessage.type === "error" 
+              ? "border-rose-500/50 bg-rose-500/10 text-rose-400" 
+              : "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
+          }`}>
+            <div className="flex items-center gap-3">
+              <span className="text-xl">{bookingMessage.type === "error" ? "🚨" : "✅"}</span>
+              <p className="text-sm font-black uppercase tracking-tight">{bookingMessage.text}</p>
+            </div>
+            <button 
+              onClick={() => setBookingMessage(null)}
+              className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
         {/* ── VIEW 1: DISCOVERY ── */}
         {view === "discovery" && currentUser.role === "player" && (
           <section className="anim-fade-in-up pb-32">
@@ -1185,15 +1199,7 @@ export default function SoccerPlatform() {
               My <span className="gradient-text">Booked Sessions</span>
             </h2>
             
-            {bookingMessage && (
-              <div className={`p-4 rounded-xl mb-6 text-sm font-semibold border ${
-                bookingMessage.type === "error" 
-                  ? "bg-rose-950/40 text-rose-400 border-rose-900/50" 
-                  : "bg-emerald-950/40 text-emerald-400 border-emerald-900/50"
-              }`}>
-                {bookingMessage.text}
-              </div>
-            )}
+            {/* bookingMessage was here, now moved to global top */}
             
             {realBookings.map((b: Booking) => (
               <div key={b.id} className="glass-card p-6 md:p-8 relative hover:transform-none">
@@ -1309,22 +1315,26 @@ export default function SoccerPlatform() {
                     </button>
                     <button
                       onClick={async () => {
+                        setIsInitiatingStripe(true);
                         try {
                           const res = await createStripeConnectAccount();
                           if (res?.url) {
                             window.location.href = res.url;
                           } else if (res?.error) {
-                            setBookingMessage({ type: "error", text: `Stripe Setup Failed: ${res.error}` });
+                            setBookingMessage({ type: "error", text: `Stripe Alert: ${res.error}` });
                           } else {
                             setBookingMessage({ type: "error", text: "Stripe connection failed for an unknown reason. Please check your credentials." });
                           }
                         } catch {
                           setBookingMessage({ type: "error", text: "A critical network error occurred while initializing Stripe." });
+                        } finally {
+                          setIsInitiatingStripe(false);
                         }
                       }}
-                      className="flex-1 md:flex-none bg-white text-black hover:bg-slate-200 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl block text-center"
+                      disabled={isInitiatingStripe}
+                      className="flex-1 md:flex-none bg-white text-black hover:bg-slate-200 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl block text-center disabled:opacity-50"
                     >
-                      Complete Setup
+                      {isInitiatingStripe ? "Processing..." : "Complete Setup"}
                     </button>
                   </div>
                 </div>

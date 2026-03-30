@@ -23,7 +23,7 @@ export async function createStripeConnectAccount() {
   const stripe = getStripe();
 
   if (!stripe) {
-    return { error: "Stripe Secret Key is missing in server environment variables. Please check your Vercel Dashboard." };
+    return { error: "CRITICAL_CONFIG_ERROR: Stripe Secret Key is missing in your Vercel Dashboard. Please add STRIPE_SECRET_KEY to your Environment Variables." };
   }
 
   const supabase = await createClient();
