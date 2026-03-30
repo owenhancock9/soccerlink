@@ -1326,6 +1326,9 @@ export default function SoccerPlatform() {
                           const res = await createStripeConnectAccount(window.location.origin);
                           if (res?.url) {
                             window.location.href = res.url;
+                          } else if (res?.alreadyComplete) {
+                            setStripeOnboarded(true);
+                            setBookingMessage({ type: "success", text: "Stripe Connection Verified! You are now live." });
                           } else if (res?.error) {
                             setBookingMessage({ type: "error", text: `Stripe Alert: ${res.error}` });
                           } else {
