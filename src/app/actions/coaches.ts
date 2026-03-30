@@ -5,6 +5,7 @@ import { getStripe } from "@/app/lib/stripe/server";
 
 export async function getCoaches() {
   const stripe = getStripe();
+  if (!stripe) return [];
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -31,10 +32,7 @@ export async function getCoaches() {
     .or("banned.is.null,banned.eq.false")
     .order("rating", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching coaches:", error);
-    return [];
-  }
+  if (error) return [];
 
   return (data || []).map((coach: Record<string, unknown>) => {
     const profile = coach.profiles as Record<string, unknown> | null;
@@ -58,7 +56,8 @@ export async function getCoaches() {
 }
 
 /** 
- * Retrieves the current user's profile and syncs Stripe status if needed. 
+ * Retrieves the current user's profile and MUST ALWAYS RETURN AN OBJECT 
+ * if a user session exists, to prevent UI null-crashes.
  */
 export async function getMyCoachProfile() {
   const supabase = await createClient();
@@ -71,20 +70,22 @@ export async function getMyCoachProfile() {
     .eq("id", user.id)
     .single();
 
-  if (error && error.code !== "PGRST116") {
-    console.error("Supabase error in getMyCoachProfile:", error);
-    return null;
-  }
+  // If we get an error from DB (and it's not simply "no row found"), capture it.
+  let dbErr = error && error.code !== "PGRST116" ? error.message : null;
+  const currentData: any = data || { 
+    id: user.id, 
+    stripe_onboarding_complete: false,
+    isFallback: true 
+  };
   
-  const currentData: any = data || { id: user.id, stripe_onboarding_complete: false };
+  if (dbErr) currentData.dbError = dbErr;
+
   const stripe = getStripe();
 
-  // If we have an account ID but it's not marked as complete, sync it once.
+  // SYNC LOGIC
   if (currentData.stripe_account_id && !currentData.stripe_onboarding_complete && stripe) {
     try {
       const account = await stripe.accounts.retrieve(currentData.stripe_account_id);
-      
-      // payouts_enabled is the ultimate goal, charges_enabled is a good proxy.
       const isComplete = !!(account.details_submitted || account.payouts_enabled);
 
       if (isComplete) {
@@ -94,20 +95,18 @@ export async function getMyCoachProfile() {
           .eq("id", user.id);
         
         if (updateErr) {
-          console.error("DB Sync Update Failed:", updateErr);
-          currentData.error = `DB Error: ${updateErr.message}`;
+          currentData.dbError = `Update failed: ${updateErr.message}`;
         } else {
           currentData.stripe_onboarding_complete = true;
         }
       } else {
         currentData.stripeDiagnostic = `Incomplete (${account.id})`;
       }
-    } catch (err) {
-      console.error("[Stripe Sync Alert] Couldn't fetch account status:", err);
-      currentData.stripeDiagnostic = `API Sync Failure`;
+    } catch (err: any) {
+      currentData.stripeDiagnostic = `API Failure: ${err.message}`;
     }
   } else if (!currentData.stripe_account_id) {
-     currentData.stripeDiagnostic = "Missing Stripe ID";
+     currentData.stripeDiagnostic = "ID Missing in DB";
   }
 
   return currentData;
@@ -129,11 +128,7 @@ export async function updateCoachProfile(formData: FormData) {
     availability: JSON.parse((formData.get("availability") as string) || "[]"),
   });
 
-  if (error) {
-    console.error("Profile update failed:", error);
-    return { error: error.message };
-  }
-
+  if (error) return { error: error.message };
   return { success: true };
 }
 
@@ -145,31 +140,24 @@ export async function getAllCoachesAdmin() {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") return [];
 
-  const { data, error } = await supabase
-    .from("coach_profiles")
-    .select("*, profiles!inner(full_name, avatar_url, email)")
-    .order("rating", { ascending: false });
-
+  const { data, error } = await supabase.from("coach_profiles").select("*, profiles!inner(*)").order("rating", { ascending: false });
   if (error) return [];
 
-  return (data || []).map((coach: Record<string, unknown>) => {
-    const p = coach.profiles as Record<string, unknown> | null;
-    return {
-      id: coach.id,
-      name: p?.full_name || "Coach",
-      email: p?.email || "",
-      style: coach.style,
-      role: coach.specialty,
-      rate: coach.rate,
-      verified: coach.verified,
-      banned: coach.banned,
-      rating: Number(coach.rating) || 0,
-      reviews: coach.review_count || 0,
-      avatar: (p?.full_name as string)?.charAt(0)?.toUpperCase() || "C",
-      gradient: getGradient(coach.id as string),
-      stripeConnected: !!(coach.stripe_onboarding_complete),
-    };
-  });
+  return (data || []).map((coach: any) => ({
+    id: coach.id,
+    name: coach.profiles?.full_name || "Coach",
+    email: coach.profiles?.email || "",
+    style: coach.style,
+    role: coach.specialty,
+    rate: coach.rate,
+    verified: coach.verified,
+    banned: coach.banned,
+    rating: Number(coach.rating) || 0,
+    reviews: coach.review_count || 0,
+    avatar: "C",
+    gradient: getGradient(coach.id),
+    stripeConnected: !!(coach.stripe_onboarding_complete)
+  }));
 }
 
 export async function banCoach(coachId: string) {
@@ -185,14 +173,7 @@ export async function unbanCoach(coachId: string) {
 }
 
 function getGradient(id: string): string {
-  const gradients = [
-    "from-indigo-600 to-violet-700",
-    "from-cyan-500 to-blue-600",
-    "from-rose-500 to-pink-600",
-    "from-emerald-500 to-teal-600",
-    "from-amber-500 to-orange-600",
-    "from-fuchsia-500 to-purple-600",
-  ];
+  const gradients = ["from-indigo-600 to-violet-700", "from-cyan-500 to-blue-600", "from-rose-500 to-pink-600", "from-emerald-500 to-teal-600", "from-amber-500 to-orange-600", "from-fuchsia-500 to-purple-600"];
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   return gradients[Math.abs(hash) % gradients.length];

@@ -487,9 +487,9 @@ export default function EditCoachProfile() {
                   <div>
                     <p className="font-black text-base tracking-tight text-white mb-1">Financial Link Missing</p>
                     <p className="text-xs font-medium text-slate-400 leading-relaxed">You must connect your bank profile via Stripe to receive session payments. All funds are secured in escrow until session completion.</p>
-                    {profileData?.stripeDiagnostic && (
-                       <p className="text-[10px] text-amber-500/50 mt-2 font-mono uppercase tracking-widest">
-                         Diagnostic: {profileData.stripeDiagnostic} / ID: {profileData.stripe_account_id?.slice(0, 10)}...
+                    {profileData && !profileData.stripe_onboarding_complete && (
+                       <p className="text-[10px] text-rose-500/80 mt-3 font-mono uppercase tracking-[0.2em] bg-rose-500/5 p-2 rounded-lg border border-rose-500/20">
+                         System Check: {profileData.dbError ? `DB ERR: ${profileData.dbError}` : (profileData.stripeDiagnostic || 'Awaiting ID Link')}
                        </p>
                     )}
                   </div>
