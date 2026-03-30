@@ -36,12 +36,21 @@ export async function createStripeConnectAccount(rootUrl?: string) {
       });
       accountId = account.id;
 
-      const { error: upsertErr } = await supabase.from("coach_profiles").upsert({ 
-        id: user.id, 
-        stripe_account_id: accountId,
-        stripe_onboarding_complete: false
-      });
-      if (upsertErr) return { error: `DB Error: ${upsertErr.message}` };
+      // Try update first (profile already exists), fall back to upsert
+      const { error: updateErr } = await supabase
+        .from("coach_profiles")
+        .update({ stripe_account_id: accountId, stripe_onboarding_complete: false })
+        .eq("id", user.id);
+      
+      if (updateErr) {
+        // Profile row might not exist yet — try upsert
+        const { error: upsertErr } = await supabase.from("coach_profiles").upsert({ 
+          id: user.id, 
+          stripe_account_id: accountId,
+          stripe_onboarding_complete: false
+        });
+        if (upsertErr) return { error: `DB Error: ${upsertErr.message}` };
+      }
     }
 
     const returnPath = `${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}coach/edit?setup=success`;
