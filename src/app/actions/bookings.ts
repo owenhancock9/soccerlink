@@ -29,6 +29,8 @@ export async function createBooking(formData: FormData) {
     .from("bookings")
     .insert({
       player_id: user.id,
+      player_name: user?.user_metadata?.full_name || "Anonymous Player",
+      player_email: user?.email || "No Email Provided",
       coach_id: coachId,
       session_date: sessionDate,
       session_time: sessionTime,
@@ -61,7 +63,7 @@ export async function createBooking(formData: FormData) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: "Coaching Session",
+              name: `Coaching Session with ${user?.user_metadata?.full_name || "Player"}`,
               description: `Session on ${sessionDate} at ${sessionTime}`,
             },
             unit_amount: Math.round(total * 100), // Stripe uses cents
@@ -69,6 +71,7 @@ export async function createBooking(formData: FormData) {
           quantity: 1,
         },
       ],
+      customer_email: user?.email,
       client_reference_id: data.id,
       success_url: `${baseUrl}/?success=true`,
       cancel_url: `${baseUrl}/?canceled=true`,

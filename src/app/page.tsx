@@ -1307,7 +1307,8 @@ export default function SoccerPlatform() {
                     <div>
                       <div className="flex items-center gap-3 mb-1">
                         <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.4)]" />
-                        <p className="font-bold">{(booking.profiles as any)?.full_name || "Anonymous Player"}</p>
+                        <p className="font-bold">{booking.player_name || (booking.player as any)?.full_name || "Anonymous Player"}</p>
+                        <p className="text-sm text-slate-400 font-mono mt-1">{booking.player_email || "No Email Provided"}</p>
                       </div>
                       <p className="text-sm text-slate-400 ml-5">
                         Session on {new Date(booking.session_date).toLocaleDateString()}. Payment confirmed. Awaiting video review.
@@ -1358,8 +1359,11 @@ export default function SoccerPlatform() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold text-white truncate">
-                          {(booking.profiles as any)?.full_name || "Anonymous Player"}
+                          {booking.player_name || (booking.player as any)?.full_name || "Anonymous Player"}
                         </h4>
+                        <div className="ml-3 px-2 py-0.5 bg-slate-800 rounded text-xs text-slate-400 font-mono">
+                          {booking.player_email || "No email"}
+                        </div>
                         <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
                           Session Date: {new Date(booking.session_date).toLocaleDateString()}
                         </p>
