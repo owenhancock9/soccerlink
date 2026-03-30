@@ -499,16 +499,16 @@ export default function SoccerPlatform() {
   /* ── Fetch Coach Bookings & Details (for coach dashboard) ── */
   useEffect(() => {
     if (currentUser.role === "coach" && currentUser.isAuthenticated) {
-      getCoachBookings().then((bookings) => {
+      getCoachBookings().then((bookings: Record<string, unknown>[]) => {
         setRealBookings(bookings);
       });
-      getMyCoachProfile().then((profile) => {
+      getMyCoachProfile().then((profile: any) => {
         if (profile) {
           setStripeOnboarded(profile.stripe_onboarding_complete);
         }
       });
     } else if (currentUser.role === "player" && currentUser.isAuthenticated) {
-      getMyBookings().then((bookings) => {
+      getMyBookings().then((bookings: Record<string, unknown>[]) => {
         setRealBookings(bookings);
       });
     }
@@ -883,6 +883,16 @@ export default function SoccerPlatform() {
                     }
                     setBookingLoading(true);
                     setBookingMessage(null);
+                    
+                    if (typeof selectedCoach.id === "number") {
+                      setBookingMessage({
+                        type: "error",
+                        text: "These are just mock profiles! Scroll down or search for the REAL coach account you just created to test booking.",
+                      });
+                      setBookingLoading(false);
+                      return;
+                    }
+
                     const formData = new FormData();
                     formData.set("coachId", String(selectedCoach.id));
                     formData.set(
