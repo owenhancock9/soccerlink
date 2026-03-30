@@ -357,9 +357,7 @@ export default function SoccerPlatform() {
       });
       getMyCoachProfile().then((profile) => {
         const p = profile as Record<string, unknown>;
-        if (p?.stripe_onboarding_complete) {
-          setStripeOnboarded(true);
-        }
+        setStripeOnboarded(!!p?.stripe_onboarding_complete);
       });
     } else if (currentUser.role === "player" && currentUser.isAuthenticated) {
       getMyBookings().then((bookings) => {
@@ -838,7 +836,12 @@ export default function SoccerPlatform() {
                 onClick={() => switchView("dashboard")}
                 accent="emerald"
               >
-                Coach Hub
+                <div className="flex items-center gap-2">
+                  <span>COACH HUB</span>
+                  {stripeOnboarded === false && (
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  )}
+                </div>
               </NavBtn>
             )}
             {currentUser.role === "admin" && (
@@ -931,9 +934,12 @@ export default function SoccerPlatform() {
             {currentUser.role === "coach" && (
               <button
                 onClick={() => switchView("dashboard")}
-                className="text-left text-emerald-400"
+                className="text-left text-emerald-400 flex items-center justify-between gap-3 w-full"
               >
-                Coach Hub
+                <span>COACH HUB</span>
+                {stripeOnboarded === false && (
+                  <span className="text-[10px] bg-amber-500 text-black px-2 py-0.5 rounded-full font-black animate-pulse">ACTION REQUIRED</span>
+                )}
               </button>
             )}
             {currentUser.role === "admin" && (
