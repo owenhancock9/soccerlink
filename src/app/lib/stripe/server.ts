@@ -13,7 +13,7 @@ export function getStripe() {
 
   stripeInstance = new Stripe(key, {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    apiVersion: ("2024-12-18" as any),
+    apiVersion: ("2024-12-18.acacia" as any),
     appInfo: {
       name: "CoachMatching",
       version: "1.0.0",
