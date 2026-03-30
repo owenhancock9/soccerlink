@@ -5,9 +5,18 @@ import { stripe } from "@/app/lib/stripe/server";
 
 export async function createStripeConnectAccount() {
   const getBaseUrl = () => {
-    let url = process.env.NEXT_PUBLIC_SITE_URL ?? "https://coachingmatch.co";
-    url = url.includes("http") ? url : `https://${url}`;
-    return url.endsWith("/") ? url.slice(0, -1) : url;
+    if (process.env.NEXT_PUBLIC_SITE_URL) {
+      return process.env.NEXT_PUBLIC_SITE_URL.endsWith("/")
+        ? process.env.NEXT_PUBLIC_SITE_URL.slice(0, -1)
+        : process.env.NEXT_PUBLIC_SITE_URL;
+    }
+    
+    // Deployment URL from Vercel
+    if (process.env.VERCEL_URL) {
+      return `https://${process.env.VERCEL_URL}`;
+    }
+
+    return "https://coachingmatch.co";
   };
   const baseUrl = getBaseUrl();
   const supabase = await createClient();

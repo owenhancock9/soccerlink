@@ -1308,8 +1308,21 @@ export default function SoccerPlatform() {
                       {isSyncingStripe ? <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : "Refresh Status"}
                     </button>
                     <button
-                      onClick={() => createStripeConnectAccount().then(res => res?.url && (window.location.href = res.url))}
-                      className="flex-1 md:flex-none bg-white text-black hover:bg-slate-200 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl"
+                      onClick={async () => {
+                        try {
+                          const res = await createStripeConnectAccount();
+                          if (res?.url) {
+                            window.location.href = res.url;
+                          } else if (res?.error) {
+                            setBookingMessage({ type: "error", text: `Stripe Setup Failed: ${res.error}` });
+                          } else {
+                            setBookingMessage({ type: "error", text: "Stripe connection failed for an unknown reason. Please check your credentials." });
+                          }
+                        } catch {
+                          setBookingMessage({ type: "error", text: "A critical network error occurred while initializing Stripe." });
+                        }
+                      }}
+                      className="flex-1 md:flex-none bg-white text-black hover:bg-slate-200 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl block text-center"
                     >
                       Complete Setup
                     </button>
