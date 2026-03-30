@@ -88,7 +88,7 @@ export default function EditCoachProfile() {
     if (res?.url) {
       window.location.href = res.url;
     } else {
-      setMessage({ type: "error", text: "Failed to initialize Stripe Connect." });
+      setMessage({ type: "error", text: res?.error || "Failed to initialize Stripe Connect." });
       setConnectingStripe(false);
     }
   }

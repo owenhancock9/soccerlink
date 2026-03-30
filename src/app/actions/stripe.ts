@@ -55,6 +55,6 @@ export async function createStripeConnectAccount() {
     return { url: accountLink.url };
   } catch (err: any) {
     console.error("Stripe Connect Error:", err);
-    return { error: "Failed to initialize Stripe Connect." };
+    return { error: err.message || "Failed to initialize Stripe Connect." };
   }
 }

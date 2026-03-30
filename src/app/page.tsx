@@ -1224,7 +1224,7 @@ export default function SoccerPlatform() {
                     if (res?.url) {
                       window.location.href = res.url;
                     } else {
-                      alert("Failed to connect to Stripe.");
+                      alert(res?.error || "Failed to connect to Stripe.");
                       setConnectingStripe(false);
                     }
                   }}
