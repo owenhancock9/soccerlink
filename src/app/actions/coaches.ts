@@ -100,7 +100,15 @@ export async function getMyCoachProfile() {
           currentData.stripe_onboarding_complete = true;
         }
       } else {
-        currentData.stripeDiagnostic = `Incomplete (${account.id})`;
+        // AGGRESSIVE FIX: If an account is still marked incomplete by Stripe,
+        // we automatically unlink it so the coach can generate a fresh one instead of getting stuck forever.
+        await supabase
+          .from("coach_profiles")
+          .update({ stripe_account_id: null, stripe_onboarding_complete: false })
+          .eq("id", user.id);
+          
+        currentData.stripe_account_id = null;
+        currentData.stripeDiagnostic = `Incomplete (${account.id}) - auto-purged`;
       }
     } catch (err: any) {
       currentData.stripeDiagnostic = `API Failure: ${err.message}`;
