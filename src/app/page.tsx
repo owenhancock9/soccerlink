@@ -60,19 +60,19 @@ function getAvailableSlots(availability: AvailabilitySlot[], date: Date) {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const dayName = days[date.getDay()];
   const daySlots = availability.filter((s) => s.day === dayName);
-  
+
   if (!daySlots || daySlots.length === 0) return [];
-  
+
   const intervals: string[] = [];
   daySlots.forEach((slot) => {
     try {
       // Create date objects for comparison (dummy date)
       const [startH, startM] = slot.start.split(':').map(Number);
       const [endH, endM] = slot.end.split(':').map(Number);
-      
+
       const current = new Date(2024, 0, 1, startH, startM);
       const end = new Date(2024, 0, 1, endH, endM);
-      
+
       while (current < end) {
         intervals.push(current.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }));
         current.setHours(current.getHours() + 1);
@@ -135,7 +135,7 @@ function CoachCard({
     >
       {/* Background Ambient Glow */}
       <div className={`absolute inset-0 bg-gradient-to-br ${coach.gradient} opacity-[0.02] blur-3xl rounded-full transition-opacity duration-1000 group-hover:opacity-[0.08] pointer-events-none`} />
-      
+
       <div className="relative z-10">
         {/* Superior Header */}
         <div className="flex justify-between items-start mb-10">
@@ -149,7 +149,7 @@ function CoachCard({
               <div className={`absolute inset-0 bg-gradient-to-br ${coach.gradient} blur-2xl opacity-0 group-hover/avatar:opacity-60 transition-opacity duration-1000 rounded-full scale-150`} />
               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-4 border-slate-900 z-20 shadow-lg" title="Online now" />
             </div>
-            
+
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-3 mb-1.5 flex-wrap">
                 <h3 className="text-2xl font-black text-white tracking-tighter leading-none group-hover:text-emerald-400 transition-colors">
@@ -164,10 +164,10 @@ function CoachCard({
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                   <Stars rating={coach.rating} />
-                   <span className="text-sm text-white font-black font-mono tracking-tighter">
-                     {coach.rating}
-                   </span>
+                  <Stars rating={coach.rating} />
+                  <span className="text-sm text-white font-black font-mono tracking-tighter">
+                    {coach.rating}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-1 h-1 rounded-full bg-slate-700" />
@@ -178,7 +178,7 @@ function CoachCard({
               </div>
             </div>
           </div>
-          
+
           <div className="flex flex-col items-end leading-none">
             <span className="text-3xl font-black text-white font-mono tracking-tighter">
               ${coach.rate}
@@ -326,7 +326,7 @@ export default function SoccerPlatform() {
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, [currentUser.role]);
-  
+
   /* ── File Upload State ── */
   const [uploadingVod, setUploadingVod] = useState<string | null>(null);
   const [releasingFunds, setReleasingFunds] = useState<string | null>(null);
@@ -494,9 +494,9 @@ export default function SoccerPlatform() {
   const handleReleaseFunds = async (bookingId: string) => {
     setReleasingFunds(bookingId);
     setBookingMessage({ type: "success", text: "Releasing funds to coach..." });
-    
+
     const result = await releaseFundsToCoach(bookingId);
-    
+
     if (result.error) {
       setBookingMessage({ type: "error", text: result.error });
     } else {
@@ -625,7 +625,7 @@ export default function SoccerPlatform() {
                         rel="noreferrer"
                         className="flex items-center justify-center gap-4 w-full bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 py-4 rounded-[1.5rem] text-sm font-black uppercase tracking-widest transition-all shadow-xl hover:-translate-y-1 hover:shadow-red-500/10 active:scale-[0.98]"
                       >
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" /></svg>
                         Watch Highlight Reel
                       </a>
                     )}
@@ -636,10 +636,10 @@ export default function SoccerPlatform() {
                 <div className="md:w-[22rem] shrink-0">
                   <div className="bg-slate-950/80 border border-slate-800 rounded-[2.5rem] p-8 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] relative overflow-hidden group/receipt h-full transition-all hover:border-emerald-500/20">
                     <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/[0.03] blur-3xl rounded-full -mr-24 -mt-24 pointer-events-none group-hover/receipt:bg-emerald-500/[0.08] transition-all duration-700" />
-                    
+
                     <h3 className="text-white font-black text-xl mb-8 tracking-tighter flex items-center gap-3">
-                       <span className="w-2 h-7 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-                       Confirm Session
+                      <span className="w-2 h-7 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+                      Confirm Session
                     </h3>
 
                     <div className="space-y-10">
@@ -661,11 +661,10 @@ export default function SoccerPlatform() {
                               <button
                                 key={i}
                                 onClick={() => setSelectedDate(dayVal)}
-                                className={`h-9 w-9 flex items-center justify-center rounded-xl text-[13px] font-black transition-all ${
-                                  isSel
+                                className={`h-9 w-9 flex items-center justify-center rounded-xl text-[13px] font-black transition-all ${isSel
                                     ? "bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-110 z-10"
                                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                                }`}
+                                  }`}
                               >
                                 {dayVal}
                               </button>
@@ -686,11 +685,10 @@ export default function SoccerPlatform() {
                                 key={t}
                                 type="button"
                                 onClick={() => setSelectedTime(t)}
-                                className={`py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all border-2 ${
-                                  selectedTime === t
+                                className={`py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all border-2 ${selectedTime === t
                                     ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
                                     : "bg-slate-900/50 border-slate-800/40 text-slate-500 hover:border-slate-700 hover:text-slate-300"
-                                }`}
+                                  }`}
                               >
                                 {t}
                               </button>
@@ -732,13 +730,13 @@ export default function SoccerPlatform() {
                               setBookingLoading(true);
                               setIsInitiatingStripe(true);
                               setBookingMessage(null);
-                              
+
                               const formData = new FormData();
                               formData.set("coachId", String(selectedCoach.id));
                               formData.set("sessionDate", `2025-10-${String(selectedDate).padStart(2, "0")}`);
                               formData.set("sessionTime", selectedTime || "10:00 AM");
                               formData.set("rate", String(selectedCoach.rate));
-                              
+
                               const result = await createBooking(formData);
                               if (result.error) {
                                 setBookingMessage({ type: "error", text: result.error });
@@ -752,13 +750,13 @@ export default function SoccerPlatform() {
                           >
                             {bookingLoading ? "Connecting Securely..." : "Book Now"}
                           </button>
-                          
+
                           <div className="mt-8 flex flex-col items-center gap-3">
                             <div className="flex items-center gap-4 opacity-40 grayscale hover:grayscale-0 transition-all">
-                               <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-5 brightness-200" />
+                              <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-5 brightness-200" />
                             </div>
                             <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.25em] text-center leading-loose">
-                              Funds Secured in Escrow Vault<br/>
+                              Funds Secured in Escrow Vault<br />
                               Locked until Review Completed
                             </p>
                           </div>
@@ -766,7 +764,7 @@ export default function SoccerPlatform() {
                       ) : (
                         <div className="pt-20 text-center opacity-20">
                           <svg className="w-16 h-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                          <p className="text-[10px] uppercase font-black tracking-widest leading-loose">Complete steps above<br/>to calculate totals</p>
+                          <p className="text-[10px] uppercase font-black tracking-widest leading-loose">Complete steps above<br />to calculate totals</p>
                         </div>
                       )}
                     </div>
@@ -869,13 +867,12 @@ export default function SoccerPlatform() {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <div
-                  className={`w-7 h-7 rounded-lg bg-gradient-to-br ${
-                    currentUser.role === "coach"
+                  className={`w-7 h-7 rounded-lg bg-gradient-to-br ${currentUser.role === "coach"
                       ? "from-emerald-500 to-teal-600"
                       : currentUser.role === "admin"
                         ? "from-rose-500 to-pink-600"
                         : "from-indigo-500 to-violet-600"
-                  } flex items-center justify-center text-white font-bold text-xs`}
+                    } flex items-center justify-center text-white font-bold text-xs`}
                 >
                   {currentUser.name.charAt(0).toUpperCase()}
                 </div>
@@ -964,11 +961,10 @@ export default function SoccerPlatform() {
               <>
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-8 h-8 rounded-lg bg-gradient-to-br ${
-                      currentUser.role === "coach"
+                    className={`w-8 h-8 rounded-lg bg-gradient-to-br ${currentUser.role === "coach"
                         ? "from-emerald-500 to-teal-600"
                         : "from-indigo-500 to-violet-600"
-                    } flex items-center justify-center text-white font-bold text-sm`}
+                      } flex items-center justify-center text-white font-bold text-sm`}
                   >
                     {currentUser.name.charAt(0).toUpperCase()}
                   </div>
@@ -1020,26 +1016,25 @@ export default function SoccerPlatform() {
         className="max-w-6xl mx-auto min-h-[60vh] px-4 md:px-6 mt-8 relative z-10"
       >
         {/* Global Alert System */}
-      {bookingMessage && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-xl px-4 anim-fade-in">
-          <div className={`glass-card p-4 border flex items-center justify-between gap-4 shadow-2xl ${
-            bookingMessage.type === "error" 
-              ? "border-rose-500/50 bg-rose-500/10 text-rose-400" 
-              : "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-          }`}>
-            <div className="flex items-center gap-3">
-              <span className="text-xl">{bookingMessage.type === "error" ? "🚨" : "✅"}</span>
-              <p className="text-sm font-black uppercase tracking-tight">{bookingMessage.text}</p>
+        {bookingMessage && (
+          <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-xl px-4 anim-fade-in">
+            <div className={`glass-card p-4 border flex items-center justify-between gap-4 shadow-2xl ${bookingMessage.type === "error"
+                ? "border-rose-500/50 bg-rose-500/10 text-rose-400"
+                : "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
+              }`}>
+              <div className="flex items-center gap-3">
+                <span className="text-xl">{bookingMessage.type === "error" ? "🚨" : "✅"}</span>
+                <p className="text-sm font-black uppercase tracking-tight">{bookingMessage.text}</p>
+              </div>
+              <button
+                onClick={() => setBookingMessage(null)}
+                className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
+              >
+                ✕
+              </button>
             </div>
-            <button 
-              onClick={() => setBookingMessage(null)}
-              className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
-            >
-              ✕
-            </button>
           </div>
-        </div>
-      )}
+        )}
 
         {/* ── VIEW 1: DISCOVERY ── */}
         {view === "discovery" && currentUser.role === "player" && (
@@ -1059,13 +1054,13 @@ export default function SoccerPlatform() {
                 </div>
 
                 <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter mb-8 text-white leading-[0.9] drop-shadow-2xl">
-                  Unlock Your <br/> <span className="gradient-text-accent">Tactical Edge.</span>
+                  Unlock Your <br /> <span className="gradient-text-accent">Tactical Edge.</span>
                 </h1>
-                
+
                 <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl leading-relaxed mb-16 drop-shadow-sm opacity-90">
                   Connect with verified professional coaches for high-precision video breakdowns and tactical intelligence to dominate your league.
                 </p>
-                
+
                 {/* Search & Filter Bar */}
                 <div className="w-full max-w-3xl glass-card p-4 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] border-slate-800/40 relative group/search overflow-visible transition-all hover:border-indigo-500/20">
                   <div className="flex flex-col md:flex-row gap-4 items-center">
@@ -1081,16 +1076,15 @@ export default function SoccerPlatform() {
                         onChange={(e) => setSearch(e.target.value)}
                       />
                     </div>
-                    
+
                     <div className="shrink-0 flex items-center gap-3 w-full md:w-auto">
                       <button
                         id="filter-toggle"
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className={`flex items-center justify-between md:justify-start gap-3 w-full md:w-auto px-6 py-4.5 rounded-2xl font-black text-[11px] uppercase tracking-widest border transition-all ${
-                          isFilterOpen || activeFilter !== "All Roles"
+                        className={`flex items-center justify-between md:justify-start gap-3 w-full md:w-auto px-6 py-4.5 rounded-2xl font-black text-[11px] uppercase tracking-widest border transition-all ${isFilterOpen || activeFilter !== "All Roles"
                             ? "bg-indigo-500/10 border-indigo-500/40 text-indigo-400 shadow-lg shadow-indigo-500/5"
                             : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-3">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
@@ -1100,7 +1094,7 @@ export default function SoccerPlatform() {
                       </button>
                     </div>
                   </div>
-                  
+
                   {isFilterOpen && (
                     <div className="absolute top-full left-0 right-0 mt-4 bg-slate-900 border border-slate-800 rounded-[2rem] p-6 shadow-3xl z-50 anim-scale-in grid grid-cols-2 md:grid-cols-5 gap-3">
                       {["All Roles", "Forward", "Midfielder", "Defender", "Goalkeeper"].map((f) => (
@@ -1110,11 +1104,10 @@ export default function SoccerPlatform() {
                             setActiveFilter(f);
                             setIsFilterOpen(false);
                           }}
-                          className={`py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
-                            activeFilter === f
+                          className={`py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${activeFilter === f
                               ? "bg-indigo-500 text-white shadow-xl shadow-indigo-600/20"
                               : "bg-slate-950 border border-slate-800 text-slate-500 hover:text-white hover:border-slate-700"
-                          }`}
+                            }`}
                         >
                           {f}
                         </button>
@@ -1212,13 +1205,13 @@ export default function SoccerPlatform() {
             <h2 className="text-2xl font-extrabold tracking-tight mb-8">
               My <span className="gradient-text">Booked Sessions</span>
             </h2>
-            
+
             {/* bookingMessage was here, now moved to global top */}
-            
+
             {realBookings.map((b: Booking) => (
               <div key={b.id} className="glass-card p-6 md:p-8 relative hover:transform-none">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                  
+
                   {/* Left: Info */}
                   <div>
                     <h3 className="text-lg font-bold text-white mb-2">
@@ -1227,57 +1220,55 @@ export default function SoccerPlatform() {
                     <p className="text-slate-400 text-sm mb-4">
                       {new Date(b.session_date).toLocaleDateString()} at {b.session_time}
                     </p>
-                    
+
                     <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${
-                        b.status === "pending" || b.status === "confirmed" ? "bg-amber-950/30 text-amber-500 border-amber-900/50" :
-                        b.status === "vod_submitted" ? "bg-indigo-950/30 text-indigo-400 border-indigo-900/50" :
-                        b.status === "reviewed" ? "bg-emerald-950/30 text-emerald-400 border-emerald-900/50" :
-                        "bg-slate-900 text-slate-400 border-slate-700"
-                      }`}>
-                        {b.status === "pending" ? "Awaiting Checkout" : 
-                         b.status === "confirmed" ? "Awaiting VOD Upload" :
-                         b.status === "vod_submitted" ? "Coach is Reviewing" :
-                         b.status === "reviewed" ? "Review Ready" : 
-                         "Completed"}
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${b.status === "pending" || b.status === "confirmed" ? "bg-amber-950/30 text-amber-500 border-amber-900/50" :
+                          b.status === "vod_submitted" ? "bg-indigo-950/30 text-indigo-400 border-indigo-900/50" :
+                            b.status === "reviewed" ? "bg-emerald-950/30 text-emerald-400 border-emerald-900/50" :
+                              "bg-slate-900 text-slate-400 border-slate-700"
+                        }`}>
+                        {b.status === "pending" ? "Awaiting Checkout" :
+                          b.status === "confirmed" ? "Awaiting VOD Upload" :
+                            b.status === "vod_submitted" ? "Coach is Reviewing" :
+                              b.status === "reviewed" ? "Review Ready" :
+                                "Completed"}
                       </span>
-                      
+
                       <span className="font-mono text-emerald-400 font-bold">${b.total}</span>
                     </div>
                   </div>
-                  
+
                   {/* Right: Actions */}
                   <div className="flex flex-col sm:flex-row gap-3 md:w-1/3">
                     {/* Upload VOD (If booking confirmed but no VOD yet) */}
                     {(b.status === "confirmed" || (b.status === "vod_submitted" && !b.vod_url)) && (
                       <div className="w-full">
-                        <label className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-sm transition-all cursor-pointer border border-dashed ${
-                          uploadingVod === b.id 
-                            ? "bg-indigo-600/20 text-indigo-400 border-indigo-500/50" 
+                        <label className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-sm transition-all cursor-pointer border border-dashed ${uploadingVod === b.id
+                            ? "bg-indigo-600/20 text-indigo-400 border-indigo-500/50"
                             : "bg-slate-900/50 text-indigo-400 border-indigo-500/30 hover:bg-slate-800 hover:border-indigo-400"
-                        }`}>
+                          }`}>
                           {uploadingVod === b.id ? "Uploading..." : "Upload MP4 Match Footage"}
-                          <input 
-                            type="file" 
-                            accept="video/mp4,video/x-m4v,video/*" 
-                            className="hidden" 
+                          <input
+                            type="file"
+                            accept="video/mp4,video/x-m4v,video/*"
+                            className="hidden"
                             disabled={uploadingVod === b.id}
                             onChange={(e) => handleVodUpload(e, b.id)}
                           />
                         </label>
                       </div>
                     )}
-                    
+
                     {/* View VOD (If URL exists) */}
                     {b.vod_url && (
                       <a href={b.vod_url} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-slate-800 text-white rounded-xl font-semibold text-sm hover:bg-slate-700 transition-colors border border-slate-700">
                         ▶ Watch VOD
                       </a>
                     )}
-                    
+
                     {/* Release Funds (Only if reviewed or actually wanted by player) */}
                     {(b.status === "reviewed" || b.status === "vod_submitted" || b.status === "confirmed") && (
-                      <button 
+                      <button
                         onClick={() => handleReleaseFunds(b.id)}
                         disabled={releasingFunds === b.id}
                         className="flex-1 py-3 px-4 bg-emerald-600/10 text-emerald-500 border border-emerald-500/30 rounded-xl font-semibold text-sm hover:bg-emerald-600/20 transition-all disabled:opacity-50"
@@ -1286,11 +1277,11 @@ export default function SoccerPlatform() {
                       </button>
                     )}
                   </div>
-                  
+
                 </div>
               </div>
             ))}
-            
+
             {realBookings.length === 0 && (
               <div className="text-center py-20 glass-card">
                 <p className="text-slate-400 mb-4">You haven&apos;t booked any sessions yet.</p>
@@ -1335,14 +1326,14 @@ export default function SoccerPlatform() {
                       onClick={async () => {
                         const { resetStripeConnection } = await import('@/app/actions/stripe');
                         if (confirm("This will completely erase your current Stripe connection so you can start over. Proceed?")) {
-                           setIsInitiatingStripe(true);
-                           const res = await resetStripeConnection();
-                           if (res.success) {
-                             window.location.reload();
-                           } else {
-                             setBookingMessage({ type: "error", text: `Reset failed: ${res.error}` });
-                             setIsInitiatingStripe(false);
-                           }
+                          setIsInitiatingStripe(true);
+                          const res = await resetStripeConnection();
+                          if (res.success) {
+                            window.location.reload();
+                          } else {
+                            setBookingMessage({ type: "error", text: `Reset failed: ${res.error}` });
+                            setIsInitiatingStripe(false);
+                          }
                         }
                       }}
                       disabled={isInitiatingStripe}
@@ -1381,32 +1372,32 @@ export default function SoccerPlatform() {
               </div>
             )}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4">
-               <div>
-                  <h2 className="text-4xl font-black tracking-tighter text-white mb-2">
-                    COACH <span className="text-emerald-500">TERMINAL</span>
-                  </h2>
-                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">
-                    Mission Control & Performance Tracking
+              <div>
+                <h2 className="text-4xl font-black tracking-tighter text-white mb-2">
+                  COACH <span className="text-emerald-500">TERMINAL</span>
+                </h2>
+                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">
+                  Mission Control & Performance Tracking
+                </p>
+              </div>
+              <div className="flex gap-4">
+                <div className="glass-card px-6 py-3 border-emerald-500/20 bg-emerald-500/5">
+                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Total Career Revenue</p>
+                  <p className="text-xl font-black text-white font-mono">
+                    ${realBookings
+                      .filter((b: Booking) => b.status === "completed")
+                      .reduce((acc: number, b: Booking) => acc + Number(b.amount || 0), 0)
+                      .toFixed(2)}
                   </p>
-               </div>
-               <div className="flex gap-4">
-                  <div className="glass-card px-6 py-3 border-emerald-500/20 bg-emerald-500/5">
-                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Total Career Revenue</p>
-                    <p className="text-xl font-black text-white font-mono">
-                      ${realBookings
-                        .filter((b: Booking) => b.status === "completed")
-                        .reduce((acc: number, b: Booking) => acc + Number(b.amount || 0), 0)
-                        .toFixed(2)}
-                    </p>
-                  </div>
-                  <Link
-                    href="/coach/edit"
-                    className="glass-card px-6 py-3 border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 transition-all flex items-center gap-2 group/edit"
-                  >
-                    <span className="text-[9px] text-indigo-400 font-black uppercase tracking-widest">Edit Lab</span>
-                    <svg className="w-3 h-3 text-indigo-400 group-hover/edit:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                  </Link>
-               </div>
+                </div>
+                <Link
+                  href="/coach/edit"
+                  className="glass-card px-6 py-3 border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 transition-all flex items-center gap-2 group/edit"
+                >
+                  <span className="text-[9px] text-indigo-400 font-black uppercase tracking-widest">Edit Lab</span>
+                  <svg className="w-3 h-3 text-indigo-400 group-hover/edit:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                </Link>
+              </div>
             </div>
 
             {/* Metrics Grid */}
@@ -1462,20 +1453,20 @@ export default function SoccerPlatform() {
                       <div className="absolute inset-0 bg-gradient-to-r from-orange-500/[0.03] to-transparent pointer-events-none" />
                       <div className="p-6 md:p-8 flex flex-col md:flex-row justify-between md:items-center gap-6">
                         <div className="flex items-center gap-6">
-                           <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 text-xl font-black shadow-2xl">
-                             {booking.player_name?.charAt(0) || "P"}
-                           </div>
-                           <div>
-                              <div className="flex items-center gap-3 mb-1">
-                                <h4 className="text-lg font-black text-white tracking-tight">{booking.player_name || "Premium Athlete"}</h4>
-                                <span className="text-[9px] bg-orange-500/10 text-orange-400 px-2.5 py-1 rounded-full border border-orange-500/30 font-black uppercase tracking-widest">Awaiting VOD</span>
-                              </div>
-                              <div className="flex items-center gap-4">
-                                <p className="text-xs text-slate-500 font-bold font-mono tracking-tighter opacity-80">{booking.player_email}</p>
-                                <span className="w-1 h-1 rounded-full bg-slate-800" />
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Session: {new Date(booking.session_date).toLocaleDateString()}</p>
-                              </div>
-                           </div>
+                          <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 text-xl font-black shadow-2xl">
+                            {booking.player_name?.charAt(0) || "P"}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-3 mb-1">
+                              <h4 className="text-lg font-black text-white tracking-tight">{booking.player_name || "Premium Athlete"}</h4>
+                              <span className="text-[9px] bg-orange-500/10 text-orange-400 px-2.5 py-1 rounded-full border border-orange-500/30 font-black uppercase tracking-widest">Awaiting VOD</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <p className="text-xs text-slate-500 font-bold font-mono tracking-tighter opacity-80">{booking.player_email}</p>
+                              <span className="w-1 h-1 rounded-full bg-slate-800" />
+                              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Session: {new Date(booking.session_date).toLocaleDateString()}</p>
+                            </div>
+                          </div>
                         </div>
                         <label className="cursor-pointer bg-white text-black hover:bg-slate-200 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-[0_15px_30px_rgba(255,255,255,0.1)] hover:-translate-y-1 active:translate-y-0 shrink-0 text-center">
                           {uploadingVod === booking.id ? "Syncing..." : "Upload Breakdown"}
@@ -1555,8 +1546,8 @@ export default function SoccerPlatform() {
                       {stat.label}
                     </p>
                     <div className="flex items-baseline gap-2 mb-1">
-                       <span className={`text-4xl font-black font-mono tracking-tighter ${stat.color}`}>{stat.val}</span>
-                       <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{stat.unit}</span>
+                      <span className={`text-4xl font-black font-mono tracking-tighter ${stat.color}`}>{stat.val}</span>
+                      <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{stat.unit}</span>
                     </div>
                     <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest mt-2">{stat.desc}</p>
                   </div>
@@ -1568,11 +1559,11 @@ export default function SoccerPlatform() {
             <div>
               <h3 className="text-sm font-black mb-8 text-slate-400 flex items-center gap-4 uppercase tracking-[0.3em]">
                 <span className="w-2.5 h-2.5 rounded-full bg-indigo-500/30 border border-indigo-500 flex items-center justify-center p-0.5">
-                   <span className="w-full h-full rounded-full bg-indigo-500" />
+                  <span className="w-full h-full rounded-full bg-indigo-500" />
                 </span>
                 Personnel Registry
               </h3>
-              
+
               {adminLoading ? (
                 <div className="glass-card p-24 text-center">
                   <div className="w-10 h-10 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mx-auto mb-6" />
@@ -1593,43 +1584,43 @@ export default function SoccerPlatform() {
                     >
                       <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-8">
                         <div className="flex items-center gap-6">
-                           <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-black text-xl shadow-2xl relative z-10 border border-white/10 ${coach.banned ? "grayscale" : ""}`}>
-                             {coach.avatar}
-                           </div>
-                           <div>
-                              <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                <h4 className="text-xl font-black text-white tracking-tighter">
-                                  {coach.name}
-                                </h4>
-                                <div className="flex gap-2">
-                                  {coach.banned ? (
-                                    <span className="text-[9px] bg-rose-500/10 text-rose-400 px-3 py-1 rounded-lg border border-rose-500/20 font-black tracking-widest">DENIED</span>
-                                  ) : (
-                                    <>
-                                      {coach.verified ? (
-                                        <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-lg border border-indigo-500/20 font-black tracking-widest leading-none flex items-center">✓ VERIFIED</span>
-                                      ) : (
-                                        <span className="text-[9px] bg-slate-800 text-slate-500 px-3 py-1 rounded-lg border border-slate-700/50 font-black tracking-widest leading-none flex items-center">PENDING</span>
-                                      )}
-                                      {coach.stripeConnected && (
-                                        <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-lg border border-emerald-500/20 font-black tracking-widest leading-none flex items-center">CREDENTIALED</span>
-                                      )}
-                                    </>
-                                  )}
-                                </div>
+                          <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-black text-xl shadow-2xl relative z-10 border border-white/10 ${coach.banned ? "grayscale" : ""}`}>
+                            {coach.avatar}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-3 mb-2 flex-wrap">
+                              <h4 className="text-xl font-black text-white tracking-tighter">
+                                {coach.name}
+                              </h4>
+                              <div className="flex gap-2">
+                                {coach.banned ? (
+                                  <span className="text-[9px] bg-rose-500/10 text-rose-400 px-3 py-1 rounded-lg border border-rose-500/20 font-black tracking-widest">DENIED</span>
+                                ) : (
+                                  <>
+                                    {coach.verified ? (
+                                      <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-lg border border-indigo-500/20 font-black tracking-widest leading-none flex items-center">✓ VERIFIED</span>
+                                    ) : (
+                                      <span className="text-[9px] bg-slate-800 text-slate-500 px-3 py-1 rounded-lg border border-slate-700/50 font-black tracking-widest leading-none flex items-center">PENDING</span>
+                                    )}
+                                    {coach.stripeConnected && (
+                                      <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-lg border border-emerald-500/20 font-black tracking-widest leading-none flex items-center">CREDENTIALED</span>
+                                    )}
+                                  </>
+                                )}
                               </div>
-                              <div className="flex items-center gap-5 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                <span className="flex items-center gap-1.5"><Stars rating={coach.rating} /> {coach.rating}</span>
-                                <span className="w-1 h-1 rounded-full bg-slate-800" />
-                                <span>${coach.rate}/SESSION</span>
-                                <span className="w-1 h-1 rounded-full bg-slate-800" />
-                                <span className="text-slate-600 lowercase font-mono">{coach.email}</span>
-                              </div>
-                           </div>
+                            </div>
+                            <div className="flex items-center gap-5 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                              <span className="flex items-center gap-1.5"><Stars rating={coach.rating} /> {coach.rating}</span>
+                              <span className="w-1 h-1 rounded-full bg-slate-800" />
+                              <span>${coach.rate}/SESSION</span>
+                              <span className="w-1 h-1 rounded-full bg-slate-800" />
+                              <span className="text-slate-600 lowercase font-mono">{coach.email}</span>
+                            </div>
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-4">
-                           {coach.banned ? (
+                          {coach.banned ? (
                             <button
                               onClick={async () => {
                                 setBanningCoach(coach.id);

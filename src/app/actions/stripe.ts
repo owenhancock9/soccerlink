@@ -44,10 +44,10 @@ export async function createStripeConnectAccount(rootUrl?: string) {
       if (upsertErr) return { error: `DB Error: ${upsertErr.message}` };
     }
 
-    const returnPath = `${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}?setup=success`;
+    const returnPath = `${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}coach/edit?setup=success`;
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
-      refresh_url: `${baseUrl}`,
+      refresh_url: `${baseUrl}/coach/edit`,
       return_url: returnPath,
       type: "account_onboarding",
     });

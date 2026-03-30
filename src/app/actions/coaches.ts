@@ -100,15 +100,9 @@ export async function getMyCoachProfile() {
           currentData.stripe_onboarding_complete = true;
         }
       } else {
-        // AGGRESSIVE FIX: If an account is still marked incomplete by Stripe,
-        // we automatically unlink it so the coach can generate a fresh one instead of getting stuck forever.
-        await supabase
-          .from("coach_profiles")
-          .update({ stripe_account_id: null, stripe_onboarding_complete: false })
-          .eq("id", user.id);
-          
-        currentData.stripe_account_id = null;
-        currentData.stripeDiagnostic = `Incomplete (${account.id}) - auto-purged`;
+        // Keep the account ID — Stripe may still be processing.
+        // Just flag it as incomplete so the UI knows.
+        currentData.stripeDiagnostic = `Stripe says incomplete (${account.id}) — try clicking Refresh in a minute`;
       }
     } catch (err: any) {
       currentData.stripeDiagnostic = `API Failure: ${err.message}`;
