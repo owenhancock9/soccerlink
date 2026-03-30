@@ -267,6 +267,22 @@ export default function SoccerPlatform() {
   const [stripeOnboarded, setStripeOnboarded] = useState<boolean | null>(null);
   const [connectingStripe, setConnectingStripe] = useState(false);
 
+  const [isSyncingStripe, setIsSyncingStripe] = useState(false);
+
+  async function refreshStripeStatus() {
+    setIsSyncingStripe(true);
+    const profile = await getMyCoachProfile();
+    if (profile) {
+      setStripeOnboarded(profile.stripe_onboarding_complete);
+      if (profile.stripe_onboarding_complete) {
+        setBookingMessage({ type: "success", text: "Stripe Connection Verified! You are now live." });
+      } else {
+        setBookingMessage({ type: "error", text: "Stripe reports onboarding is still incomplete. Please finish all steps in the Stripe dashboard." });
+      }
+    }
+    setIsSyncingStripe(false);
+  }
+
   /* ── Detect Stripe Setup Success ── */
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -1204,6 +1220,38 @@ export default function SoccerPlatform() {
         {/* ── VIEW 3: COACH DASHBOARD ── */}
         {view === "dashboard" && currentUser.role === "coach" && (
           <div className="anim-fade-in-up space-y-12">
+            {/* Stripe Onboarding Alert */}
+            {stripeOnboarded === false && (
+              <div className="glass-card p-6 border-amber-500/20 bg-amber-500/[0.03] relative overflow-hidden anim-fade-in">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-amber-500/20 rounded-2xl flex items-center justify-center text-xl shrink-0">⚠️</div>
+                    <div>
+                      <p className="font-black text-lg tracking-tight text-white mb-1">Financial Link Missing</p>
+                      <p className="text-xs font-medium text-slate-400 leading-relaxed max-w-xl">
+                        You must complete your Stripe onboarding to receive session payouts. Your profile is currently hidden from players until this connection is verified.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 w-full md:w-auto">
+                    <button
+                      onClick={refreshStripeStatus}
+                      disabled={isSyncingStripe}
+                      className="flex-1 md:flex-none bg-slate-900 border border-slate-800 hover:border-cyan-500/50 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isSyncingStripe ? <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : "Refresh Status"}
+                    </button>
+                    <button
+                      onClick={() => createStripeConnectAccount().then(res => res?.url && (window.location.href = res.url))}
+                      className="flex-1 md:flex-none bg-white text-black hover:bg-slate-200 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl"
+                    >
+                      Complete Setup
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4">
                <div>
                   <h2 className="text-4xl font-black tracking-tighter text-white mb-2">
