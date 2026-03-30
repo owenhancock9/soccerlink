@@ -1333,6 +1333,25 @@ export default function SoccerPlatform() {
                     </button>
                     <button
                       onClick={async () => {
+                        const { resetStripeConnection } = await import('@/app/actions/stripe');
+                        if (confirm("This will completely erase your current Stripe connection so you can start over. Proceed?")) {
+                           setIsInitiatingStripe(true);
+                           const res = await resetStripeConnection();
+                           if (res.success) {
+                             window.location.reload();
+                           } else {
+                             setBookingMessage({ type: "error", text: `Reset failed: ${res.error}` });
+                             setIsInitiatingStripe(false);
+                           }
+                        }
+                      }}
+                      disabled={isInitiatingStripe}
+                      className="flex-1 md:flex-none bg-red-500/10 border border-red-500/50 hover:bg-red-500/20 text-red-500 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      Reset & Start Over
+                    </button>
+                    <button
+                      onClick={async () => {
                         setIsInitiatingStripe(true);
                         try {
                           const res = await createStripeConnectAccount(window.location.origin);
