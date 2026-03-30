@@ -40,18 +40,32 @@ export async function createStripeConnectAccount(rootUrl?: string) {
 
     let accountId = profile?.stripe_account_id;
 
-    if (accountId) {
-      // Periodic Sync Check
-      const account = await stripe.accounts.retrieve(accountId);
-      const isComplete = !!(account.details_submitted || account.charges_enabled);
-      
-      if (isComplete && !profile?.stripe_onboarding_complete) {
-        await supabase.from("coach_profiles").update({ stripe_onboarding_complete: true }).eq("id", user.id);
-        return { success: true, alreadyComplete: true };
+    // If we have an account ID but it's not marked as complete, sync it once.
+    if (profile?.stripe_account_id && !profile?.stripe_onboarding_complete && stripe) {
+      try {
+        const account = await stripe.accounts.retrieve(profile.stripe_account_id);
+        
+        // payouts_enabled is the ultimate goal, charges_enabled is a good proxy.
+        const isComplete = !!(account.details_submitted || account.payouts_enabled || account.charges_enabled);
+
+        if (isComplete) {
+          const { error: updateErr } = await supabase
+            .from("coach_profiles")
+            .update({ stripe_onboarding_complete: true })
+            .eq("id", user.id);
+          
+          if (updateErr) {
+            console.error("DB Sync Update Failed:", updateErr);
+          } else {
+            return { success: true, alreadyComplete: true };
+          }
+        }
+      } catch (err) {
+        console.error("[Stripe Sync Alert] Couldn't fetch account status:", err);
       }
-      
-      if (isComplete) return { success: true, alreadyComplete: true };
     }
+
+    if (profile?.stripe_onboarding_complete) return { success: true, alreadyComplete: true };
 
     // 2. Create if missing
     if (!accountId) {
@@ -62,11 +76,18 @@ export async function createStripeConnectAccount(rootUrl?: string) {
       });
       accountId = account.id;
 
-      await supabase.from("coach_profiles").upsert({ 
-        id: user.id, 
-        stripe_account_id: accountId,
-        stripe_onboarding_complete: false
-      });
+      const { error: upsertErr } = await supabase
+        .from("coach_profiles")
+        .upsert({ 
+          id: user.id, 
+          stripe_account_id: accountId,
+          stripe_onboarding_complete: false
+        });
+      
+      if (upsertErr) {
+        console.error("[STRIPE_DB_FAILURE] Upsert failed:", upsertErr);
+        return { error: `Database Error: ${upsertErr.message}. Check your Supabase RLS policies for coach_profiles.` };
+      }
     }
 
     // 3. Generate Link

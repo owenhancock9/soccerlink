@@ -76,26 +76,38 @@ export async function getMyCoachProfile() {
     return null;
   }
   
-  const currentData = data || { id: user.id, stripe_onboarding_complete: false };
+  const currentData: any = data || { id: user.id, stripe_onboarding_complete: false };
   const stripe = getStripe();
 
   // If we have an account ID but it's not marked as complete, sync it once.
   if (currentData.stripe_account_id && !currentData.stripe_onboarding_complete && stripe) {
     try {
       const account = await stripe.accounts.retrieve(currentData.stripe_account_id);
-      const isComplete = !!(account.details_submitted || account.charges_enabled);
+      
+      // payouts_enabled is the ultimate goal, charges_enabled is a good proxy.
+      const isComplete = !!(account.details_submitted || account.payouts_enabled);
 
       if (isComplete) {
-        // Use a targeted update to avoid any risk of field loss
-        await supabase
+        const { error: updateErr } = await supabase
           .from("coach_profiles")
           .update({ stripe_onboarding_complete: true })
           .eq("id", user.id);
-        currentData.stripe_onboarding_complete = true;
+        
+        if (updateErr) {
+          console.error("DB Sync Update Failed:", updateErr);
+          currentData.error = `DB Error: ${updateErr.message}`;
+        } else {
+          currentData.stripe_onboarding_complete = true;
+        }
+      } else {
+        currentData.stripeDiagnostic = `Incomplete (${account.id})`;
       }
     } catch (err) {
       console.error("[Stripe Sync Alert] Couldn't fetch account status:", err);
+      currentData.stripeDiagnostic = `API Sync Failure`;
     }
+  } else if (!currentData.stripe_account_id) {
+     currentData.stripeDiagnostic = "Missing Stripe ID";
   }
 
   return currentData;
