@@ -43,6 +43,7 @@ export default function EditCoachProfile() {
   const [highlightUrl, setHighlightUrl] = useState("");
   type TimeSlot = { day: string; start: string; end: string };
   const [availability, setAvailability] = useState<TimeSlot[]>([]);
+  const [profileData, setProfileData] = useState<any>(null);
 
   const [stripeOnboarded, setStripeOnboarded] = useState(false);
   const [connectingStripe, setConnectingStripe] = useState(false);
@@ -68,6 +69,7 @@ export default function EditCoachProfile() {
   async function refreshStripeStatus() {
     setIsSyncing(true);
     const data = await getMyCoachProfile();
+    setProfileData(data);
     if (data?.stripe_onboarding_complete) {
       setStripeOnboarded(true);
       setMessage({ type: "success", text: "Stripe connection verified!" });
@@ -110,6 +112,7 @@ export default function EditCoachProfile() {
           setAvailability(slots);
         }
         setStripeOnboarded(data.stripe_onboarding_complete || false);
+        setProfileData(data);
       }
       setLoading(false);
     }
@@ -484,6 +487,11 @@ export default function EditCoachProfile() {
                   <div>
                     <p className="font-black text-base tracking-tight text-white mb-1">Financial Link Missing</p>
                     <p className="text-xs font-medium text-slate-400 leading-relaxed">You must connect your bank profile via Stripe to receive session payments. All funds are secured in escrow until session completion.</p>
+                    {profileData?.stripeDiagnostic && (
+                       <p className="text-[10px] text-amber-500/50 mt-2 font-mono uppercase tracking-widest">
+                         Diagnostic: {profileData.stripeDiagnostic} / ID: {profileData.stripe_account_id?.slice(0, 10)}...
+                       </p>
+                    )}
                   </div>
                 </div>
                 

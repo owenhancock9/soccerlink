@@ -286,6 +286,7 @@ export default function SoccerPlatform() {
 
   /* ── Coach Context ── */
   const [stripeOnboarded, setStripeOnboarded] = useState<boolean | null>(null);
+  const [profile, setProfile] = useState<any>(null);
 
   const [isSyncingStripe, setIsSyncingStripe] = useState(false);
   const [isInitiatingStripe, setIsInitiatingStripe] = useState(false);
@@ -293,6 +294,7 @@ export default function SoccerPlatform() {
   async function refreshStripeStatus() {
     setIsSyncingStripe(true);
     const profile = await getMyCoachProfile();
+    setProfile(profile);
     if (profile) {
       const p = profile as Record<string, unknown>;
       setStripeOnboarded(!!p.stripe_onboarding_complete);
@@ -313,8 +315,9 @@ export default function SoccerPlatform() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("setup") === "success" && currentUser.role === "coach") {
-      getMyCoachProfile().then((profile) => {
-        const p = profile as Record<string, unknown>;
+      getMyCoachProfile().then((profileResult) => {
+        setProfile(profileResult);
+        const p = profileResult as Record<string, unknown>;
         if (p?.stripe_onboarding_complete) {
           setStripeOnboarded(true);
         }
@@ -359,8 +362,9 @@ export default function SoccerPlatform() {
       getCoachBookings().then((bookings) => {
         setRealBookings(bookings as unknown as Booking[]);
       });
-      getMyCoachProfile().then((profile) => {
-        const p = profile as Record<string, unknown>;
+      getMyCoachProfile().then((profileResult) => {
+        setProfile(profileResult);
+        const p = profileResult as Record<string, unknown>;
         setStripeOnboarded(!!p?.stripe_onboarding_complete);
       });
     } else if (currentUser.role === "player" && currentUser.isAuthenticated) {
@@ -1313,6 +1317,11 @@ export default function SoccerPlatform() {
                       <p className="text-xs font-medium text-slate-400 leading-relaxed max-w-xl">
                         You must complete your Stripe onboarding to receive session payouts. Your profile is currently hidden from players until this connection is verified.
                       </p>
+                      {profile?.stripeDiagnostic && (
+                        <p className="text-[10px] text-amber-500/50 mt-3 font-mono uppercase tracking-widest">
+                           Diagnostic: {profile.stripeDiagnostic} / ID: {profile.stripe_account_id?.slice(0, 10)}...
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-3 w-full md:w-auto">
