@@ -499,10 +499,6 @@ export default function EditCoachProfile() {
                   <div>
                     <p className="font-black text-base tracking-tight text-white mb-1">Financial Link Missing</p>
                     <p className="text-xs font-medium text-slate-400 leading-relaxed">You must connect your bank profile via Stripe to receive session payments. All funds are secured in escrow until session completion.</p>
-                    <div className="mt-4 p-3 bg-red-900/50 text-red-100 text-[10px] font-mono whitespace-pre-wrap rounded-md border border-red-500/50">
-                        RAW PROFILE DATA:
-                        {JSON.stringify(profileData || { nullOrUndefined: true }, null, 2)}
-                    </div>
                   </div>
                 </div>
                 

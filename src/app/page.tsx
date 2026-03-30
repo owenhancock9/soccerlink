@@ -1308,10 +1308,6 @@ export default function SoccerPlatform() {
                       <p className="text-xs font-medium text-slate-400 leading-relaxed max-w-xl">
                         You must complete your Stripe onboarding to receive session payouts. Your profile is currently hidden from players until this connection is verified.
                       </p>
-                      <div className="mt-4 p-3 bg-red-900/50 text-red-100 text-[10px] font-mono whitespace-pre-wrap rounded-md border border-red-500/50">
-                        RAW PROFILE DATA:
-                        {JSON.stringify(profile || { nullOrUndefined: true }, null, 2)}
-                      </div>
                     </div>
                   </div>
                   <div className="flex gap-3 w-full md:w-auto">
