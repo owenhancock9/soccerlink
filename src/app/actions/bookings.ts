@@ -45,6 +45,13 @@ export async function createBooking(formData: FormData) {
     return { error: error.message };
   }
 
+  const getBaseUrl = () => {
+    let url = process.env.NEXT_PUBLIC_SITE_URL ?? "https://coachingmatch.co";
+    url = url.includes("http") ? url : `https://${url}`;
+    return url.endsWith("/") ? url.slice(0, -1) : url;
+  };
+  const baseUrl = getBaseUrl();
+
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -63,8 +70,8 @@ export async function createBooking(formData: FormData) {
         },
       ],
       client_reference_id: data.id,
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}?canceled=true`,
+      success_url: `${baseUrl}/?success=true`,
+      cancel_url: `${baseUrl}/?canceled=true`,
     });
 
     return { success: true, booking: data, url: session.url };
