@@ -90,17 +90,25 @@ export async function getMyCoachProfile() {
       // We check for charges_enabled or payouts_enabled as a fallback to details_submitted
       const isComplete = account.details_submitted || account.charges_enabled || account.payouts_enabled;
       
+      console.log(`[Stripe Sync] Coach: ${user.id} | Complete: ${isComplete} | Detail Sub: ${account.details_submitted}`);
+
       if (isComplete) {
-        await supabase
+        const { error: upsertErr } = await supabase
           .from("coach_profiles")
           .upsert({ 
             id: user.id, 
             stripe_onboarding_complete: true 
           });
-        currentData.stripe_onboarding_complete = true;
+        
+        if (upsertErr) {
+          console.error("[Stripe Sync Error] Supabase Upsert Failed:", upsertErr);
+        } else {
+          currentData.stripe_onboarding_complete = true;
+          console.log("[Stripe Sync] Success: Coach status updated to complete.");
+        }
       }
     } catch (err) {
-      console.error("Error syncing Stripe status:", err);
+      console.error("[Stripe Sync Error] Stripe API Call Failed:", err);
     }
   }
 

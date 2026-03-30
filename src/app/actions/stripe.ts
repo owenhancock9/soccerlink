@@ -65,10 +65,13 @@ export async function createStripeConnectAccount(rootUrl?: string) {
     }
 
     // 3. Create an onboarding link
+    const returnPath = `${baseUrl}?setup=success`;
+    console.log(`[Stripe Onboarding] Generating link for ${user.id} | Return Path: ${returnPath}`);
+    
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
       refresh_url: `${baseUrl}`,
-      return_url: `${baseUrl}?setup=success`,
+      return_url: returnPath,
       type: "account_onboarding",
     });
 
