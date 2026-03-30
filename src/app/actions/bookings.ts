@@ -126,6 +126,7 @@ export async function getCoachBookings() {
     `,
     )
     .eq("coach_id", user.id)
+    .neq("status", "pending")
     .order("created_at", { ascending: false });
 
   return coachBookings || [];
