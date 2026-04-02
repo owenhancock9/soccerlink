@@ -23,6 +23,11 @@ export async function createStripeConnectAccount(rootUrl?: string) {
     let accountId = profile?.stripe_account_id;
 
     if (accountId) {
+      // Ensure existing account is on the fastest free payout schedule (Daily)
+      await stripe.accounts.update(accountId, {
+        settings: { payouts: { schedule: { interval: "daily" } } }
+      }).catch(e => console.warn("Failed to set daily payout schedule:", e.message));
+
       const account = await stripe.accounts.retrieve(accountId);
       const isComplete = !!(account.details_submitted || account.payouts_enabled);
       if (isComplete) {
@@ -32,7 +37,8 @@ export async function createStripeConnectAccount(rootUrl?: string) {
     } else {
       const account = await stripe.accounts.create({
         type: "express",
-        capabilities: { transfers: { requested: true } }
+        capabilities: { transfers: { requested: true } },
+        settings: { payouts: { schedule: { interval: "daily" } } }
       });
       accountId = account.id;
 

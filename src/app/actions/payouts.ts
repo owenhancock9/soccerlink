@@ -37,12 +37,9 @@ export async function releaseFundsToCoach(bookingId: string) {
       };
     }
 
-    // 2. Transfer funds to Coach
+    // 1. Transfer funds from Platform to Coach's Stripe Balance
     // Rate is what the coach is owed (the total is rate + platform fee)
     const transferAmountCents = Math.round(booking.rate * 100);
-    // 4. Create transfer to coach account
-    const stripe = getStripe();
-    if (!stripe) return { error: "Stripe not configured on server" };
     const transfer = await stripe.transfers.create({
       amount: transferAmountCents,
       currency: "usd",
@@ -50,7 +47,7 @@ export async function releaseFundsToCoach(bookingId: string) {
       description: `Payout for session ${booking.id}`,
     });
 
-    // 3. Update the booking status to "completed" so it doesn't get paid twice
+    // 2. Update the booking status to "completed" so it doesn't get paid twice
     const { error: updateErr } = await supabase
       .from("bookings")
       .update({ status: "completed" })
@@ -61,7 +58,10 @@ export async function releaseFundsToCoach(bookingId: string) {
       return { error: "Transfer successful but failed to update status." };
     }
 
-    return { success: true, transferId: transfer.id };
+    return { 
+      success: true, 
+      transferId: transfer.id, 
+    };
   } catch (err: unknown) {
     console.error("Stripe Transfer Error:", err);
     return { error: err instanceof Error ? err.message : "Failed to release funds." };
