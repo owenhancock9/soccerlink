@@ -929,7 +929,7 @@ export default function SoccerPlatform() {
               <NavBtn
                 active={view === "dashboard"}
                 onClick={() => switchView("dashboard")}
-                accent="pink"
+                accent="rose"
               >
                 <div className="flex items-center gap-2">
                   <span>COACH HUB</span>
@@ -1866,7 +1866,7 @@ function NavBtn({
       ? "text-pink-400 bg-pink-400/10"
       : "text-slate-400 hover:text-white hover:bg-slate-800/60",
     rose: active
-      ? "text-rose-400 bg-rose-500/10"
+      ? "text-pink-400 bg-pink-400/10"
       : "text-slate-400 hover:text-white hover:bg-slate-800/60",
   };
 
