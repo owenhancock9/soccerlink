@@ -7,11 +7,6 @@ export async function releaseFundsToCoach(bookingId: string) {
   const stripe = getStripe();
   if (!stripe) return { error: "Stripe not configured on server" };
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return { error: "Not authenticated" };
 
   try {
     // 1. Fetch the booking to verify it exists and is ready for payout
@@ -25,6 +20,10 @@ export async function releaseFundsToCoach(bookingId: string) {
       return { error: "Booking not found." };
     }
 
+    // Allow payout if confirmed with both-party confirmation, or legacy confirmed status
+    if (booking.status === "completed") {
+      return { error: "Funds already released for this session." };
+    }
     if (booking.status !== "confirmed") {
       return { error: "Funds cannot be released. Session must be confirmed." };
     }

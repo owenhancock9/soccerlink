@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/app/lib/supabase/client";
 import { signOut } from "@/app/actions/auth";
 import { getCoaches, getMyCoachProfile, getAllCoachesAdmin, banCoach, unbanCoach } from "@/app/actions/coaches";
-import { createBooking, getCoachBookings, getMyBookings } from "@/app/actions/bookings";
+import { createBooking, getCoachBookings, getMyBookings, confirmSession, submitRating } from "@/app/actions/bookings";
 import { createStripeConnectAccount } from "@/app/actions/stripe";
 import { uploadVodForBooking } from "@/app/actions/upload";
 import { releaseFundsToCoach } from "@/app/actions/payouts";
@@ -39,14 +39,20 @@ interface Booking {
   status: string;
   amount: number;
   total: number;
+  rate: number;
   session_date: string;
   session_time: string;
+  coach_id?: string;
   coach?: { full_name: string };
   player_name?: string;
   player_email?: string;
   vod_url?: string;
   payout_id?: string;
-  [key: string]: unknown; // Index signature for safety with dynamic properties
+  coach_confirmed_at?: string;
+  player_confirmed_at?: string;
+  player_rating?: number;
+  player_review?: string;
+  [key: string]: unknown;
 }
 
 /* ─── Scheduling Helpers ─── */
@@ -331,6 +337,14 @@ export default function SoccerPlatform() {
   const [uploadingVod, setUploadingVod] = useState<string | null>(null);
   const [releasingFunds, setReleasingFunds] = useState<string | null>(null);
 
+  /* ── Session Confirmation & Rating State ── */
+  const [confirmingSession, setConfirmingSession] = useState<string | null>(null);
+  const [ratingBookingId, setRatingBookingId] = useState<string | null>(null);
+  const [ratingValue, setRatingValue] = useState(0);
+  const [ratingHover, setRatingHover] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [submittingRating, setSubmittingRating] = useState(false);
+
   /* ── Admin State ── */
   const [adminCoaches, setAdminCoaches] = useState<AdminCoach[]>([]);
   const [adminLoading, setAdminLoading] = useState(false);
@@ -506,6 +520,56 @@ export default function SoccerPlatform() {
       setRealBookings(updated);
     }
     setReleasingFunds(null);
+  };
+
+  /* ── Session Confirmation Handler ── */
+  const handleConfirmSession = async (bookingId: string) => {
+    setConfirmingSession(bookingId);
+    setBookingMessage({ type: "success", text: "Confirming session..." });
+
+    const result = await confirmSession(bookingId);
+
+    if (result.error) {
+      setBookingMessage({ type: "error", text: result.error });
+    } else if (result.bothConfirmed) {
+      setBookingMessage({ type: "success", text: "Both parties confirmed! Funds are being released to the coach. 🎉" });
+    } else {
+      setBookingMessage({ type: "success", text: "Session confirmed! Waiting for the other party to confirm." });
+    }
+
+    // Refresh bookings
+    if (currentUser.role === "coach") {
+      const updated = await getCoachBookings();
+      setRealBookings(updated as unknown as Booking[]);
+    } else {
+      const updated = await getMyBookings();
+      setRealBookings(updated as unknown as Booking[]);
+    }
+    setConfirmingSession(null);
+  };
+
+  /* ── Rating Submission Handler ── */
+  const handleSubmitRating = async (bookingId: string) => {
+    if (ratingValue === 0) {
+      setBookingMessage({ type: "error", text: "Please select a star rating." });
+      return;
+    }
+    setSubmittingRating(true);
+
+    const result = await submitRating(bookingId, ratingValue, reviewText);
+
+    if (result.error) {
+      setBookingMessage({ type: "error", text: result.error });
+    } else {
+      setBookingMessage({ type: "success", text: "Thank you for your review! ⭐" });
+      setRatingBookingId(null);
+      setRatingValue(0);
+      setReviewText("");
+    }
+
+    const updated = await getMyBookings();
+    setRealBookings(updated as unknown as Booking[]);
+    setSubmittingRating(false);
   };
 
   /* ═══════════════════
@@ -757,7 +821,7 @@ export default function SoccerPlatform() {
                             </div>
                             <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.25em] text-center leading-loose">
                               Funds Secured in Escrow Vault<br />
-                              Locked until Review Completed
+                              Released when both parties confirm session
                             </p>
                           </div>
                         </div>
@@ -784,12 +848,16 @@ export default function SoccerPlatform() {
                 </div>
                 <div className="space-y-6">
                   <div className="p-8 bg-slate-950/60 rounded-[2rem] border border-slate-800 shadow-2xl">
-                    <strong className="text-white text-lg block mb-3 uppercase tracking-tighter">1. The Escrow Vault System</strong>
-                    <p className="text-slate-400 leading-relaxed font-medium">To ensure 100% security for players, your funds are held by CoachMatching&apos;s secure vault. Coaches only receive payment once they have uploaded your custom VOD breakdown. If no video is delivered, your funds are returned.</p>
+                    <strong className="text-white text-lg block mb-3 uppercase tracking-tighter">1. Two-Way Confirmation System</strong>
+                    <p className="text-slate-400 leading-relaxed font-medium">To ensure security for both sides, session funds are held in CoachMatching&apos;s secure vault. After your session is completed, both the coach and the player must click &quot;Confirm Session Complete&quot; for funds to be released. If either party does not confirm, the funds remain held and our support team will assist.</p>
                   </div>
                   <div className="p-8 bg-rose-950/10 rounded-[2rem] border border-rose-900/30 shadow-2xl">
                     <strong className="text-rose-400 text-lg block mb-3 uppercase tracking-tighter">2. Off-Platform Protection</strong>
                     <p className="text-rose-300/60 leading-relaxed font-medium">Attempting to book coaching sessions outside of CoachMatching is strictly prohibited. This is for your own safety; sessions outside our portal are not protected by our escrow guarantee and will result in immediate permanent account suspension.</p>
+                  </div>
+                  <div className="p-8 bg-amber-950/10 rounded-[2rem] border border-amber-900/30 shadow-2xl">
+                    <strong className="text-amber-400 text-lg block mb-3 uppercase tracking-tighter">3. Reviews &amp; Ratings</strong>
+                    <p className="text-amber-300/60 leading-relaxed font-medium">After a session is completed, players are encouraged to leave a star rating and review. This helps future players make informed decisions and helps coaches build their reputation on the platform.</p>
                   </div>
                 </div>
               </div>
@@ -832,7 +900,7 @@ export default function SoccerPlatform() {
                   active={view === "session"}
                   onClick={() => switchView("session")}
                 >
-                  My VODs
+                  My Sessions
                 </NavBtn>
               </>
             )}
@@ -932,7 +1000,7 @@ export default function SoccerPlatform() {
                   onClick={() => switchView("session")}
                   className="text-left text-slate-300 hover:text-white transition-colors"
                 >
-                  My VODs
+                  My Sessions
                 </button>
               </>
             )}
@@ -1210,73 +1278,142 @@ export default function SoccerPlatform() {
 
             {realBookings.map((b: Booking) => (
               <div key={b.id} className="glass-card p-6 md:p-8 relative hover:transform-none">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                <div className="flex flex-col gap-6">
 
-                  {/* Left: Info */}
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">
-                      Session with Coach {b.coach?.full_name || "Unknown"}
-                    </h3>
-                    <p className="text-slate-400 text-sm mb-4">
-                      {new Date(b.session_date).toLocaleDateString()} at {b.session_time}
-                    </p>
-
-                    <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${b.status === "pending" || b.status === "confirmed" ? "bg-amber-950/30 text-amber-500 border-amber-900/50" :
-                          b.status === "vod_submitted" ? "bg-indigo-950/30 text-indigo-400 border-indigo-900/50" :
-                            b.status === "reviewed" ? "bg-emerald-950/30 text-emerald-400 border-emerald-900/50" :
-                              "bg-slate-900 text-slate-400 border-slate-700"
+                  {/* Top: Info Row */}
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-white mb-2">
+                        Session with Coach {b.coach?.full_name || "Unknown"}
+                      </h3>
+                      <p className="text-slate-400 text-sm mb-3">
+                        {new Date(b.session_date).toLocaleDateString()} at {b.session_time}
+                      </p>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${
+                          b.status === "pending" ? "bg-amber-950/30 text-amber-500 border-amber-900/50" :
+                          b.status === "confirmed" ? "bg-cyan-950/30 text-cyan-400 border-cyan-900/50" :
+                          b.status === "completed" ? "bg-emerald-950/30 text-emerald-400 border-emerald-900/50" :
+                          "bg-slate-900 text-slate-400 border-slate-700"
                         }`}>
-                        {b.status === "pending" ? "Awaiting Checkout" :
-                          b.status === "confirmed" ? "Awaiting VOD Upload" :
-                            b.status === "vod_submitted" ? "Coach is Reviewing" :
-                              b.status === "reviewed" ? "Review Ready" :
-                                "Completed"}
-                      </span>
-
-                      <span className="font-mono text-emerald-400 font-bold">${b.total}</span>
+                          {b.status === "pending" ? "Awaiting Checkout" :
+                           b.status === "confirmed" ? "Session Paid — Confirm When Done" :
+                           b.status === "completed" ? "Completed ✓" :
+                           b.status}
+                        </span>
+                        <span className="font-mono text-emerald-400 font-bold">${b.total}</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Right: Actions */}
-                  <div className="flex flex-col sm:flex-row gap-3 md:w-1/3">
-                    {/* Upload VOD (If booking confirmed but no VOD yet) */}
-                    {(b.status === "confirmed" || (b.status === "vod_submitted" && !b.vod_url)) && (
-                      <div className="w-full">
-                        <label className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-sm transition-all cursor-pointer border border-dashed ${uploadingVod === b.id
-                            ? "bg-indigo-600/20 text-indigo-400 border-indigo-500/50"
-                            : "bg-slate-900/50 text-indigo-400 border-indigo-500/30 hover:bg-slate-800 hover:border-indigo-400"
-                          }`}>
-                          {uploadingVod === b.id ? "Uploading..." : "Upload MP4 Match Footage"}
-                          <input
-                            type="file"
-                            accept="video/mp4,video/x-m4v,video/*"
-                            className="hidden"
-                            disabled={uploadingVod === b.id}
-                            onChange={(e) => handleVodUpload(e, b.id)}
-                          />
-                        </label>
+                  {/* Two-Way Confirmation Status */}
+                  {b.status === "confirmed" && (
+                    <div className="bg-slate-950/60 rounded-2xl p-5 border border-slate-800/80">
+                      <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-4">Session Confirmation Status</p>
+                      <div className="grid grid-cols-2 gap-4 mb-5">
+                        <div className={`rounded-xl p-4 border text-center ${b.coach_confirmed_at ? "bg-emerald-500/10 border-emerald-500/30" : "bg-slate-900 border-slate-800"}`}>
+                          <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Coach</p>
+                          <p className={`text-sm font-black ${b.coach_confirmed_at ? "text-emerald-400" : "text-slate-600"}`}>
+                            {b.coach_confirmed_at ? "✓ Confirmed" : "⏳ Pending"}
+                          </p>
+                        </div>
+                        <div className={`rounded-xl p-4 border text-center ${b.player_confirmed_at ? "bg-emerald-500/10 border-emerald-500/30" : "bg-slate-900 border-slate-800"}`}>
+                          <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">You (Player)</p>
+                          <p className={`text-sm font-black ${b.player_confirmed_at ? "text-emerald-400" : "text-slate-600"}`}>
+                            {b.player_confirmed_at ? "✓ Confirmed" : "⏳ Pending"}
+                          </p>
+                        </div>
                       </div>
-                    )}
 
-                    {/* View VOD (If URL exists) */}
-                    {b.vod_url && (
-                      <a href={b.vod_url} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-slate-800 text-white rounded-xl font-semibold text-sm hover:bg-slate-700 transition-colors border border-slate-700">
-                        ▶ Watch VOD
-                      </a>
-                    )}
+                      {/* Player Confirm Button */}
+                      {!b.player_confirmed_at && (
+                        <button
+                          onClick={() => handleConfirmSession(b.id)}
+                          disabled={confirmingSession === b.id}
+                          className="w-full py-4 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 active:scale-[0.98]"
+                        >
+                          {confirmingSession === b.id ? "Confirming..." : "✓ Confirm Session Complete"}
+                        </button>
+                      )}
+                      {b.player_confirmed_at && !b.coach_confirmed_at && (
+                        <p className="text-center text-amber-400 text-xs font-bold">Waiting for coach to confirm...</p>
+                      )}
+                    </div>
+                  )}
 
-                    {/* Release Funds (Only if reviewed or actually wanted by player) */}
-                    {(b.status === "reviewed" || b.status === "vod_submitted" || b.status === "confirmed") && (
-                      <button
-                        onClick={() => handleReleaseFunds(b.id)}
-                        disabled={releasingFunds === b.id}
-                        className="flex-1 py-3 px-4 bg-emerald-600/10 text-emerald-500 border border-emerald-500/30 rounded-xl font-semibold text-sm hover:bg-emerald-600/20 transition-all disabled:opacity-50"
-                      >
-                        {releasingFunds === b.id ? "Releasing..." : "Release Funds"}
-                      </button>
-                    )}
-                  </div>
+                  {/* Rating Form (After completion) */}
+                  {b.status === "completed" && !b.player_rating && (
+                    <div className="bg-gradient-to-br from-amber-500/5 to-transparent rounded-2xl p-6 border border-amber-500/20">
+                      <p className="text-sm font-black text-white mb-4">Rate Your Session</p>
+                      <div className="flex gap-2 mb-4">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            onMouseEnter={() => setRatingHover(star)}
+                            onMouseLeave={() => setRatingHover(0)}
+                            onClick={() => { setRatingValue(star); setRatingBookingId(b.id); }}
+                            className={`text-3xl transition-all hover:scale-125 ${
+                              star <= (ratingHover || (ratingBookingId === b.id ? ratingValue : 0))
+                                ? "text-amber-400"
+                                : "text-slate-700"
+                            }`}
+                          >
+                            ★
+                          </button>
+                        ))}
+                      </div>
+                      {ratingBookingId === b.id && ratingValue > 0 && (
+                        <div className="space-y-3 anim-fade-in">
+                          <textarea
+                            value={reviewText}
+                            onChange={(e) => setReviewText(e.target.value)}
+                            placeholder="Tell us about your experience (optional)"
+                            maxLength={500}
+                            rows={3}
+                            className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm placeholder:text-slate-700 outline-none focus:border-amber-500/30 resize-none"
+                          />
+                          <button
+                            onClick={() => handleSubmitRating(b.id)}
+                            disabled={submittingRating}
+                            className="w-full py-3 bg-amber-500 text-black rounded-xl font-black text-xs uppercase tracking-widest hover:bg-amber-400 transition-all disabled:opacity-50"
+                          >
+                            {submittingRating ? "Submitting..." : `Submit ${ratingValue}-Star Review`}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Show existing rating */}
+                  {b.player_rating && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-amber-400">{"★".repeat(b.player_rating)}{"☆".repeat(5 - b.player_rating)}</span>
+                      <span className="text-slate-500 font-bold">Your Review</span>
+                      {b.player_review && <span className="text-slate-400 italic text-xs">— "{b.player_review}"</span>}
+                    </div>
+                  )}
+
+                  {/* Optional: VOD Upload (separate feature, not gating payment) */}
+                  {b.status === "confirmed" && (
+                    <div className="border-t border-slate-800/50 pt-4">
+                      <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mb-3">Optional: Upload Match Footage for Analysis</p>
+                      <div className="flex gap-3">
+                        <label className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-xs transition-all cursor-pointer border border-dashed ${
+                          uploadingVod === b.id
+                            ? "bg-indigo-600/20 text-indigo-400 border-indigo-500/50"
+                            : "bg-slate-900/50 text-slate-500 border-slate-800 hover:text-indigo-400 hover:border-indigo-500/30"
+                        }`}>
+                          {uploadingVod === b.id ? "Uploading..." : "📎 Upload MP4"}
+                          <input type="file" accept="video/*" className="hidden" disabled={!!uploadingVod} onChange={(e) => handleVodUpload(e, b.id)} />
+                        </label>
+                        {b.vod_url && (
+                          <a href={b.vod_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 py-3 px-4 bg-slate-800 text-white rounded-xl font-semibold text-xs hover:bg-slate-700 transition-colors border border-slate-700">
+                            ▶ Watch VOD
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                 </div>
               </div>
@@ -1440,40 +1577,48 @@ export default function SoccerPlatform() {
             <div>
               <h3 className="text-sm font-black mb-6 text-slate-400 flex items-center gap-3 uppercase tracking-[0.2em]">
                 <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.6)] animate-pulse" />
-                Critical Actions
+                Sessions Requiring Action
               </h3>
-              {realBookings.filter((b: Booking) => b.status === 'completed' && !b.vod_url).length > 0 ? (
+              {realBookings.filter((b: Booking) => b.status === 'confirmed' && !b.coach_confirmed_at).length > 0 ? (
                 <div className="grid gap-4">
-                  {realBookings.filter((b: Booking) => b.status === 'completed' && !b.vod_url).map((booking: Booking) => (
-                    <div key={booking.id} className="glass-card overflow-hidden group/action relative border-l-4 border-l-orange-500">
-                      <div className="absolute inset-0 bg-gradient-to-r from-orange-500/[0.03] to-transparent pointer-events-none" />
-                      <div className="p-6 md:p-8 flex flex-col md:flex-row justify-between md:items-center gap-6">
-                        <div className="flex items-center gap-6">
-                          <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 text-xl font-black shadow-2xl">
-                            {booking.player_name?.charAt(0) || "P"}
+                  {realBookings.filter((b: Booking) => b.status === 'confirmed' && !b.coach_confirmed_at).map((booking: Booking) => (
+                    <div key={booking.id} className="glass-card overflow-hidden group/action relative border-l-4 border-l-cyan-500">
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/[0.03] to-transparent pointer-events-none" />
+                      <div className="p-6 md:p-8">
+                        <div className="flex flex-col md:flex-row justify-between md:items-center gap-6 mb-5">
+                          <div className="flex items-center gap-6">
+                            <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-500 text-xl font-black shadow-2xl">
+                              {booking.player_name?.charAt(0) || "P"}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-3 mb-1">
+                                <h4 className="text-lg font-black text-white tracking-tight">{booking.player_name || "Player"}</h4>
+                                <span className="text-[9px] bg-cyan-500/10 text-cyan-400 px-2.5 py-1 rounded-full border border-cyan-500/30 font-black uppercase tracking-widest">Confirm Session</span>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <p className="text-xs text-slate-500 font-bold font-mono tracking-tighter opacity-80">{booking.player_email}</p>
+                                <span className="w-1 h-1 rounded-full bg-slate-800" />
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Session: {new Date(booking.session_date).toLocaleDateString()}</p>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="flex items-center gap-3 mb-1">
-                              <h4 className="text-lg font-black text-white tracking-tight">{booking.player_name || "Premium Athlete"}</h4>
-                              <span className="text-[9px] bg-orange-500/10 text-orange-400 px-2.5 py-1 rounded-full border border-orange-500/30 font-black uppercase tracking-widest">Awaiting VOD</span>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <p className="text-xs text-slate-500 font-bold font-mono tracking-tighter opacity-80">{booking.player_email}</p>
-                              <span className="w-1 h-1 rounded-full bg-slate-800" />
-                              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Session: {new Date(booking.session_date).toLocaleDateString()}</p>
-                            </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[9px] px-3 py-1.5 rounded-lg font-black uppercase tracking-widest ${
+                              booking.player_confirmed_at 
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                                : "bg-slate-800 text-slate-500 border border-slate-700"
+                            }`}>
+                              Player: {booking.player_confirmed_at ? "✓ Confirmed" : "Pending"}
+                            </span>
                           </div>
                         </div>
-                        <label className="cursor-pointer bg-white text-black hover:bg-slate-200 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-[0_15px_30px_rgba(255,255,255,0.1)] hover:-translate-y-1 active:translate-y-0 shrink-0 text-center">
-                          {uploadingVod === booking.id ? "Syncing..." : "Upload Breakdown"}
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept="video/*"
-                            disabled={!!uploadingVod}
-                            onChange={(e) => handleVodUpload(e, booking.id)}
-                          />
-                        </label>
+                        <button
+                          onClick={() => handleConfirmSession(booking.id)}
+                          disabled={confirmingSession === booking.id}
+                          className="w-full py-4 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 active:scale-[0.98]"
+                        >
+                          {confirmingSession === booking.id ? "Confirming..." : "✓ Confirm Session Complete"}
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -1483,7 +1628,7 @@ export default function SoccerPlatform() {
                   <div className="w-16 h-16 bg-slate-900 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-slate-800 shadow-2xl">
                     <span className="text-2xl">⚡</span>
                   </div>
-                  <p className="text-slate-500 text-xs font-black uppercase tracking-widest">No pending operations. System optimal.</p>
+                  <p className="text-slate-500 text-xs font-black uppercase tracking-widest">No sessions awaiting confirmation. System optimal.</p>
                 </div>
               )}
             </div>

@@ -2,6 +2,8 @@
 
 import { createClient } from "@/app/lib/supabase/server";
 import { getStripe } from "@/app/lib/stripe/server";
+import { sendBookingNotification, sendSessionConfirmedEmail, sendFundsReleasedEmail, sendRatingReceivedEmail } from "./emails";
+import { releaseFundsToCoach } from "./payouts";
 
 export async function createBooking(formData: FormData) {
   const stripe = getStripe();
@@ -49,6 +51,26 @@ export async function createBooking(formData: FormData) {
     return { error: error.message };
   }
 
+  // Email the coach about the new booking
+  try {
+    const { data: coachProfile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", coachId)
+      .single();
+    if (coachProfile?.email) {
+      await sendBookingNotification(
+        coachProfile.email,
+        user?.user_metadata?.full_name || "A Player",
+        sessionDate,
+        sessionTime,
+        rate,
+      );
+    }
+  } catch (e) {
+    console.warn("Failed to send booking email:", e);
+  }
+
   const getBaseUrl = () => {
     let url = process.env.NEXT_PUBLIC_SITE_URL ?? "https://coachingmatch.co";
     url = url.includes("http") ? url : `https://${url}`;
@@ -65,10 +87,10 @@ export async function createBooking(formData: FormData) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `Coaching Session with ${user?.user_metadata?.full_name || "Player"}`,
+              name: `Coaching Session`,
               description: `Session on ${sessionDate} at ${sessionTime}`,
             },
-            unit_amount: Math.round(total * 100), // Stripe uses cents
+            unit_amount: Math.round(total * 100),
           },
           quantity: 1,
         },
@@ -86,6 +108,157 @@ export async function createBooking(formData: FormData) {
   }
 }
 
+/* ═══════════════════════════════════
+   TWO-WAY SESSION CONFIRMATION
+   ═══════════════════════════════════ */
+
+export async function confirmSession(bookingId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  // Fetch the booking
+  const { data: booking, error: fetchErr } = await supabase
+    .from("bookings")
+    .select("*, coach:profiles!bookings_coach_id_fkey(full_name, email), player:profiles!bookings_player_id_fkey(full_name, email)")
+    .eq("id", bookingId)
+    .single();
+
+  if (fetchErr || !booking) return { error: "Booking not found." };
+
+  // Determine role
+  const isCoach = user.id === booking.coach_id;
+  const isPlayer = user.id === booking.player_id;
+  if (!isCoach && !isPlayer) return { error: "Not authorized for this booking." };
+
+  // Prevent double-confirm
+  if (isCoach && booking.coach_confirmed_at) return { error: "You already confirmed this session." };
+  if (isPlayer && booking.player_confirmed_at) return { error: "You already confirmed this session." };
+
+  // Set the confirmation timestamp
+  const now = new Date().toISOString();
+  const updatePayload = isCoach
+    ? { coach_confirmed_at: now }
+    : { player_confirmed_at: now };
+
+  const { error: updateErr } = await supabase
+    .from("bookings")
+    .update(updatePayload)
+    .eq("id", bookingId);
+
+  if (updateErr) return { error: updateErr.message };
+
+  // Check if BOTH sides have now confirmed
+  const coachConfirmed = isCoach ? true : !!booking.coach_confirmed_at;
+  const playerConfirmed = isPlayer ? true : !!booking.player_confirmed_at;
+
+  // Email the other party
+  try {
+    const confirmerName = isCoach
+      ? (booking.coach as any)?.full_name || "Your Coach"
+      : (booking.player as any)?.full_name || "Your Player";
+    const recipientEmail = isCoach
+      ? (booking.player as any)?.email
+      : (booking.coach as any)?.email;
+
+    if (recipientEmail) {
+      if (coachConfirmed && playerConfirmed) {
+        // Both confirmed — release funds
+        const payoutResult = await releaseFundsToCoach(bookingId);
+        if (payoutResult.error) {
+          console.error("Auto-payout failed:", payoutResult.error);
+        }
+        // Email coach about payout
+        const coachEmail = (booking.coach as any)?.email;
+        if (coachEmail) {
+          await sendFundsReleasedEmail(coachEmail, booking.rate || 0);
+        }
+      } else {
+        // Only one side confirmed — notify the other
+        await sendSessionConfirmedEmail(
+          recipientEmail,
+          confirmerName,
+          isCoach ? "coach" : "player",
+        );
+      }
+    }
+  } catch (e) {
+    console.warn("Failed to send confirmation email:", e);
+  }
+
+  return {
+    success: true,
+    bothConfirmed: coachConfirmed && playerConfirmed,
+  };
+}
+
+/* ═══════════════════════════════════
+   PLAYER RATING & REVIEW
+   ═══════════════════════════════════ */
+
+export async function submitRating(bookingId: string, rating: number, review: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  if (rating < 1 || rating > 5) return { error: "Rating must be 1-5." };
+
+  // Fetch booking
+  const { data: booking, error: fetchErr } = await supabase
+    .from("bookings")
+    .select("*, coach:profiles!bookings_coach_id_fkey(email)")
+    .eq("id", bookingId)
+    .eq("player_id", user.id)
+    .single();
+
+  if (fetchErr || !booking) return { error: "Booking not found or you don't own it." };
+  if (booking.status !== "completed") return { error: "Session must be completed before rating." };
+  if (booking.player_rating) return { error: "You already rated this session." };
+
+  // Save rating to booking
+  const { error: updateErr } = await supabase
+    .from("bookings")
+    .update({ player_rating: rating, player_review: review || null })
+    .eq("id", bookingId);
+
+  if (updateErr) return { error: updateErr.message };
+
+  // Update coach's aggregate rating
+  const { data: allRatings } = await supabase
+    .from("bookings")
+    .select("player_rating")
+    .eq("coach_id", booking.coach_id)
+    .not("player_rating", "is", null);
+
+  if (allRatings && allRatings.length > 0) {
+    const avg = allRatings.reduce((sum: number, b: any) => sum + b.player_rating, 0) / allRatings.length;
+    await supabase
+      .from("coach_profiles")
+      .update({
+        rating: Math.round(avg * 10) / 10,
+        review_count: allRatings.length,
+      })
+      .eq("id", booking.coach_id);
+  }
+
+  // Email coach about the new review
+  try {
+    const coachEmail = (booking.coach as any)?.email;
+    const playerName = user.user_metadata?.full_name || "A Player";
+    if (coachEmail) {
+      await sendRatingReceivedEmail(coachEmail, playerName, rating, review);
+    }
+  } catch (e) {
+    console.warn("Failed to send rating email:", e);
+  }
+
+  return { success: true };
+}
+
+/* ═══════════════════════════════════
+   EXISTING FUNCTIONS
+   ═══════════════════════════════════ */
+
 export async function getMyBookings() {
   const supabase = await createClient();
   const {
@@ -94,7 +267,6 @@ export async function getMyBookings() {
 
   if (!user) return [];
 
-  // Get bookings where user is the player
   const { data: playerBookings } = await supabase
     .from("bookings")
     .select(
@@ -119,7 +291,6 @@ export async function getCoachBookings() {
 
   if (!user) return [];
 
-  // Get bookings where user is the coach
   const { data: coachBookings } = await supabase
     .from("bookings")
     .select(
