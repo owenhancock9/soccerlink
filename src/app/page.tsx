@@ -178,7 +178,7 @@ function CoachCard({
                 <div className="flex items-center gap-2">
                   <span className="w-1 h-1 rounded-full bg-slate-700" />
                   <span className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] opacity-80">
-                    {coach.reviews} INTEL REVIEWS
+                    {coach.reviews} reviews
                   </span>
                 </div>
               </div>
@@ -203,11 +203,11 @@ function CoachCard({
           </span>
         </div>
 
-        {/* Narrative Strategic Bio */}
+        {/* Coach Bio */}
         <div className="relative mb-10 group/bio">
           <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-slate-800 to-transparent opacity-50 group-hover/bio:via-emerald-500/50 transition-all duration-700" />
           <p className="text-sm text-slate-400 leading-relaxed line-clamp-3 font-medium tracking-tight italic pl-2">
-            &quot;{coach.bio || "Tactical specialist available for full-match analysis and position-specific breakdown."}&quot;
+            &quot;{coach.bio || "Experienced coach available for sessions and video analysis."}&quot;
           </p>
         </div>
 
@@ -215,7 +215,7 @@ function CoachCard({
         {coach.availability && coach.availability.length > 0 && (
           <div className="mb-10 bg-slate-950/50 rounded-2xl p-4 border border-slate-900 shadow-inner group/schedule">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-[9px] text-slate-600 font-black uppercase tracking-[0.3em]">Operational Readiness</span>
+              <span className="text-[9px] text-slate-600 font-black uppercase tracking-[0.3em]">Availability</span>
               <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest animate-pulse">Available</span>
             </div>
             <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
@@ -242,7 +242,7 @@ function CoachCard({
         >
           {/* Shimmer Intensity */}
           <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1s_infinite] pointer-events-none" />
-          <span className="relative z-10">Initiate Tactical Protocol</span>
+          <span className="relative z-10">Book Now</span>
         </button>
       </div>
     </div>
@@ -774,7 +774,7 @@ export default function SoccerPlatform() {
                               <span className="text-white">${selectedCoach.rate}.00</span>
                             </div>
                             <div className="flex justify-between text-sm font-bold">
-                              <span className="text-slate-500 uppercase tracking-widest text-[10px]">Platform Vault Fee</span>
+                              <span className="text-slate-500 uppercase tracking-widest text-[10px]">Service Fee</span>
                               <span className="text-white">$7.00</span>
                             </div>
                             <div className="flex justify-between items-end pt-5 border-t border-slate-800/50">
@@ -820,7 +820,7 @@ export default function SoccerPlatform() {
                               <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-5 brightness-200" />
                             </div>
                             <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.25em] text-center leading-loose">
-                              Funds Secured in Escrow Vault<br />
+                              Payment Secured<br />
                               Released when both parties confirm session
                             </p>
                           </div>
@@ -1122,7 +1122,7 @@ export default function SoccerPlatform() {
                 </div>
 
                 <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter mb-8 text-white leading-[0.9] drop-shadow-2xl">
-                  Unlock Your <br /> <span className="gradient-text-accent">Tactical Edge.</span>
+                  Level Up <br /> <span className="gradient-text-accent">Your Game.</span>
                 </h1>
 
                 <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl leading-relaxed mb-16 drop-shadow-sm opacity-90">
@@ -1201,9 +1201,9 @@ export default function SoccerPlatform() {
             {filteredCoaches.length === 0 && allCoaches.length === 0 && coachesLoaded && (
               <div className="text-center py-32 anim-fade-in glass-card border-dashed">
                 <p className="text-6xl mb-8">🏟️</p>
-                <h3 className="text-2xl font-black text-white mb-4 tracking-tighter">No Active Deployments</h3>
+                <h3 className="text-2xl font-black text-white mb-4 tracking-tighter">No Coaches Available Yet</h3>
                 <p className="text-slate-400 max-w-sm mx-auto leading-relaxed font-bold uppercase text-[10px] tracking-[0.2em]">
-                  Be the first to join the elite network.
+                  Be the first coach on the platform.
                 </p>
                 {!currentUser.isAuthenticated && (
                   <Link
@@ -1236,31 +1236,31 @@ export default function SoccerPlatform() {
             {/* Tactical Lifecycle Section */}
             <div className="mt-40 mb-20">
               <div className="text-center mb-20 flex flex-col items-center">
-                <span className="text-[10px] font-black tracking-[0.4em] uppercase text-emerald-500 mb-6 bg-emerald-500/10 px-6 py-2 rounded-full border border-emerald-500/20 shadow-xl shadow-emerald-500/5">Protocol Overview</span>
-                <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-white mb-6">The Tactical <span className="gradient-text-accent">Lifecycle.</span></h2>
-                <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-[11px] max-w-lg leading-loose opacity-70">A professional-grade performance optimization pipeline secured by encrypted escrow.</p>
+                <span className="text-[10px] font-black tracking-[0.4em] uppercase text-emerald-500 mb-6 bg-emerald-500/10 px-6 py-2 rounded-full border border-emerald-500/20 shadow-xl shadow-emerald-500/5">How It Works</span>
+                <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-white mb-6">Simple & <span className="gradient-text-accent">Secure.</span></h2>
+                <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-[11px] max-w-lg leading-loose opacity-70">Book a session, train together, and both confirm when you're done. Easy.</p>
               </div>
 
               <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
                 <div className="glass-card p-10 relative group hover:border-indigo-500/30 transition-all duration-700">
                   <div className="absolute top-0 right-0 p-8 text-6xl font-black text-slate-800/20 group-hover:text-indigo-500/10 transition-colors">01</div>
                   <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-2xl mb-8 border border-indigo-500/20 shadow-xl shadow-indigo-500/5 group-hover:scale-110 transition-transform">🎯</div>
-                  <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Reserve Agent</h4>
-                  <p className="text-sm text-slate-400 leading-relaxed font-medium">Select a verified professional or tactical specialist matching your performance profile and book a high-precision review slot.</p>
+                  <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Find a Coach</h4>
+                  <p className="text-sm text-slate-400 leading-relaxed font-medium">Browse verified coaches by position, style, and availability. Pick one that fits your goals and book a time that works for you.</p>
                 </div>
 
                 <div className="glass-card p-10 relative group hover:border-emerald-500/30 transition-all duration-700">
                   <div className="absolute top-0 right-0 p-8 text-6xl font-black text-slate-800/20 group-hover:text-emerald-500/10 transition-colors">02</div>
                   <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-2xl mb-8 border border-emerald-500/20 shadow-xl shadow-emerald-500/5 group-hover:scale-110 transition-transform">🔐</div>
-                  <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Secure Escrow</h4>
-                  <p className="text-sm text-slate-400 leading-relaxed font-medium">Deployment funds are locked in our secure vault. Coaches only receive payment upon successful upload of your custom tactical VOD breakdown.</p>
+                  <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Secure Payment</h4>
+                  <p className="text-sm text-slate-400 leading-relaxed font-medium">Your payment is held securely until the session is complete. Both you and the coach confirm it happened, then the coach gets paid.</p>
                 </div>
 
                 <div className="glass-card p-10 relative group hover:border-cyan-500/30 transition-all duration-700">
                   <div className="absolute top-0 right-0 p-8 text-6xl font-black text-slate-800/20 group-hover:text-cyan-500/10 transition-colors">03</div>
                   <div className="w-14 h-14 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-2xl mb-8 border border-cyan-500/20 shadow-xl shadow-cyan-500/5 group-hover:scale-110 transition-transform">📊</div>
-                  <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Review Intel</h4>
-                  <p className="text-sm text-slate-400 leading-relaxed font-medium">Receive your encrypted tactical intelligence packet including timestamped analysis, technical corrections, and elite performance scaling.</p>
+                  <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Get Better</h4>
+                  <p className="text-sm text-slate-400 leading-relaxed font-medium">Train with your coach, get personalized feedback, and watch your game improve. Leave a review to help other players find great coaches.</p>
                 </div>
               </div>
             </div>
@@ -1507,10 +1507,10 @@ export default function SoccerPlatform() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4">
               <div>
                 <h2 className="text-4xl font-black tracking-tighter text-white mb-2">
-                  COACH <span className="text-emerald-500">TERMINAL</span>
+                  COACH <span className="text-emerald-500">DASHBOARD</span>
                 </h2>
                 <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">
-                  Mission Control & Performance Tracking
+                  Your Dashboard
                 </p>
               </div>
               <div className="flex gap-4">
@@ -1527,7 +1527,7 @@ export default function SoccerPlatform() {
                   href="/coach/edit"
                   className="glass-card px-6 py-3 border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 transition-all flex items-center gap-2 group/edit"
                 >
-                  <span className="text-[9px] text-indigo-400 font-black uppercase tracking-widest">Edit Lab</span>
+                  <span className="text-[9px] text-indigo-400 font-black uppercase tracking-widest">Edit Profile</span>
                   <svg className="w-3 h-3 text-indigo-400 group-hover/edit:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </Link>
               </div>
@@ -1537,7 +1537,7 @@ export default function SoccerPlatform() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
               {[
                 {
-                  label: "Escrow Locked",
+                  label: "Pending",
                   val: `$${realBookings
                     .filter((b: Booking) => b.status === "completed" && !b.payout_id)
                     .reduce((sum, b: Booking) => sum + Number(b.amount || 0), 0)
@@ -1553,12 +1553,12 @@ export default function SoccerPlatform() {
                   color: "text-emerald-400",
                 },
                 {
-                  label: "Deployments",
+                  label: "Sessions",
                   val: realBookings.length.toString(),
                   color: "text-white",
                 },
                 {
-                  label: "Network Fee",
+                  label: "Platform Fee",
                   val: `$${realBookings
                     .filter((b: Booking) => b.payout_id)
                     .reduce((sum, b: Booking) => sum + Number(b.amount || 0) * PLATFORM_CUT, 0)
@@ -1628,7 +1628,7 @@ export default function SoccerPlatform() {
                   <div className="w-16 h-16 bg-slate-900 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-slate-800 shadow-2xl">
                     <span className="text-2xl">⚡</span>
                   </div>
-                  <p className="text-slate-500 text-xs font-black uppercase tracking-widest">No sessions awaiting confirmation. System optimal.</p>
+                  <p className="text-slate-500 text-xs font-black uppercase tracking-widest">No sessions awaiting confirmation. You're all caught up!</p>
                 </div>
               )}
             </div>
@@ -1642,10 +1642,10 @@ export default function SoccerPlatform() {
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
                 <div>
                   <h2 className="text-4xl font-black tracking-tighter text-white mb-2">
-                    COMMAND <span className="gradient-text">CENTER</span>
+                    ADMIN <span className="gradient-text">PANEL</span>
                   </h2>
                   <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] opacity-80">
-                    Platform Governance & System Oversight
+                    Admin Dashboard
                   </p>
                 </div>
               </div>
@@ -1657,13 +1657,13 @@ export default function SoccerPlatform() {
                     val: adminCoaches.length.toString(),
                     color: "text-indigo-400",
                     unit: "COACHES",
-                    desc: "Registered Personnel"
+                    desc: "Total Signed Up"
                   },
                   {
                     label: "Active Nodes",
                     val: adminCoaches.filter((c: AdminCoach) => !c.banned).length.toString(),
                     color: "text-emerald-400",
-                    unit: "OPERATIONAL",
+                    unit: "ACTIVE",
                     desc: "Live in Marketplace"
                   },
                   {
@@ -1702,7 +1702,7 @@ export default function SoccerPlatform() {
                 <span className="w-2.5 h-2.5 rounded-full bg-indigo-500/30 border border-indigo-500 flex items-center justify-center p-0.5">
                   <span className="w-full h-full rounded-full bg-indigo-500" />
                 </span>
-                Personnel Registry
+                All Coaches
               </h3>
 
               {adminLoading ? (
@@ -1713,8 +1713,8 @@ export default function SoccerPlatform() {
               ) : adminCoaches.length === 0 ? (
                 <div className="glass-card p-20 text-center border-dashed border-slate-800">
                   <p className="text-5xl mb-6 opacity-30">🏟️</p>
-                  <p className="text-slate-400 font-black uppercase tracking-widest mb-2">Zero Personnel Found</p>
-                  <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">Platform is currently in pre-operational state.</p>
+                  <p className="text-slate-400 font-black uppercase tracking-widest mb-2">No Coaches Found</p>
+                  <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">No coach profiles have been created yet.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
