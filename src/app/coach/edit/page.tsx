@@ -38,6 +38,7 @@ export default function EditCoachProfile() {
   const [specialty, setSpecialty] = useState("");
   const [rate, setRate] = useState(50);
   const [bio, setBio] = useState("");
+  const [location, setLocation] = useState("");
 
   const [experience, setExperience] = useState("");
   const [highlightUrl, setHighlightUrl] = useState("");
@@ -95,6 +96,7 @@ export default function EditCoachProfile() {
         setSpecialty(data.specialty || "");
         setRate(data.rate || 50);
         setBio(data.bio || "");
+        setLocation(data.location || "");
         setExperience(data.experience || "");
         setHighlightUrl(data.highlight_reel_url || "");
         if (data.availability) {
@@ -158,6 +160,7 @@ export default function EditCoachProfile() {
     formData.set("experience", experience);
     formData.set("highlight_reel_url", highlightUrl);
     formData.set("availability", JSON.stringify(availability));
+    formData.set("location", location);
 
     const result = await updateCoachProfile(formData);
 
@@ -175,7 +178,7 @@ export default function EditCoachProfile() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-pink-400/30 border-t-pink-400 rounded-full animate-spin" />
       </div>
     );
   }
@@ -193,7 +196,7 @@ export default function EditCoachProfile() {
         <div className="flex items-center justify-between mb-12">
           <div>
             <h1 className="text-4xl font-black tracking-tighter text-white mb-2">
-              PROFILE <span className="text-emerald-500">LAB</span>
+              PROFILE <span className="text-pink-400">LAB</span>
             </h1>
             <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em] opacity-80">
               Configure your marketplace presence
@@ -215,7 +218,7 @@ export default function EditCoachProfile() {
             <div
               className={`p-4 rounded-xl text-sm border anim-fade-in ${
                 message.type === "success"
-                  ? "bg-emerald-950/30 border-emerald-900/40 text-emerald-400"
+                  ? "bg-emerald-950/30 border-emerald-900/40 text-pink-400"
                   : "bg-rose-950/30 border-rose-900/40 text-rose-400"
               }`}
             >
@@ -238,7 +241,7 @@ export default function EditCoachProfile() {
                     onClick={() => setStyle(s)}
                     className={`px-3 py-3 rounded-xl text-[11px] font-black uppercase tracking-tighter transition-all duration-300 border-2 ${
                       style === s
-                        ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.15)]"
+                        ? "bg-pink-400/10 border-pink-400/50 text-pink-400 shadow-[0_0_20px_rgba(236,132,191,0.15)]"
                         : "bg-slate-950 border-slate-800/60 text-slate-500 hover:border-slate-700 hover:text-slate-300"
                     }`}
                   >
@@ -261,7 +264,7 @@ export default function EditCoachProfile() {
                     onClick={() => setSpecialty(s)}
                     className={`px-3 py-3 rounded-xl text-[11px] font-black uppercase tracking-tighter transition-all duration-300 border-2 ${
                       specialty === s
-                        ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.15)]"
+                        ? "bg-pink-400/10 border-pink-400/50 text-pink-400 shadow-[0_0_20px_rgba(236,132,191,0.15)]"
                         : "bg-slate-950 border-slate-800/60 text-slate-500 hover:border-slate-700 hover:text-slate-300"
                     }`}
                   >
@@ -274,7 +277,7 @@ export default function EditCoachProfile() {
 
           {/* Hourly Rate */}
           <div className="glass-card p-8 group/card overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-400/5 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
             <div className="flex justify-between items-center mb-6">
               <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black ml-1">
                 Contract Rate
@@ -294,7 +297,7 @@ export default function EditCoachProfile() {
                 step="5"
                 value={rate}
                 onChange={(e) => setRate(parseInt(e.target.value))}
-                className="w-full h-1.5 bg-slate-950 rounded-full appearance-none cursor-pointer accent-emerald-500 ring-1 ring-slate-800/50 shadow-inner"
+                className="w-full h-1.5 bg-slate-950 rounded-full appearance-none cursor-pointer accent-pink-400 ring-1 ring-slate-800/50 shadow-inner"
               />
             </div>
             <div className="flex justify-between text-[9px] text-slate-600 font-bold uppercase tracking-widest mt-2 px-1">
@@ -312,7 +315,7 @@ export default function EditCoachProfile() {
                 htmlFor="bio"
                 className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 ml-1"
               >
-                Mission Statement & Bio
+                Your Bio
               </label>
               <textarea
                 id="bio"
@@ -321,11 +324,11 @@ export default function EditCoachProfile() {
                 rows={4}
                 maxLength={300}
                 placeholder="What defines your coaching style? (e.g. Focus on ball mastery and tactical awareness)"
-                className="w-full p-5 bg-slate-950/80 border border-slate-800 rounded-2xl focus:ring-2 ring-emerald-500/20 outline-none text-white text-[15px] leading-relaxed placeholder:text-slate-700 transition-all duration-300 focus:border-emerald-500/30 resize-none"
+                className="w-full p-5 bg-slate-950/80 border border-slate-800 rounded-2xl focus:ring-2 ring-pink-400/20 outline-none text-white text-[15px] leading-relaxed placeholder:text-slate-700 transition-all duration-300 focus:border-pink-400/30 resize-none"
               />
               <div className="flex justify-between items-center mt-2 px-1">
                 <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">Maximum Impact: 300 Characters</span>
-                <span className={`text-[10px] font-black ${bio.length > 250 ? 'text-emerald-400' : 'text-slate-600'}`}>
+                <span className={`text-[10px] font-black ${bio.length > 250 ? 'text-pink-400' : 'text-slate-600'}`}>
                   {bio.length}/300
                 </span>
               </div>
@@ -335,13 +338,13 @@ export default function EditCoachProfile() {
               {/* Experience */}
               <div>
                 <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 ml-1">
-                  Professional Pedigree
+                  Experience Level
                 </label>
                 <div className="relative group/select">
                   <select
                     value={experience}
                     onChange={(e) => setExperience(e.target.value)}
-                    className="w-full p-4 bg-slate-950 border border-slate-800 rounded-[1.25rem] appearance-none focus:ring-2 ring-emerald-500/20 outline-none text-white text-sm font-bold tracking-tight cursor-pointer"
+                    className="w-full p-4 bg-slate-950 border border-slate-800 rounded-[1.25rem] appearance-none focus:ring-2 ring-pink-400/20 outline-none text-white text-sm font-bold tracking-tight cursor-pointer"
                   >
                     <option value="" className="bg-slate-900">Select Credentials...</option>
                     <option value="Pro/Semi-Pro Player" className="bg-slate-900">Elite: Pro / Semi-Pro</option>
@@ -349,7 +352,7 @@ export default function EditCoachProfile() {
                     <option value="Certified Youth Coach" className="bg-slate-900">Tactical: Certified Coach</option>
                     <option value="High School Varsity" className="bg-slate-900">Varsity Veteran</option>
                   </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 group-hover/select:text-emerald-400 transition-colors">
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 group-hover/select:text-pink-400 transition-colors">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                   </div>
                 </div>
@@ -358,7 +361,7 @@ export default function EditCoachProfile() {
               {/* Highlight URL */}
               <div>
                 <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 ml-1">
-                  Reel Evidence (URL)
+                   Highlight Reel (URL)
                 </label>
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600">
@@ -369,16 +372,31 @@ export default function EditCoachProfile() {
                     value={highlightUrl}
                     onChange={(e) => setHighlightUrl(e.target.value)}
                     placeholder="https://youtube.com/..."
-                    className="w-full p-4 pl-12 bg-slate-950 border border-slate-800 rounded-[1.25rem] focus:ring-2 ring-emerald-500/20 outline-none text-white text-sm font-medium transition-all"
+                    className="w-full p-4 pl-12 bg-slate-950 border border-slate-800 rounded-[1.25rem] focus:ring-2 ring-pink-400/20 outline-none text-white text-sm font-medium transition-all"
                   />
                 </div>
               </div>
             </div>
 
+            {/* Location */}
+            <div>
+              <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 ml-1">
+                📍 Training Location
+              </label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="e.g. Memorial Park, Houston TX"
+                className="w-full p-4 bg-slate-950 border border-slate-800 rounded-[1.25rem] focus:ring-2 ring-pink-400/20 outline-none text-white text-sm font-medium transition-all focus:border-pink-400/30 placeholder:text-slate-700"
+              />
+              <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest mt-2 ml-1">Where do you normally hold sessions?</p>
+            </div>
+
             {/* Availability */}
             <div>
               <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-6 ml-1">
-                 Weekly Operation Schedule
+                 Weekly Availability
               </label>
               <div className="grid gap-4">
                 {DAYS_OF_WEEK.map((day) => {
@@ -390,7 +408,7 @@ export default function EditCoachProfile() {
                       key={day}
                       className={`flex flex-col gap-5 p-6 rounded-2xl border transition-all duration-500 ${
                         isSelected
-                          ? "bg-slate-950/80 border-emerald-500/40 shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
+                          ? "bg-slate-950/80 border-pink-400/40 shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
                           : "bg-slate-950/20 border-slate-900 opacity-60 hover:opacity-100"
                       }`}
                     >
@@ -401,11 +419,11 @@ export default function EditCoachProfile() {
                           className="flex items-center gap-4 cursor-pointer group/toggle"
                         >
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                            isSelected ? "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]" : "bg-slate-900 text-slate-600 border border-slate-800"
+                            isSelected ? "bg-pink-400 text-white shadow-[0_0_15px_rgba(236,132,191,0.4)]" : "bg-slate-900 text-slate-600 border border-slate-800"
                           }`}>
                             <span className="text-[11px] font-black transition-transform group-hover/toggle:scale-110">{day.toUpperCase()}</span>
                           </div>
-                          <span className={`text-[10px] font-black uppercase tracking-widest ${isSelected ? "text-emerald-400" : "text-slate-600"}`}>
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${isSelected ? "text-pink-400" : "text-slate-600"}`}>
                             {isSelected ? `${daySlots.length} Slots Active` : "Closed"}
                           </span>
                         </button>
@@ -414,7 +432,7 @@ export default function EditCoachProfile() {
                           <button
                             type="button"
                             onClick={() => addSlot(day)}
-                            className="text-[10px] bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-lg border border-emerald-500/20 font-black uppercase tracking-widest hover:bg-emerald-500/20 transition-all flex items-center gap-2"
+                            className="text-[10px] bg-pink-400/10 text-pink-400 px-3 py-1.5 rounded-lg border border-pink-400/20 font-black uppercase tracking-widest hover:bg-pink-400/20 transition-all flex items-center gap-2"
                           >
                             <span>Add Break</span>
                             <span className="text-sm">+</span>
@@ -437,7 +455,7 @@ export default function EditCoachProfile() {
                                         availability.map((slot, i) => (i === idx ? { ...slot, start: e.target.value } : slot)),
                                       );
                                     }}
-                                    className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 outline-none focus:border-emerald-500/50 text-white font-mono font-bold text-xs transition-all"
+                                    className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 outline-none focus:border-pink-400/50 text-white font-mono font-bold text-xs transition-all"
                                   />
                                   <span className="text-slate-700 font-bold text-[10px] uppercase">to</span>
                                   <input
@@ -448,7 +466,7 @@ export default function EditCoachProfile() {
                                         availability.map((slot, i) => (i === idx ? { ...slot, end: e.target.value } : slot)),
                                       );
                                     }}
-                                    className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 outline-none focus:border-emerald-500/50 text-white font-mono font-bold text-xs transition-all"
+                                    className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 outline-none focus:border-pink-400/50 text-white font-mono font-bold text-xs transition-all"
                                   />
                                 </div>
                                 
@@ -480,11 +498,11 @@ export default function EditCoachProfile() {
               Escrow & Payout Integration
             </label>
             {stripeOnboarded ? (
-              <div className="flex items-center gap-5 text-emerald-400 bg-emerald-500/5 p-6 rounded-[1.5rem] border border-emerald-500/20 shadow-xl">
-                <div className="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center text-xl">✅</div>
+              <div className="flex items-center gap-5 text-pink-400 bg-pink-400/5 p-6 rounded-[1.5rem] border border-pink-400/20 shadow-xl">
+                <div className="w-12 h-12 bg-pink-400/20 rounded-2xl flex items-center justify-center text-xl">✅</div>
                 <div>
                   <p className="font-black text-base tracking-tight text-white">Stripe Vault Connected</p>
-                  <p className="text-[10px] uppercase font-bold tracking-widest text-emerald-400/60 mt-1">Operational & Ready for Deposits</p>
+                  <p className="text-[10px] uppercase font-bold tracking-widest text-pink-400/60 mt-1">Operational & Ready for Deposits</p>
                 </div>
               </div>
             ) : (
@@ -549,10 +567,10 @@ export default function EditCoachProfile() {
 
           {/* Live Preview */}
           <div className="glass-card p-10 group/preview relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/[0.02] blur-3xl rounded-full -mr-32 -mt-32 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-pink-400/[0.02] blur-3xl rounded-full -mr-32 -mt-32 pointer-events-none" />
             
             <div className="flex items-center gap-3 mb-8">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
               <p className="text-[10px] text-slate-500 uppercase tracking-[0.4em] font-black">
                 Marketplace Preview
               </p>
@@ -561,7 +579,7 @@ export default function EditCoachProfile() {
             <div className="bg-slate-950/80 border border-slate-800/80 rounded-[2.5rem] p-8 shadow-2xl relative">
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-emerald-500/10">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-pink-400/10">
                     {style?.[0] || specialty?.[0] || "?"}
                   </div>
                   <div>
@@ -570,7 +588,7 @@ export default function EditCoachProfile() {
                        <span className="text-[9px] bg-slate-900 text-slate-400 px-3 py-1 rounded-full border border-slate-800 font-bold uppercase tracking-widest leading-none">
                          {specialty || "POSITION"}
                        </span>
-                       <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 font-bold uppercase tracking-widest leading-none">
+                       <span className="text-[9px] bg-pink-400/10 text-pink-400 px-3 py-1 rounded-full border border-pink-400/20 font-bold uppercase tracking-widest leading-none">
                          {style || "STYLE"}
                        </span>
                     </div>
@@ -583,7 +601,7 @@ export default function EditCoachProfile() {
                   <div className="text-[9px] text-slate-500 font-black uppercase tracking-tighter">PER HOUR</div>
                 </div>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed font-medium italic opacity-80 border-l-2 border-emerald-500/30 pl-4 py-1">
+              <p className="text-slate-400 text-sm leading-relaxed font-medium italic opacity-80 border-l-2 border-pink-400/30 pl-4 py-1">
                 {bio || "Your mission statement will be displayed here for all prospective athletes..."}
               </p>
             </div>
@@ -593,7 +611,7 @@ export default function EditCoachProfile() {
           <button
             type="submit"
             disabled={saving}
-            className="gradient-btn w-full py-6 text-base uppercase tracking-[0.4em] shadow-[0_20px_50px_rgba(16,185,129,0.3)] hover:shadow-[0_30px_70px_rgba(16,185,129,0.4)] transition-all hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:grayscale mb-20"
+            className="gradient-btn w-full py-6 text-base uppercase tracking-[0.4em] shadow-[0_20px_50px_rgba(236,132,191,0.3)] hover:shadow-[0_30px_70px_rgba(236,132,191,0.4)] transition-all hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:grayscale mb-20"
           >
             {saving ? (
               <span className="flex items-center justify-center gap-4">

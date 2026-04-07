@@ -19,6 +19,7 @@ export async function getCoaches() {
       experience,
       highlight_reel_url,
       availability,
+      location,
       verified,
       rating,
       review_count,
@@ -49,6 +50,7 @@ export async function getCoaches() {
       experience: (coach.experience as string) || "",
       highlightUrl: (coach.highlight_reel_url as string) || "",
       availability: (coach.availability as { day: string; start: string; end: string }[]) || [],
+      location: (coach.location as string) || "",
       avatar: (profile?.full_name as string)?.charAt(0)?.toUpperCase() || "C",
       gradient: getGradient(coach.id as string),
     };
@@ -128,6 +130,7 @@ export async function updateCoachProfile(formData: FormData) {
     experience: formData.get("experience"),
     highlight_reel_url: formData.get("highlight_reel_url"),
     availability: JSON.parse((formData.get("availability") as string) || "[]"),
+    location: formData.get("location") || null,
   });
 
   if (error) return { error: error.message };

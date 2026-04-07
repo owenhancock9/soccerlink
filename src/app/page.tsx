@@ -42,6 +42,7 @@ interface Booking {
   rate: number;
   session_date: string;
   session_time: string;
+  location?: string;
   coach_id?: string;
   coach?: { full_name: string };
   player_name?: string;
@@ -123,6 +124,7 @@ interface Coach {
   experience?: string;
   highlightUrl?: string;
   availability: AvailabilitySlot[];
+  location?: string;
 }
 
 function CoachCard({
@@ -136,7 +138,7 @@ function CoachCard({
 }) {
   return (
     <div
-      className="glass-card p-8 flex flex-col justify-between group overflow-visible relative border-slate-800/60 hover:border-emerald-500/30 transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] hover:-translate-y-2"
+      className="glass-card p-8 flex flex-col justify-between group overflow-visible relative border-slate-800/60 hover:border-pink-400/30 transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] hover:-translate-y-2"
       style={{ animationDelay: `${index * 80}ms` }}
     >
       {/* Background Ambient Glow */}
@@ -153,16 +155,16 @@ function CoachCard({
                 {coach.avatar}
               </div>
               <div className={`absolute inset-0 bg-gradient-to-br ${coach.gradient} blur-2xl opacity-0 group-hover/avatar:opacity-60 transition-opacity duration-1000 rounded-full scale-150`} />
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-4 border-slate-900 z-20 shadow-lg" title="Online now" />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-pink-400 rounded-full border-4 border-slate-900 z-20 shadow-lg" title="Online now" />
             </div>
 
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-3 mb-1.5 flex-wrap">
-                <h3 className="text-2xl font-black text-white tracking-tighter leading-none group-hover:text-emerald-400 transition-colors">
+                <h3 className="text-2xl font-black text-white tracking-tighter leading-none group-hover:text-pink-400 transition-colors">
                   {coach.name}
                 </h3>
                 {coach.verified && (
-                  <div className="shrink-0 flex items-center gap-1.5 text-[10px] bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30 font-black uppercase tracking-widest shadow-lg shadow-emerald-500/10">
+                  <div className="shrink-0 flex items-center gap-1.5 text-[10px] bg-pink-400/20 text-pink-400 px-3 py-1 rounded-full border border-pink-400/30 font-black uppercase tracking-widest shadow-lg shadow-pink-400/10">
                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
                     VERIFIED
                   </div>
@@ -193,6 +195,14 @@ function CoachCard({
           </div>
         </div>
 
+        {/* Location */}
+        {coach.location && (
+          <div className="flex items-center gap-2 mb-4 text-slate-400">
+            <span className="text-xs">📍</span>
+            <span className="text-[11px] font-medium">{coach.location}</span>
+          </div>
+        )}
+
         {/* Technical Profile Tags */}
         <div className="flex flex-wrap gap-2.5 mb-8">
           <span className="bg-slate-950/80 text-slate-200 text-[10px] px-4 py-2 rounded-xl font-black uppercase tracking-[0.2em] border border-slate-800 shadow-[inset_0_2px_10px_rgba(0,0,0,0.4)]">
@@ -205,7 +215,7 @@ function CoachCard({
 
         {/* Coach Bio */}
         <div className="relative mb-10 group/bio">
-          <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-slate-800 to-transparent opacity-50 group-hover/bio:via-emerald-500/50 transition-all duration-700" />
+          <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-slate-800 to-transparent opacity-50 group-hover/bio:via-pink-400/50 transition-all duration-700" />
           <p className="text-sm text-slate-400 leading-relaxed line-clamp-3 font-medium tracking-tight italic pl-2">
             &quot;{coach.bio || "Experienced coach available for sessions and video analysis."}&quot;
           </p>
@@ -216,13 +226,13 @@ function CoachCard({
           <div className="mb-10 bg-slate-950/50 rounded-2xl p-4 border border-slate-900 shadow-inner group/schedule">
             <div className="flex justify-between items-center mb-3">
               <span className="text-[9px] text-slate-600 font-black uppercase tracking-[0.3em]">Availability</span>
-              <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest animate-pulse">Available</span>
+              <span className="text-[9px] text-pink-400 font-black uppercase tracking-widest animate-pulse">Available</span>
             </div>
             <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
               {coach.availability.map((slot: AvailabilitySlot, i: number) => (
                 <div
                   key={i}
-                  className="flex flex-col items-center bg-slate-900 border border-slate-800/80 rounded-xl px-4 py-2.5 min-w-[80px] transition-all hover:border-emerald-500/30 hover:bg-emerald-500/[0.03]"
+                  className="flex flex-col items-center bg-slate-900 border border-slate-800/80 rounded-xl px-4 py-2.5 min-w-[80px] transition-all hover:border-pink-400/30 hover:bg-pink-400/[0.03]"
                 >
                   <span className="text-[8px] text-slate-500 font-black uppercase tracking-widest mb-1.5">{slot.day?.substring(0, 3)}</span>
                   <span className="text-[10px] text-slate-200 font-black font-mono">{slot.start}</span>
@@ -238,7 +248,7 @@ function CoachCard({
         <button
           id={`book-coach-${coach.id}`}
           onClick={() => onBook(coach)}
-          className="relative w-full py-5 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] transition-all duration-500 active:scale-[0.98] overflow-hidden group/btn shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_25px_50px_rgba(16,185,129,0.3)] hover:-translate-y-1 block text-center"
+          className="relative w-full py-5 bg-white text-black hover:bg-pink-400 hover:text-white rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] transition-all duration-500 active:scale-[0.98] overflow-hidden group/btn shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_25px_50px_rgba(236,132,191,0.3)] hover:-translate-y-1 block text-center"
         >
           {/* Shimmer Intensity */}
           <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1s_infinite] pointer-events-none" />
@@ -276,6 +286,8 @@ export default function SoccerPlatform() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   /* ── Real Coaches from DB ── */
@@ -596,7 +608,7 @@ export default function SoccerPlatform() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Background Glows for Modal */}
-            <div className="absolute -top-[20%] -right-[10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
+            <div className="absolute -top-[20%] -right-[10%] w-[40%] h-[40%] bg-pink-400/10 rounded-full blur-[80px] pointer-events-none" />
             <div className="absolute -bottom-[20%] -left-[10%] w-[30%] h-[30%] bg-cyan-500/5 rounded-full blur-[60px] pointer-events-none" />
 
             <button
@@ -627,14 +639,14 @@ export default function SoccerPlatform() {
                           {selectedCoach.name}
                         </h2>
                         {selectedCoach.verified && (
-                          <span className="flex items-center gap-1.5 text-[10px] bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30 font-black uppercase tracking-widest">
+                          <span className="flex items-center gap-1.5 text-[10px] bg-pink-400/20 text-pink-400 px-3 py-1 rounded-full border border-pink-400/30 font-black uppercase tracking-widest">
                             <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
                             VERIFIED PRO
                           </span>
                         )}
                       </div>
 
-                      <p className="text-sm text-emerald-400/90 font-bold uppercase tracking-widest mb-3">
+                      <p className="text-sm text-pink-400/90 font-bold uppercase tracking-widest mb-3">
                         {selectedCoach.experience || "ELITE PERFORMANCE COACH"}
                       </p>
 
@@ -665,16 +677,16 @@ export default function SoccerPlatform() {
                     {selectedCoach.availability && selectedCoach.availability.length > 0 && (
                       <div>
                         <p className="text-[11px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />
                           Coach&apos;s Weekly Hours
                         </p>
                         <div className="flex flex-wrap gap-2.5">
                           {selectedCoach.availability.map((slot: AvailabilitySlot, i: number) => (
                             <span
                               key={i}
-                              className="text-[10px] bg-slate-950 text-slate-200 px-3 py-2 rounded-xl border-l-2 border-emerald-500 font-mono font-bold shadow-2xl flex items-center gap-2"
+                              className="text-[10px] bg-slate-950 text-slate-200 px-3 py-2 rounded-xl border-l-2 border-pink-400 font-mono font-bold shadow-2xl flex items-center gap-2"
                             >
-                              <span className="text-emerald-500/50">{slot.day}</span>
+                              <span className="text-pink-400/50">{slot.day}</span>
                               {slot.start} - {slot.end}
                             </span>
                           ))}
@@ -698,11 +710,11 @@ export default function SoccerPlatform() {
 
                 {/* Right Side: Simple Selection & Receipt */}
                 <div className="md:w-[22rem] shrink-0">
-                  <div className="bg-slate-950/80 border border-slate-800 rounded-[2.5rem] p-8 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] relative overflow-hidden group/receipt h-full transition-all hover:border-emerald-500/20">
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/[0.03] blur-3xl rounded-full -mr-24 -mt-24 pointer-events-none group-hover/receipt:bg-emerald-500/[0.08] transition-all duration-700" />
+                  <div className="bg-slate-950/80 border border-slate-800 rounded-[2.5rem] p-8 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] relative overflow-hidden group/receipt h-full transition-all hover:border-pink-400/20">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-pink-400/[0.03] blur-3xl rounded-full -mr-24 -mt-24 pointer-events-none group-hover/receipt:bg-pink-400/[0.08] transition-all duration-700" />
 
                     <h3 className="text-white font-black text-xl mb-8 tracking-tighter flex items-center gap-3">
-                      <span className="w-2 h-7 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+                      <span className="w-2 h-7 bg-pink-400 rounded-full shadow-[0_0_15px_rgba(236,132,191,0.5)]" />
                       Confirm Session
                     </h3>
 
@@ -718,22 +730,31 @@ export default function SoccerPlatform() {
                               {d}
                             </div>
                           ))}
-                          {Array.from({ length: 14 }).map((_, i) => {
-                            const dayVal = i + 10;
-                            const isSel = selectedDate === dayVal;
-                            return (
-                              <button
-                                key={i}
-                                onClick={() => setSelectedDate(dayVal)}
-                                className={`h-9 w-9 flex items-center justify-center rounded-xl text-[13px] font-black transition-all ${isSel
-                                    ? "bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-110 z-10"
-                                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                          {(() => {
+                            const days: { date: Date; label: string }[] = [];
+                            const today = new Date();
+                            for (let i = 1; i <= 14; i++) {
+                              const d = new Date(today);
+                              d.setDate(today.getDate() + i);
+                              days.push({ date: d, label: String(d.getDate()) });
+                            }
+                            return days.map((d, i) => {
+                              const isSel = selectedDate === d.date.getDate() && selectedMonth === d.date.getMonth();
+                              return (
+                                <button
+                                  key={i}
+                                  onClick={() => { setSelectedDate(d.date.getDate()); setSelectedMonth(d.date.getMonth()); setSelectedYear(d.date.getFullYear()); }}
+                                  className={`h-9 w-9 flex items-center justify-center rounded-xl text-[13px] font-black transition-all ${
+                                    isSel
+                                      ? "bg-pink-400 text-white shadow-[0_0_20px_rgba(236,132,191,0.4)] scale-110 z-10"
+                                      : "text-slate-400 hover:bg-slate-800 hover:text-white"
                                   }`}
-                              >
-                                {dayVal}
-                              </button>
-                            );
-                          })}
+                                >
+                                  {d.label}
+                                </button>
+                              );
+                            });
+                          })()}
                         </div>
                       </div>
 
@@ -743,14 +764,14 @@ export default function SoccerPlatform() {
                           2 • Preferred Time
                         </label>
                         <div className="grid grid-cols-2 gap-3">
-                          {getAvailableSlots(selectedCoach.availability || [], new Date(2025, 9, selectedDate || 1)).length > 0 ? (
-                            getAvailableSlots(selectedCoach.availability || [], new Date(2025, 9, selectedDate || 1)).map((t) => (
+                          {getAvailableSlots(selectedCoach.availability || [], new Date(selectedYear || 2025, selectedMonth ?? 0, selectedDate || 1)).length > 0 ? (
+                            getAvailableSlots(selectedCoach.availability || [], new Date(selectedYear || 2025, selectedMonth ?? 0, selectedDate || 1)).map((t) => (
                               <button
                                 key={t}
                                 type="button"
                                 onClick={() => setSelectedTime(t)}
                                 className={`py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all border-2 ${selectedTime === t
-                                    ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+                                    ? "bg-pink-400/10 border-pink-400/50 text-pink-400 shadow-[0_0_20px_rgba(236,132,191,0.2)]"
                                     : "bg-slate-900/50 border-slate-800/40 text-slate-500 hover:border-slate-700 hover:text-slate-300"
                                   }`}
                               >
@@ -773,13 +794,13 @@ export default function SoccerPlatform() {
                               <span className="text-slate-500 uppercase tracking-widest text-[10px]">Coaching Session</span>
                               <span className="text-white">${selectedCoach.rate}.00</span>
                             </div>
-                            <div className="flex justify-between text-sm font-bold">
+                             <div className="flex justify-between text-sm font-bold">
                               <span className="text-slate-500 uppercase tracking-widest text-[10px]">Service Fee</span>
-                              <span className="text-white">$7.00</span>
+                              <span className="text-white">${Math.round(selectedCoach.rate * PLATFORM_CUT)}.00</span>
                             </div>
                             <div className="flex justify-between items-end pt-5 border-t border-slate-800/50">
                               <span className="text-slate-400 font-black uppercase text-[11px] tracking-[0.2em]">TOTAL DUE</span>
-                              <span className="text-white text-3xl font-black tracking-tighter leading-none">${selectedCoach.rate + 7}.00</span>
+                              <span className="text-white text-3xl font-black tracking-tighter leading-none">${selectedCoach.rate + Math.round(selectedCoach.rate * PLATFORM_CUT)}.00</span>
                             </div>
                           </div>
 
@@ -797,7 +818,7 @@ export default function SoccerPlatform() {
 
                               const formData = new FormData();
                               formData.set("coachId", String(selectedCoach.id));
-                              formData.set("sessionDate", `2025-10-${String(selectedDate).padStart(2, "0")}`);
+                              formData.set("sessionDate", `${selectedYear}-${String((selectedMonth ?? 0) + 1).padStart(2, "0")}-${String(selectedDate).padStart(2, "0")}`);
                               formData.set("sessionTime", selectedTime || "10:00 AM");
                               formData.set("rate", String(selectedCoach.rate));
 
@@ -810,7 +831,7 @@ export default function SoccerPlatform() {
                                 window.location.href = result.url;
                               }
                             }}
-                            className="gradient-btn w-full py-5 text-[15px] uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:shadow-[0_25px_50px_rgba(16,185,129,0.4)] transition-all hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:grayscale group-hover/receipt:scale-[1.02]"
+                            className="gradient-btn w-full py-5 text-[15px] uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(236,132,191,0.3)] hover:shadow-[0_25px_50px_rgba(236,132,191,0.4)] transition-all hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:grayscale group-hover/receipt:scale-[1.02]"
                           >
                             {bookingLoading ? "Connecting Securely..." : "Book Now"}
                           </button>
@@ -882,7 +903,7 @@ export default function SoccerPlatform() {
             )
           }
         >
-          COACH_MATCHING
+          CoachMatching
         </h1>
 
         {/* Desktop Nav */}
@@ -908,7 +929,7 @@ export default function SoccerPlatform() {
               <NavBtn
                 active={view === "dashboard"}
                 onClick={() => switchView("dashboard")}
-                accent="emerald"
+                accent="pink"
               >
                 <div className="flex items-center gap-2">
                   <span>COACH HUB</span>
@@ -936,7 +957,7 @@ export default function SoccerPlatform() {
               <div className="flex items-center gap-2">
                 <div
                   className={`w-7 h-7 rounded-lg bg-gradient-to-br ${currentUser.role === "coach"
-                      ? "from-emerald-500 to-teal-600"
+                      ? "from-pink-400 to-purple-500"
                       : currentUser.role === "admin"
                         ? "from-rose-500 to-pink-600"
                         : "from-indigo-500 to-violet-600"
@@ -1007,7 +1028,7 @@ export default function SoccerPlatform() {
             {currentUser.role === "coach" && (
               <button
                 onClick={() => switchView("dashboard")}
-                className="text-left text-emerald-400 flex items-center justify-between gap-3 w-full"
+                className="text-left text-pink-400 flex items-center justify-between gap-3 w-full"
               >
                 <span>COACH HUB</span>
                 {stripeOnboarded === false && (
@@ -1030,7 +1051,7 @@ export default function SoccerPlatform() {
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-8 h-8 rounded-lg bg-gradient-to-br ${currentUser.role === "coach"
-                        ? "from-emerald-500 to-teal-600"
+                        ? "from-pink-400 to-purple-500"
                         : "from-indigo-500 to-violet-600"
                       } flex items-center justify-center text-white font-bold text-sm`}
                   >
@@ -1088,7 +1109,7 @@ export default function SoccerPlatform() {
           <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-xl px-4 anim-fade-in">
             <div className={`glass-card p-4 border flex items-center justify-between gap-4 shadow-2xl ${bookingMessage.type === "error"
                 ? "border-rose-500/50 bg-rose-500/10 text-rose-400"
-                : "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
+                : "border-pink-400/50 bg-pink-400/10 text-pink-400"
               }`}>
               <div className="flex items-center gap-3">
                 <span className="text-xl">{bookingMessage.type === "error" ? "🚨" : "✅"}</span>
@@ -1112,13 +1133,13 @@ export default function SoccerPlatform() {
               {/* Dynamic Background Elements */}
               <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
                 <div className="absolute top-1/4 -left-20 w-[40rem] h-[40rem] bg-indigo-600/[0.07] blur-[120px] rounded-full animate-pulse" />
-                <div className="absolute bottom-0 right-1/4 w-[30rem] h-[30rem] bg-emerald-600/[0.05] blur-[100px] rounded-full animate-[pulse_8s_infinite]" />
+                <div className="absolute bottom-0 right-1/4 w-[30rem] h-[30rem] bg-pink-500/[0.05] blur-[100px] rounded-full animate-[pulse_8s_infinite]" />
               </div>
 
               <div className="flex flex-col items-center text-center max-w-4xl mx-auto px-4">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 border border-slate-800/80 mb-10 transition-all hover:border-indigo-500/30 group cursor-default">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 group-hover:text-emerald-400 transition-colors">Elite Performance Network</span>
+                  <span className="w-2 h-2 rounded-full bg-pink-400 animate-pulse shadow-[0_0_10px_rgba(236,132,191,0.8)]" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 group-hover:text-pink-400 transition-colors">Find Your Coach</span>
                 </div>
 
                 <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter mb-8 text-white leading-[0.9] drop-shadow-2xl">
@@ -1126,7 +1147,7 @@ export default function SoccerPlatform() {
                 </h1>
 
                 <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl leading-relaxed mb-16 drop-shadow-sm opacity-90">
-                  Connect with verified professional coaches for high-precision video breakdowns and tactical intelligence to dominate your league.
+                  Connect with experienced coaches for personalized training sessions, film analysis, and skill development.
                 </p>
 
                 {/* Search & Filter Bar */}
@@ -1236,7 +1257,7 @@ export default function SoccerPlatform() {
             {/* Tactical Lifecycle Section */}
             <div className="mt-40 mb-20">
               <div className="text-center mb-20 flex flex-col items-center">
-                <span className="text-[10px] font-black tracking-[0.4em] uppercase text-emerald-500 mb-6 bg-emerald-500/10 px-6 py-2 rounded-full border border-emerald-500/20 shadow-xl shadow-emerald-500/5">How It Works</span>
+                <span className="text-[10px] font-black tracking-[0.4em] uppercase text-pink-400 mb-6 bg-pink-400/10 px-6 py-2 rounded-full border border-pink-400/20 shadow-xl shadow-pink-400/5">How It Works</span>
                 <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-white mb-6">Simple & <span className="gradient-text-accent">Secure.</span></h2>
                 <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-[11px] max-w-lg leading-loose opacity-70">Book a session, train together, and both confirm when you're done. Easy.</p>
               </div>
@@ -1249,9 +1270,9 @@ export default function SoccerPlatform() {
                   <p className="text-sm text-slate-400 leading-relaxed font-medium">Browse verified coaches by position, style, and availability. Pick one that fits your goals and book a time that works for you.</p>
                 </div>
 
-                <div className="glass-card p-10 relative group hover:border-emerald-500/30 transition-all duration-700">
-                  <div className="absolute top-0 right-0 p-8 text-6xl font-black text-slate-800/20 group-hover:text-emerald-500/10 transition-colors">02</div>
-                  <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-2xl mb-8 border border-emerald-500/20 shadow-xl shadow-emerald-500/5 group-hover:scale-110 transition-transform">🔐</div>
+                <div className="glass-card p-10 relative group hover:border-pink-400/30 transition-all duration-700">
+                  <div className="absolute top-0 right-0 p-8 text-6xl font-black text-slate-800/20 group-hover:text-pink-400/10 transition-colors">02</div>
+                  <div className="w-14 h-14 bg-pink-400/10 rounded-2xl flex items-center justify-center text-2xl mb-8 border border-pink-400/20 shadow-xl shadow-pink-400/5 group-hover:scale-110 transition-transform">🔐</div>
                   <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Secure Payment</h4>
                   <p className="text-sm text-slate-400 leading-relaxed font-medium">Your payment is held securely until the session is complete. Both you and the coach confirm it happened, then the coach gets paid.</p>
                 </div>
@@ -1293,7 +1314,7 @@ export default function SoccerPlatform() {
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${
                           b.status === "pending" ? "bg-amber-950/30 text-amber-500 border-amber-900/50" :
                           b.status === "confirmed" ? "bg-cyan-950/30 text-cyan-400 border-cyan-900/50" :
-                          b.status === "completed" ? "bg-emerald-950/30 text-emerald-400 border-emerald-900/50" :
+                          b.status === "completed" ? "bg-pink-950/30 text-pink-400 border-pink-900/50" :
                           "bg-slate-900 text-slate-400 border-slate-700"
                         }`}>
                           {b.status === "pending" ? "Awaiting Checkout" :
@@ -1301,7 +1322,7 @@ export default function SoccerPlatform() {
                            b.status === "completed" ? "Completed ✓" :
                            b.status}
                         </span>
-                        <span className="font-mono text-emerald-400 font-bold">${b.total}</span>
+                        <span className="font-mono text-pink-400 font-bold">${b.total}</span>
                       </div>
                     </div>
                   </div>
@@ -1311,15 +1332,15 @@ export default function SoccerPlatform() {
                     <div className="bg-slate-950/60 rounded-2xl p-5 border border-slate-800/80">
                       <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-4">Session Confirmation Status</p>
                       <div className="grid grid-cols-2 gap-4 mb-5">
-                        <div className={`rounded-xl p-4 border text-center ${b.coach_confirmed_at ? "bg-emerald-500/10 border-emerald-500/30" : "bg-slate-900 border-slate-800"}`}>
+                        <div className={`rounded-xl p-4 border text-center ${b.coach_confirmed_at ? "bg-pink-400/10 border-pink-400/30" : "bg-slate-900 border-slate-800"}`}>
                           <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Coach</p>
-                          <p className={`text-sm font-black ${b.coach_confirmed_at ? "text-emerald-400" : "text-slate-600"}`}>
+                          <p className={`text-sm font-black ${b.coach_confirmed_at ? "text-pink-400" : "text-slate-600"}`}>
                             {b.coach_confirmed_at ? "✓ Confirmed" : "⏳ Pending"}
                           </p>
                         </div>
-                        <div className={`rounded-xl p-4 border text-center ${b.player_confirmed_at ? "bg-emerald-500/10 border-emerald-500/30" : "bg-slate-900 border-slate-800"}`}>
+                        <div className={`rounded-xl p-4 border text-center ${b.player_confirmed_at ? "bg-pink-400/10 border-pink-400/30" : "bg-slate-900 border-slate-800"}`}>
                           <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">You (Player)</p>
-                          <p className={`text-sm font-black ${b.player_confirmed_at ? "text-emerald-400" : "text-slate-600"}`}>
+                          <p className={`text-sm font-black ${b.player_confirmed_at ? "text-pink-400" : "text-slate-600"}`}>
                             {b.player_confirmed_at ? "✓ Confirmed" : "⏳ Pending"}
                           </p>
                         </div>
@@ -1330,7 +1351,7 @@ export default function SoccerPlatform() {
                         <button
                           onClick={() => handleConfirmSession(b.id)}
                           disabled={confirmingSession === b.id}
-                          className="w-full py-4 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 active:scale-[0.98]"
+                          className="w-full py-4 bg-white text-black hover:bg-pink-400 hover:text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 active:scale-[0.98]"
                         >
                           {confirmingSession === b.id ? "Confirming..." : "✓ Confirm Session Complete"}
                         </button>
@@ -1507,14 +1528,14 @@ export default function SoccerPlatform() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4">
               <div>
                 <h2 className="text-4xl font-black tracking-tighter text-white mb-2">
-                  COACH <span className="text-emerald-500">DASHBOARD</span>
+                  COACH <span className="text-pink-400">DASHBOARD</span>
                 </h2>
                 <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">
                   Your Dashboard
                 </p>
               </div>
               <div className="flex gap-4">
-                <div className="glass-card px-6 py-3 border-emerald-500/20 bg-emerald-500/5">
+                <div className="glass-card px-6 py-3 border-pink-400/20 bg-pink-400/5">
                   <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Total Career Revenue</p>
                   <p className="text-xl font-black text-white font-mono">
                     ${realBookings
@@ -1550,7 +1571,7 @@ export default function SoccerPlatform() {
                     .filter((b: Booking) => !!b.payout_id)
                     .reduce((sum: number, b: Booking) => sum + Number(b.amount || 0) * (1 - PLATFORM_CUT), 0)
                     .toFixed(2)}`,
-                  color: "text-emerald-400",
+                  color: "text-pink-400",
                 },
                 {
                   label: "Sessions",
@@ -1605,7 +1626,7 @@ export default function SoccerPlatform() {
                           <div className="flex items-center gap-2">
                             <span className={`text-[9px] px-3 py-1.5 rounded-lg font-black uppercase tracking-widest ${
                               booking.player_confirmed_at 
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                                ? "bg-pink-400/10 text-pink-400 border border-pink-400/30"
                                 : "bg-slate-800 text-slate-500 border border-slate-700"
                             }`}>
                               Player: {booking.player_confirmed_at ? "✓ Confirmed" : "Pending"}
@@ -1615,7 +1636,7 @@ export default function SoccerPlatform() {
                         <button
                           onClick={() => handleConfirmSession(booking.id)}
                           disabled={confirmingSession === booking.id}
-                          className="w-full py-4 bg-white text-black hover:bg-emerald-500 hover:text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 active:scale-[0.98]"
+                          className="w-full py-4 bg-white text-black hover:bg-pink-400 hover:text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 active:scale-[0.98]"
                         >
                           {confirmingSession === booking.id ? "Confirming..." : "✓ Confirm Session Complete"}
                         </button>
@@ -1662,7 +1683,7 @@ export default function SoccerPlatform() {
                   {
                     label: "Active Nodes",
                     val: adminCoaches.filter((c: AdminCoach) => !c.banned).length.toString(),
-                    color: "text-emerald-400",
+                    color: "text-pink-400",
                     unit: "ACTIVE",
                     desc: "Live in Marketplace"
                   },
@@ -1682,7 +1703,7 @@ export default function SoccerPlatform() {
                   },
                 ].map((stat, i) => (
                   <div key={i} className="glass-card p-6 relative overflow-hidden group/stat">
-                    <div className={`absolute top-0 right-0 w-24 h-24 blur-3xl rounded-full -mr-12 -mt-12 opacity-10 transition-all group-hover/stat:opacity-20 ${stat.color === 'text-indigo-400' ? 'bg-indigo-500' : stat.color === 'text-emerald-400' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                    <div className={`absolute top-0 right-0 w-24 h-24 blur-3xl rounded-full -mr-12 -mt-12 opacity-10 transition-all group-hover/stat:opacity-20 ${stat.color === 'text-indigo-400' ? 'bg-indigo-500' : stat.color === 'text-pink-400' ? 'bg-pink-400' : 'bg-rose-500'}`} />
                     <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-4">
                       {stat.label}
                     </p>
@@ -1744,7 +1765,7 @@ export default function SoccerPlatform() {
                                       <span className="text-[9px] bg-slate-800 text-slate-500 px-3 py-1 rounded-lg border border-slate-700/50 font-black tracking-widest leading-none flex items-center">PENDING</span>
                                     )}
                                     {coach.stripeConnected && (
-                                      <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-lg border border-emerald-500/20 font-black tracking-widest leading-none flex items-center">CREDENTIALED</span>
+                                      <span className="text-[9px] bg-pink-400/10 text-pink-400 px-3 py-1 rounded-lg border border-pink-400/20 font-black tracking-widest leading-none flex items-center">CREDENTIALED</span>
                                     )}
                                   </>
                                 )}
@@ -1773,7 +1794,7 @@ export default function SoccerPlatform() {
                                 setBanningCoach(null);
                               }}
                               disabled={banningCoach === coach.id}
-                              className="bg-emerald-500 text-black hover:bg-emerald-400 px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50"
+                              className="bg-pink-400 text-black hover:bg-pink-400 px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50"
                             >
                               {banningCoach === coach.id ? "RESTORING..." : "RESTORE ACCESS"}
                             </button>
@@ -1842,7 +1863,7 @@ function NavBtn({
       ? "text-indigo-400 bg-indigo-500/10"
       : "text-slate-400 hover:text-white hover:bg-slate-800/60",
     emerald: active
-      ? "text-emerald-400 bg-emerald-500/10"
+      ? "text-pink-400 bg-pink-400/10"
       : "text-slate-400 hover:text-white hover:bg-slate-800/60",
     rose: active
       ? "text-rose-400 bg-rose-500/10"
