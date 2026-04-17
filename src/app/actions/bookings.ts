@@ -327,3 +327,32 @@ export async function updateBookingStatus(bookingId: string, status: string) {
 
   return { success: true };
 }
+
+/* ═══════════════════════════════════
+   ADMIN: GET ALL BOOKINGS
+   ═══════════════════════════════════ */
+
+export async function getAllBookingsAdmin() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (profile?.role !== "admin") return [];
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(`
+      *,
+      coach:profiles!bookings_coach_id_fkey ( full_name, email ),
+      player:profiles!bookings_player_id_fkey ( full_name, email )
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Admin bookings error:", error);
+    return [];
+  }
+
+  return data || [];
+}

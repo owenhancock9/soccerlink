@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/app/lib/supabase/client";
 import { signOut } from "@/app/actions/auth";
 import { getCoaches, getMyCoachProfile, getAllCoachesAdmin, banCoach, unbanCoach } from "@/app/actions/coaches";
-import { createBooking, getCoachBookings, getMyBookings, confirmSession, submitRating } from "@/app/actions/bookings";
+import { createBooking, getCoachBookings, getMyBookings, confirmSession, submitRating, getAllBookingsAdmin } from "@/app/actions/bookings";
 import { createStripeConnectAccount } from "@/app/actions/stripe";
 import { uploadVodForBooking } from "@/app/actions/upload";
 import { releaseFundsToCoach } from "@/app/actions/payouts";
@@ -359,8 +359,10 @@ export default function SoccerPlatform() {
 
   /* ── Admin State ── */
   const [adminCoaches, setAdminCoaches] = useState<AdminCoach[]>([]);
+  const [adminBookings, setAdminBookings] = useState<Record<string, unknown>[]>([]);
   const [adminLoading, setAdminLoading] = useState(false);
   const [banningCoach, setBanningCoach] = useState<string | null>(null);
+  const [adminTab, setAdminTab] = useState<"overview" | "coaches" | "bookings">("overview");
 
   /* ── Fetch Coaches from DB ── */
   useEffect(() => {
@@ -372,11 +374,13 @@ export default function SoccerPlatform() {
     loadCoaches();
   }, []);
 
-  /* ── Fetch Admin Coaches ── */
+  /* ── Fetch Admin Data ── */
   useEffect(() => {
     if (currentUser.role === "admin" && currentUser.isAuthenticated) {
-      getAllCoachesAdmin().then((coaches) => {
+      setAdminLoading(true);
+      Promise.all([getAllCoachesAdmin(), getAllBookingsAdmin()]).then(([coaches, bookings]) => {
         setAdminCoaches(coaches as unknown as AdminCoach[]);
+        setAdminBookings(bookings as Record<string, unknown>[]);
         setAdminLoading(false);
       });
     }
@@ -1658,168 +1662,403 @@ export default function SoccerPlatform() {
 
         {/* ── VIEW 4: ADMIN CONSOLE ── */}
         {view === "admin" && currentUser.role === "admin" && (
-          <div className="anim-fade-in-up space-y-16">
+          <div className="anim-fade-in-up space-y-10">
             <div>
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
                 <div>
                   <h2 className="text-4xl font-black tracking-tighter text-white mb-2">
-                    ADMIN <span className="gradient-text">PANEL</span>
+                    Admin <span className="gradient-text">Dashboard</span>
                   </h2>
                   <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] opacity-80">
-                    Admin Dashboard
+                    Platform Overview & Management
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {[
-                  {
-                    label: "Network Capacity",
-                    val: adminCoaches.length.toString(),
-                    color: "text-indigo-400",
-                    unit: "COACHES",
-                    desc: "Total Signed Up"
-                  },
-                  {
-                    label: "Active Nodes",
-                    val: adminCoaches.filter((c: AdminCoach) => !c.banned).length.toString(),
-                    color: "text-pink-400",
-                    unit: "ACTIVE",
-                    desc: "Live in Marketplace"
-                  },
-                  {
-                    label: "Restricted",
-                    val: adminCoaches.filter((c: AdminCoach) => c.banned).length.toString(),
-                    color: "text-rose-400",
-                    unit: "OFFLINE",
-                    desc: "Policy Violations"
-                  },
-                  {
-                    label: "Economic Link",
-                    val: adminCoaches.filter((c: AdminCoach) => c.stripeConnected).length.toString(),
-                    color: "text-white",
-                    unit: "STRIPE",
-                    desc: "Payout Integrated"
-                  },
-                ].map((stat, i) => (
-                  <div key={i} className="glass-card p-6 relative overflow-hidden group/stat">
-                    <div className={`absolute top-0 right-0 w-24 h-24 blur-3xl rounded-full -mr-12 -mt-12 opacity-10 transition-all group-hover/stat:opacity-20 ${stat.color === 'text-indigo-400' ? 'bg-indigo-500' : stat.color === 'text-pink-400' ? 'bg-pink-400' : 'bg-rose-500'}`} />
-                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-4">
-                      {stat.label}
-                    </p>
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <span className={`text-4xl font-black font-mono tracking-tighter ${stat.color}`}>{stat.val}</span>
-                      <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{stat.unit}</span>
-                    </div>
-                    <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest mt-2">{stat.desc}</p>
-                  </div>
+              {/* ── Admin Tabs ── */}
+              <div className="flex gap-2 mb-10 border-b border-slate-800/50 pb-4">
+                {(["overview", "coaches", "bookings"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setAdminTab(tab)}
+                    className={`px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all ${
+                      adminTab === tab
+                        ? "bg-pink-400/10 text-pink-400 border border-pink-400/30"
+                        : "text-slate-500 hover:text-white hover:bg-slate-800/40 border border-transparent"
+                    }`}
+                  >
+                    {tab === "overview" ? "📊 Overview" : tab === "coaches" ? "👥 Coaches" : "📅 Bookings"}
+                  </button>
                 ))}
               </div>
-            </div>
-
-            {/* ── Coach Roster ── */}
-            <div>
-              <h3 className="text-sm font-black mb-8 text-slate-400 flex items-center gap-4 uppercase tracking-[0.3em]">
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500/30 border border-indigo-500 flex items-center justify-center p-0.5">
-                  <span className="w-full h-full rounded-full bg-indigo-500" />
-                </span>
-                All Coaches
-              </h3>
 
               {adminLoading ? (
                 <div className="glass-card p-24 text-center">
                   <div className="w-10 h-10 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mx-auto mb-6" />
-                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Accessing Secure Database...</p>
-                </div>
-              ) : adminCoaches.length === 0 ? (
-                <div className="glass-card p-20 text-center border-dashed border-slate-800">
-                  <p className="text-5xl mb-6 opacity-30">🏟️</p>
-                  <p className="text-slate-400 font-black uppercase tracking-widest mb-2">No Coaches Found</p>
-                  <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">No coach profiles have been created yet.</p>
+                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Loading data...</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {adminCoaches.map((coach: AdminCoach) => (
-                    <div
-                      key={coach.id}
-                      className={`glass-card overflow-hidden transition-all duration-500 group/personnel ${coach.banned ? "opacity-60 border-rose-900/40 bg-rose-500/[0.01]" : "hover:border-indigo-500/30"}`}
-                    >
-                      <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-8">
-                        <div className="flex items-center gap-6">
-                          <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-black text-xl shadow-2xl relative z-10 border border-white/10 ${coach.banned ? "grayscale" : ""}`}>
-                            {coach.avatar}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-3 mb-2 flex-wrap">
-                              <h4 className="text-xl font-black text-white tracking-tighter">
-                                {coach.name}
-                              </h4>
-                              <div className="flex gap-2">
-                                {coach.banned ? (
-                                  <span className="text-[9px] bg-rose-500/10 text-rose-400 px-3 py-1 rounded-lg border border-rose-500/20 font-black tracking-widest">DENIED</span>
-                                ) : (
-                                  <>
-                                    {coach.verified ? (
-                                      <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-lg border border-indigo-500/20 font-black tracking-widest leading-none flex items-center">✓ VERIFIED</span>
-                                    ) : (
-                                      <span className="text-[9px] bg-slate-800 text-slate-500 px-3 py-1 rounded-lg border border-slate-700/50 font-black tracking-widest leading-none flex items-center">PENDING</span>
-                                    )}
-                                    {coach.stripeConnected && (
-                                      <span className="text-[9px] bg-pink-400/10 text-pink-400 px-3 py-1 rounded-lg border border-pink-400/20 font-black tracking-widest leading-none flex items-center">CREDENTIALED</span>
-                                    )}
-                                  </>
-                                )}
-                              </div>
+                <>
+                  {/* ═══════════════ OVERVIEW TAB ═══════════════ */}
+                  {adminTab === "overview" && (
+                    <div className="space-y-10">
+                      {/* Stats Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {[
+                          {
+                            label: "Total Coaches",
+                            val: adminCoaches.length.toString(),
+                            color: "text-indigo-400",
+                            unit: "SIGNED UP",
+                          },
+                          {
+                            label: "Active Coaches",
+                            val: adminCoaches.filter((c: AdminCoach) => !c.banned).length.toString(),
+                            color: "text-pink-400",
+                            unit: "LIVE",
+                          },
+                          {
+                            label: "Total Bookings",
+                            val: adminBookings.length.toString(),
+                            color: "text-purple-400",
+                            unit: "ALL TIME",
+                          },
+                          {
+                            label: "Revenue (Platform)",
+                            val: "$" + adminBookings
+                              .filter((b) => b.status === "completed" || b.status === "confirmed")
+                              .reduce((sum, b) => sum + Math.round(((Number(b.rate)) || 0) * PLATFORM_CUT), 0)
+                              .toString(),
+                            color: "text-white",
+                            unit: "EARNED",
+                          },
+                        ].map((stat, i) => (
+                          <div key={i} className="glass-card p-6 relative overflow-hidden group/stat">
+                            <div className={`absolute top-0 right-0 w-24 h-24 blur-3xl rounded-full -mr-12 -mt-12 opacity-10 transition-all group-hover/stat:opacity-20 ${stat.color === 'text-indigo-400' ? 'bg-indigo-500' : stat.color === 'text-pink-400' ? 'bg-pink-400' : stat.color === 'text-purple-400' ? 'bg-purple-400' : 'bg-white'}`} />
+                            <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-4">
+                              {stat.label}
+                            </p>
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span className={`text-4xl font-black font-mono tracking-tighter ${stat.color}`}>{stat.val}</span>
+                              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{stat.unit}</span>
                             </div>
-                            <div className="flex items-center gap-5 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                              <span className="flex items-center gap-1.5"><Stars rating={coach.rating} /> {coach.rating}</span>
-                              <span className="w-1 h-1 rounded-full bg-slate-800" />
-                              <span>${coach.rate}/SESSION</span>
-                              <span className="w-1 h-1 rounded-full bg-slate-800" />
-                              <span className="text-slate-600 lowercase font-mono">{coach.email}</span>
-                            </div>
                           </div>
-                        </div>
+                        ))}
+                      </div>
 
-                        <div className="flex items-center gap-4">
-                          {coach.banned ? (
-                            <button
-                              onClick={async () => {
-                                setBanningCoach(coach.id);
-                                await unbanCoach(coach.id);
-                                const updated = await getAllCoachesAdmin();
-                                setAdminCoaches(updated as unknown as AdminCoach[]);
-                                const publicCoaches = await getCoaches();
-                                setDbCoaches(publicCoaches as unknown as Coach[]);
-                                setBanningCoach(null);
-                              }}
-                              disabled={banningCoach === coach.id}
-                              className="bg-pink-400 text-black hover:bg-pink-400 px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50"
-                            >
-                              {banningCoach === coach.id ? "RESTORING..." : "RESTORE ACCESS"}
-                            </button>
-                          ) : (
-                            <button
-                              onClick={async () => {
-                                setBanningCoach(coach.id);
-                                await banCoach(coach.id);
-                                const updated = await getAllCoachesAdmin();
-                                setAdminCoaches(updated as unknown as AdminCoach[]);
-                                const publicCoaches = await getCoaches();
-                                setDbCoaches(publicCoaches as unknown as Coach[]);
-                                setBanningCoach(null);
-                              }}
-                              disabled={banningCoach === coach.id}
-                              className="bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-rose-500/30 hover:border-transparent disabled:opacity-50"
-                            >
-                              {banningCoach === coach.id ? "TERMINATING..." : "REVOKE ACCESS"}
-                            </button>
-                          )}
-                        </div>
+                      {/* Upcoming Sessions */}
+                      <div>
+                        <h3 className="text-sm font-black mb-6 text-slate-400 flex items-center gap-4 uppercase tracking-[0.3em]">
+                          <span className="w-2.5 h-2.5 rounded-full bg-pink-400/30 border border-pink-400 flex items-center justify-center p-0.5">
+                            <span className="w-full h-full rounded-full bg-pink-400" />
+                          </span>
+                          Upcoming Sessions
+                        </h3>
+                        {(() => {
+                          const upcoming = adminBookings
+                            .filter((b) => {
+                              const d = String(b.session_date);
+                              return (b.status === "confirmed" || b.status === "pending") && d && new Date(d) >= new Date(new Date().toDateString());
+                            })
+                            .sort((a, b) => new Date(a.session_date as string).getTime() - new Date(String(b.session_date)).getTime())
+                            .slice(0, 10);
+
+                          if (upcoming.length === 0) {
+                            return (
+                              <div className="glass-card p-12 text-center border-dashed border-slate-800">
+                                <p className="text-3xl mb-4 opacity-30">📅</p>
+                                <p className="text-slate-500 text-sm font-bold">No upcoming sessions scheduled</p>
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div className="space-y-3">
+                              {upcoming.map((b, i) => {
+                                const coach = b.coach as Record<string, string> | null;
+                                const player = b.player as Record<string, string> | null;
+                                return (
+                                  <div key={i} className="glass-card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-pink-400/20">
+                                    <div className="flex items-center gap-4">
+                                      <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">
+                                        📅
+                                      </div>
+                                      <div>
+                                        <p className="text-white font-bold text-sm">
+                                          {new Date(String(b.session_date)).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                          {b.session_time && <span className="text-slate-500 ml-2">@ {String(b.session_time)}</span>}
+                                        </p>
+                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                                          {coach?.full_name || "Unknown Coach"} → {player?.full_name || String(b.player_name) || "Player"}
+                                          {b.location && <span className="ml-2 text-pink-400/70">📍 {String(b.location)}</span>}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                      <span className="text-white font-black font-mono">${Number(b.rate)}</span>
+                                      <span className={`text-[9px] px-3 py-1 rounded-lg font-black uppercase tracking-widest border ${
+                                        b.status === "confirmed"
+                                          ? "bg-pink-400/10 text-pink-400 border-pink-400/20"
+                                          : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                      }`}>{String(b.status)}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })()}
+                      </div>
+
+                      {/* Recent Completed */}
+                      <div>
+                        <h3 className="text-sm font-black mb-6 text-slate-400 flex items-center gap-4 uppercase tracking-[0.3em]">
+                          <span className="w-2.5 h-2.5 rounded-full bg-green-500/30 border border-green-500 flex items-center justify-center p-0.5">
+                            <span className="w-full h-full rounded-full bg-green-500" />
+                          </span>
+                          Recently Completed
+                        </h3>
+                        {(() => {
+                          const completed = adminBookings
+                            .filter((b) => b.status === "completed")
+                            .slice(0, 5);
+
+                          if (completed.length === 0) {
+                            return (
+                              <div className="glass-card p-12 text-center border-dashed border-slate-800">
+                                <p className="text-3xl mb-4 opacity-30">✅</p>
+                                <p className="text-slate-500 text-sm font-bold">No completed sessions yet</p>
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div className="space-y-3">
+                              {completed.map((b, i) => {
+                                const coach = b.coach as Record<string, string> | null;
+                                const player = b.player as Record<string, string> | null;
+                                return (
+                                  <div key={i} className="glass-card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-80">
+                                    <div className="flex items-center gap-4">
+                                      <div className="w-10 h-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-sm">
+                                        ✅
+                                      </div>
+                                      <div>
+                                        <p className="text-white font-bold text-sm">
+                                          {new Date(String(b.session_date)).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                        </p>
+                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                                          {coach?.full_name || "Coach"} → {player?.full_name || String(b.player_name) || "Player"}
+                                          {b.player_rating && <span className="ml-2 text-amber-400">{"★".repeat(Number(b.player_rating))}</span>}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                      <span className="text-slate-400 font-bold font-mono text-sm">${Number(b.rate)}</span>
+                                      <span className="text-[9px] text-slate-600 font-bold">→ ${Math.round((Number(b.rate)) * PLATFORM_CUT)} fee</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  )}
+
+                  {/* ═══════════════ COACHES TAB ═══════════════ */}
+                  {adminTab === "coaches" && (
+                    <div>
+                      <h3 className="text-sm font-black mb-8 text-slate-400 flex items-center gap-4 uppercase tracking-[0.3em]">
+                        <span className="w-2.5 h-2.5 rounded-full bg-indigo-500/30 border border-indigo-500 flex items-center justify-center p-0.5">
+                          <span className="w-full h-full rounded-full bg-indigo-500" />
+                        </span>
+                        All Coaches ({adminCoaches.length})
+                      </h3>
+
+                      {adminCoaches.length === 0 ? (
+                        <div className="glass-card p-20 text-center border-dashed border-slate-800">
+                          <p className="text-5xl mb-6 opacity-30">🏟️</p>
+                          <p className="text-slate-400 font-black uppercase tracking-widest mb-2">No Coaches Yet</p>
+                          <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">No coach profiles have been created yet.</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {adminCoaches.map((coach: AdminCoach) => (
+                            <div
+                              key={coach.id}
+                              className={`glass-card overflow-hidden transition-all duration-500 group/personnel ${coach.banned ? "opacity-60 border-rose-900/40 bg-rose-500/[0.01]" : "hover:border-indigo-500/30"}`}
+                            >
+                              <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                                <div className="flex items-center gap-6">
+                                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-black text-xl shadow-2xl relative z-10 border border-white/10 ${coach.banned ? "grayscale" : ""}`}>
+                                    {coach.avatar}
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                      <h4 className="text-xl font-black text-white tracking-tighter">
+                                        {coach.name}
+                                      </h4>
+                                      <div className="flex gap-2">
+                                        {coach.banned ? (
+                                          <span className="text-[9px] bg-rose-500/10 text-rose-400 px-3 py-1 rounded-lg border border-rose-500/20 font-black tracking-widest">BANNED</span>
+                                        ) : (
+                                          <>
+                                            {coach.verified ? (
+                                              <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-lg border border-indigo-500/20 font-black tracking-widest leading-none flex items-center">✓ VERIFIED</span>
+                                            ) : (
+                                              <span className="text-[9px] bg-slate-800 text-slate-500 px-3 py-1 rounded-lg border border-slate-700/50 font-black tracking-widest leading-none flex items-center">PENDING</span>
+                                            )}
+                                            {coach.stripeConnected && (
+                                              <span className="text-[9px] bg-pink-400/10 text-pink-400 px-3 py-1 rounded-lg border border-pink-400/20 font-black tracking-widest leading-none flex items-center">STRIPE ✓</span>
+                                            )}
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-5 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                                      <span className="flex items-center gap-1.5"><Stars rating={coach.rating} /> {coach.rating}</span>
+                                      <span className="w-1 h-1 rounded-full bg-slate-800" />
+                                      <span>${coach.rate}/session</span>
+                                      <span className="w-1 h-1 rounded-full bg-slate-800" />
+                                      <span className="text-slate-600 lowercase font-mono">{coach.email}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                  {coach.banned ? (
+                                    <button
+                                      onClick={async () => {
+                                        setBanningCoach(coach.id);
+                                        await unbanCoach(coach.id);
+                                        const updated = await getAllCoachesAdmin();
+                                        setAdminCoaches(updated as unknown as AdminCoach[]);
+                                        const publicCoaches = await getCoaches();
+                                        setDbCoaches(publicCoaches as unknown as Coach[]);
+                                        setBanningCoach(null);
+                                      }}
+                                      disabled={banningCoach === coach.id}
+                                      className="bg-pink-400 text-black hover:bg-pink-300 px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50"
+                                    >
+                                      {banningCoach === coach.id ? "RESTORING..." : "RESTORE ACCESS"}
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={async () => {
+                                        setBanningCoach(coach.id);
+                                        await banCoach(coach.id);
+                                        const updated = await getAllCoachesAdmin();
+                                        setAdminCoaches(updated as unknown as AdminCoach[]);
+                                        const publicCoaches = await getCoaches();
+                                        setDbCoaches(publicCoaches as unknown as Coach[]);
+                                        setBanningCoach(null);
+                                      }}
+                                      disabled={banningCoach === coach.id}
+                                      className="bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-rose-500/30 hover:border-transparent disabled:opacity-50"
+                                    >
+                                      {banningCoach === coach.id ? "BANNING..." : "BAN COACH"}
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ═══════════════ BOOKINGS TAB ═══════════════ */}
+                  {adminTab === "bookings" && (
+                    <div>
+                      <h3 className="text-sm font-black mb-8 text-slate-400 flex items-center gap-4 uppercase tracking-[0.3em]">
+                        <span className="w-2.5 h-2.5 rounded-full bg-purple-500/30 border border-purple-500 flex items-center justify-center p-0.5">
+                          <span className="w-full h-full rounded-full bg-purple-500" />
+                        </span>
+                        All Bookings ({adminBookings.length})
+                      </h3>
+
+                      {adminBookings.length === 0 ? (
+                        <div className="glass-card p-20 text-center border-dashed border-slate-800">
+                          <p className="text-5xl mb-6 opacity-30">📋</p>
+                          <p className="text-slate-400 font-black uppercase tracking-widest mb-2">No Bookings Yet</p>
+                          <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">Bookings will appear here once players start booking sessions.</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {adminBookings.map((b, i) => {
+                            const coach = b.coach as Record<string, string> | null;
+                            const player = b.player as Record<string, string> | null;
+                            const statusColors: Record<string, string> = {
+                              pending: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+                              confirmed: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+                              completed: "bg-green-500/10 text-green-400 border-green-500/20",
+                              cancelled: "bg-slate-800 text-slate-500 border-slate-700/50",
+                            };
+                            const status = String(b.status);
+                            return (
+                              <div key={i} className="glass-card p-5 hover:border-indigo-500/20 transition-all">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                  <div className="flex items-center gap-4 flex-1">
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm border ${
+                                      status === "completed" ? "bg-green-500/10 border-green-500/20" :
+                                      status === "confirmed" ? "bg-blue-500/10 border-blue-500/20" :
+                                      "bg-slate-800/50 border-slate-700/30"
+                                    }`}>
+                                      {status === "completed" ? "✅" : status === "confirmed" ? "📅" : "⏳"}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-3 mb-1 flex-wrap">
+                                        <p className="text-white font-bold text-sm truncate">
+                                          {coach?.full_name || "Unknown Coach"}
+                                        </p>
+                                        <span className="text-slate-700">→</span>
+                                        <p className="text-slate-300 font-medium text-sm truncate">
+                                          {player?.full_name || String(b.player_name) || "Player"}
+                                        </p>
+                                      </div>
+                                      <div className="flex items-center gap-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest flex-wrap">
+                                        <span>
+                                          {b.session_date ? new Date(String(b.session_date)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "No date"}
+                                        </span>
+                                        {b.session_time && (
+                                          <>
+                                            <span className="w-1 h-1 rounded-full bg-slate-800" />
+                                            <span>{String(b.session_time)}</span>
+                                          </>
+                                        )}
+                                        {b.location && (
+                                          <>
+                                            <span className="w-1 h-1 rounded-full bg-slate-800" />
+                                            <span className="text-pink-400/70">📍 {String(b.location)}</span>
+                                          </>
+                                        )}
+                                        {b.player_rating && (
+                                          <>
+                                            <span className="w-1 h-1 rounded-full bg-slate-800" />
+                                            <span className="text-amber-400">{"★".repeat(Number(b.player_rating))}</span>
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-4">
+                                    <span className="text-white font-black font-mono">${Number(b.rate)}</span>
+                                    <span className={`text-[9px] px-3 py-1.5 rounded-lg font-black uppercase tracking-widest border ${statusColors[status] || statusColors.pending}`}>
+                                      {status}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
