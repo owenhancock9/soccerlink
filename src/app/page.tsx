@@ -1360,7 +1360,7 @@ export default function SoccerPlatform() {
                           {confirmingSession === b.id ? "Confirming..." : "✓ Confirm Session Complete"}
                         </button>
                       )}
-                      {b.player_confirmed_at && !b.coach_confirmed_at && (
+                      {!!b.player_confirmed_at && !b.coach_confirmed_at && (
                         <p className="text-center text-amber-400 text-xs font-bold">Waiting for coach to confirm...</p>
                       )}
                     </div>
@@ -1410,11 +1410,11 @@ export default function SoccerPlatform() {
                   )}
 
                   {/* Show existing rating */}
-                  {b.player_rating && (
+                  {!!b.player_rating && (
                     <div className="flex items-center gap-2 text-sm">
                       <span className="text-amber-400">{"★".repeat(b.player_rating)}{"☆".repeat(5 - b.player_rating)}</span>
                       <span className="text-slate-500 font-bold">Your Review</span>
-                      {b.player_review && <span className="text-slate-400 italic text-xs">— "{b.player_review}"</span>}
+                      {!!b.player_review && <span className="text-slate-400 italic text-xs">— "{b.player_review}"</span>}
                     </div>
                   )}
 
@@ -1431,7 +1431,7 @@ export default function SoccerPlatform() {
                           {uploadingVod === b.id ? "Uploading..." : "📎 Upload MP4"}
                           <input type="file" accept="video/*" className="hidden" disabled={!!uploadingVod} onChange={(e) => handleVodUpload(e, b.id)} />
                         </label>
-                        {b.vod_url && (
+                        {!!b.vod_url && (
                           <a href={b.vod_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 py-3 px-4 bg-slate-800 text-white rounded-xl font-semibold text-xs hover:bg-slate-700 transition-colors border border-slate-700">
                             ▶ Watch VOD
                           </a>
@@ -1786,11 +1786,11 @@ export default function SoccerPlatform() {
                                       <div>
                                         <p className="text-white font-bold text-sm">
                                           {new Date(String(b.session_date)).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                                          {b.session_time && <span className="text-slate-500 ml-2">@ {String(b.session_time)}</span>}
+                                          {!!b.session_time && <span className="text-slate-500 ml-2">@ {String(b.session_time)}</span>}
                                         </p>
                                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
                                           {coach?.full_name || "Unknown Coach"} → {player?.full_name || String(b.player_name) || "Player"}
-                                          {b.location && <span className="ml-2 text-pink-400/70">📍 {String(b.location)}</span>}
+                                          {!!b.location && <span className="ml-2 text-pink-400/70">📍 {String(b.location)}</span>}
                                         </p>
                                       </div>
                                     </div>
@@ -1849,7 +1849,7 @@ export default function SoccerPlatform() {
                                         </p>
                                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
                                           {coach?.full_name || "Coach"} → {player?.full_name || String(b.player_name) || "Player"}
-                                          {b.player_rating && <span className="ml-2 text-amber-400">{"★".repeat(Number(b.player_rating))}</span>}
+                                          {!!b.player_rating && <span className="ml-2 text-amber-400">{"★".repeat(Number(b.player_rating))}</span>}
                                         </p>
                                       </div>
                                     </div>
@@ -2023,19 +2023,19 @@ export default function SoccerPlatform() {
                                         <span>
                                           {b.session_date ? new Date(String(b.session_date)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "No date"}
                                         </span>
-                                        {b.session_time && (
+                                        {!!b.session_time && (
                                           <>
                                             <span className="w-1 h-1 rounded-full bg-slate-800" />
                                             <span>{String(b.session_time)}</span>
                                           </>
                                         )}
-                                        {b.location && (
+                                        {!!b.location && (
                                           <>
                                             <span className="w-1 h-1 rounded-full bg-slate-800" />
                                             <span className="text-pink-400/70">📍 {String(b.location)}</span>
                                           </>
                                         )}
-                                        {b.player_rating && (
+                                        {!!b.player_rating && (
                                           <>
                                             <span className="w-1 h-1 rounded-full bg-slate-800" />
                                             <span className="text-amber-400">{"★".repeat(Number(b.player_rating))}</span>
