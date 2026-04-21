@@ -39,7 +39,6 @@ export async function createBooking(formData: FormData) {
       session_time: sessionTime,
       rate,
       platform_fee: platformFee,
-      platformFee,
       total,
       status: "pending",
     })
