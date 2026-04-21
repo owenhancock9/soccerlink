@@ -167,12 +167,20 @@ export async function getAllCoachesAdmin() {
 
 export async function banCoach(coachId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (profile?.role !== "admin") return { error: "Not authorized" };
   await supabase.from("coach_profiles").update({ banned: true }).eq("id", coachId);
   return { success: true };
 }
 
 export async function unbanCoach(coachId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (profile?.role !== "admin") return { error: "Not authorized" };
   await supabase.from("coach_profiles").update({ banned: false }).eq("id", coachId);
   return { success: true };
 }

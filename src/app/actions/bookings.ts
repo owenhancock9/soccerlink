@@ -124,6 +124,7 @@ export async function confirmSession(bookingId: string) {
     .single();
 
   if (fetchErr || !booking) return { error: "Booking not found." };
+  if (booking.status !== "confirmed") return { error: "Session cannot be confirmed until payment is complete." };
 
   // Determine role
   const isCoach = user.id === booking.coach_id;
