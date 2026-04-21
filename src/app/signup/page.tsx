@@ -40,7 +40,7 @@ export default function SignupPage() {
         <div className="text-center mb-10">
           <Link href="/">
             <h1 className="text-2xl font-black tracking-tighter gradient-text inline-block cursor-pointer">
-              COACH_MATCHING
+              CoachMatching
             </h1>
           </Link>
           <p className="text-slate-500 text-sm mt-2">Create your account</p>

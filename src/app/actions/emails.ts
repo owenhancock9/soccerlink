@@ -24,7 +24,7 @@ function wrap(body: string) {
   return `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px; background: #0a0a0a; color: #e2e8f0;">
       <div style="text-align: center; margin-bottom: 32px;">
-        <span style="font-size: 18px; font-weight: 900; letter-spacing: -0.5px; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">COACH_MATCHING</span>
+        <span style="font-size: 18px; font-weight: 900; letter-spacing: -0.5px; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CoachMatching</span>
       </div>
       <div style="background: #111827; border: 1px solid #1e293b; border-radius: 16px; padding: 32px;">
         ${body}
