@@ -127,6 +127,10 @@ interface Coach {
   location?: string;
 }
 
+function titleCase(s: string) {
+  return s.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 function CoachCard({
   coach,
   index,
@@ -161,7 +165,7 @@ function CoachCard({
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-3 mb-1.5 flex-wrap">
                 <h3 className="text-2xl font-black text-white tracking-tighter leading-none group-hover:text-pink-400 transition-colors">
-                  {coach.name}
+                  {titleCase(coach.name)}
                 </h3>
                 {coach.verified && (
                   <div className="shrink-0 flex items-center gap-1.5 text-[10px] bg-pink-400/20 text-pink-400 px-3 py-1 rounded-full border border-pink-400/30 font-black uppercase tracking-widest shadow-lg shadow-pink-400/10">
@@ -651,7 +655,7 @@ export default function SoccerPlatform() {
                       </div>
 
                       <p className="text-sm text-pink-400/90 font-bold uppercase tracking-widest mb-3">
-                        {selectedCoach.experience || "ELITE PERFORMANCE COACH"}
+                        {selectedCoach.experience || "Experienced Coach"}
                       </p>
 
                       <div className="flex items-center gap-3 text-sm">
@@ -1253,7 +1257,7 @@ export default function SoccerPlatform() {
                   }}
                   className="text-indigo-400 text-[12px] font-bold uppercase tracking-widest hover:underline decoration-2"
                 >
-                  Reset Parameters
+                  Clear Filters
                 </button>
               </div>
             )}
@@ -1515,7 +1519,7 @@ export default function SoccerPlatform() {
                             setBookingMessage({ type: "error", text: "Stripe connection failed for an unknown reason." });
                           }
                         } catch (err: any) {
-                          setBookingMessage({ type: "error", text: "A critical network error occurred while initializing Stripe." });
+                          setBookingMessage({ type: "error", text: "Something went wrong connecting to Stripe. Please try again." });
                         } finally {
                           setIsInitiatingStripe(false);
                         }

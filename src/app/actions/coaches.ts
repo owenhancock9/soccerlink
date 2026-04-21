@@ -46,7 +46,7 @@ export async function getCoaches() {
       verified: (coach.verified as boolean) || false,
       rating: Number(coach.rating) || 0,
       reviews: (coach.review_count as number) || 0,
-      bio: (coach.bio as string) || "No bio yet.",
+      bio: (coach.bio as string) || "Passionate about helping players reach their full potential.",
       experience: (coach.experience as string) || "",
       highlightUrl: (coach.highlight_reel_url as string) || "",
       availability: (coach.availability as { day: string; start: string; end: string }[]) || [],
