@@ -118,3 +118,57 @@ export async function uploadHighlightReel(formData: FormData) {
 
   return { success: true, url: publicUrl };
 }
+
+export async function uploadProfilePicture(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const file = formData.get("file") as File;
+  if (!file) return { error: "No file provided" };
+
+  if (file.size > 5 * 1024 * 1024) {
+    return { error: "File too large. Please upload an image under 5MB." };
+  }
+
+  const allowed = ["image/jpeg", "image/png", "image/webp"];
+  if (!allowed.includes(file.type)) {
+    return { error: "Invalid format. Please upload a JPG, PNG, or WebP image." };
+  }
+
+  const fileExt = file.name.split(".").pop();
+  const fileName = `avatars/${user.id}-${Date.now()}.${fileExt}`;
+
+  const arrayBuffer = await file.arrayBuffer();
+
+  const { error: uploadError } = await supabase.storage
+    .from("vods")
+    .upload(fileName, arrayBuffer, {
+      contentType: file.type,
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.error("Avatar upload error:", uploadError);
+    return { error: "Failed to upload image." };
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("vods").getPublicUrl(fileName);
+
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({ avatar_url: publicUrl })
+    .eq("id", user.id);
+
+  if (updateError) {
+    console.error("Profile update error:", updateError);
+    return { error: "Uploaded, but failed to save to your profile." };
+  }
+
+  return { success: true, url: publicUrl };
+}

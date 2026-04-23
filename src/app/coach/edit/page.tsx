@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { updateCoachProfile, getMyCoachProfile } from "@/app/actions/coaches";
 import { createStripeConnectAccount } from "@/app/actions/stripe";
-import { uploadHighlightReel } from "@/app/actions/upload";
+import { uploadHighlightReel, uploadProfilePicture } from "@/app/actions/upload";
 
 const STYLES = [
   "Tiki-Taka",
@@ -51,7 +51,10 @@ export default function EditCoachProfile() {
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const addSlot = (day: string) => {
     setAvailability((prev) => [...prev, { day, start: "09:00", end: "17:00" }]);
@@ -102,6 +105,7 @@ export default function EditCoachProfile() {
         setLocation(data.location || "");
         setExperience(data.experience || "");
         setHighlightUrl(data.highlight_reel_url || "");
+        setAvatarUrl(data.avatar_url || "");
         if (data.availability) {
           // Fallback handle for old string format if any exists, but primarily expect JSON
           let slots: TimeSlot[] = [];
@@ -230,6 +234,67 @@ export default function EditCoachProfile() {
           )}
 
           {/* Style & Specialty Grid */}
+
+          {/* Profile Picture */}
+          <div className="glass-card p-8 group/card">
+            <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-5 ml-1">
+              📸 Profile Picture
+            </label>
+            <div className="flex items-center gap-8">
+              <div
+                onClick={() => avatarInputRef.current?.click()}
+                className="relative w-24 h-24 rounded-[2rem] bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-black text-3xl shadow-2xl cursor-pointer group/pfp overflow-hidden border-2 border-white/10 hover:border-pink-400/50 transition-all"
+              >
+                {uploadingAvatar ? (
+                  <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : avatarUrl ? (
+                  <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="group-hover/pfp:scale-110 transition-transform">{style?.[0] || specialty?.[0] || "?"}</span>
+                )}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/pfp:opacity-100 transition-opacity flex items-center justify-center">
+                  <span className="text-xs font-black uppercase tracking-widest">Change</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white mb-1">{avatarUrl ? "Looking good!" : "Add a profile photo"}</p>
+                <p className="text-[10px] text-slate-500 font-medium">JPG, PNG, or WebP · Max 5MB</p>
+                {avatarUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setAvatarUrl("")}
+                    className="text-[10px] text-rose-400 font-black uppercase tracking-widest mt-2 hover:underline"
+                  >
+                    Remove Photo
+                  </button>
+                )}
+              </div>
+            </div>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setUploadingAvatar(true);
+                setMessage(null);
+                const fd = new FormData();
+                fd.append("file", file);
+                const result = await uploadProfilePicture(fd);
+                if (result.error) {
+                  setMessage({ type: "error", text: result.error });
+                } else if (result.url) {
+                  setAvatarUrl(result.url);
+                  setMessage({ type: "success", text: "Profile photo updated!" });
+                }
+                setUploadingAvatar(false);
+                e.target.value = "";
+              }}
+            />
+          </div>
+
           <div className="grid md:grid-cols-2 gap-6">
             {/* Playing Style */}
             <div className="glass-card p-8 group/card">

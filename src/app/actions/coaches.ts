@@ -52,6 +52,7 @@ export async function getCoaches() {
       availability: (coach.availability as { day: string; start: string; end: string }[]) || [],
       location: (coach.location as string) || "",
       avatar: (profile?.full_name as string)?.charAt(0)?.toUpperCase() || "C",
+      avatarUrl: (profile?.avatar_url as string) || "",
       gradient: getGradient(coach.id as string),
     };
   });
@@ -111,6 +112,17 @@ export async function getMyCoachProfile() {
     }
   } else if (!currentData.stripe_account_id) {
      currentData.stripeDiagnostic = "ID Missing in DB";
+  }
+
+  // Fetch avatar_url from profiles table
+  const { data: profileRow } = await supabase
+    .from("profiles")
+    .select("avatar_url")
+    .eq("id", user.id)
+    .single();
+
+  if (profileRow?.avatar_url) {
+    currentData.avatar_url = profileRow.avatar_url;
   }
 
   return currentData;

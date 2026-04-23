@@ -120,6 +120,7 @@ interface Coach {
   reviews: number;
   bio: string;
   avatar: string;
+  avatarUrl?: string;
   gradient: string;
   experience?: string;
   highlightUrl?: string;
@@ -166,9 +167,13 @@ function CoachCard({
           <div className="flex items-center gap-6">
             <div className="relative group/avatar">
               <div
-                className={`w-16 h-16 rounded-[1.5rem] bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-black text-2xl shadow-2xl shrink-0 transition-all duration-700 group-hover/avatar:scale-110 group-hover/avatar:rotate-6 z-10 relative border-2 border-white/10`}
+                className={`w-16 h-16 rounded-[1.5rem] bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-black text-2xl shadow-2xl shrink-0 transition-all duration-700 group-hover/avatar:scale-110 group-hover/avatar:rotate-6 z-10 relative border-2 border-white/10 overflow-hidden`}
               >
-                {coach.avatar}
+                {coach.avatarUrl ? (
+                  <img src={coach.avatarUrl} alt={coach.name} className="w-full h-full object-cover" />
+                ) : (
+                  coach.avatar
+                )}
               </div>
               <div className={`absolute inset-0 bg-gradient-to-br ${coach.gradient} blur-2xl opacity-0 group-hover/avatar:opacity-60 transition-opacity duration-1000 rounded-full scale-150`} />
               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-pink-400 rounded-full border-4 border-slate-900 z-20 shadow-lg" title="Online now" />
