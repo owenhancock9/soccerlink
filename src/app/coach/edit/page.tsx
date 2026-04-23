@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { updateCoachProfile, getMyCoachProfile } from "@/app/actions/coaches";
 import { createStripeConnectAccount } from "@/app/actions/stripe";
+import { uploadHighlightReel } from "@/app/actions/upload";
 
 const STYLES = [
   "Tiki-Taka",
@@ -49,6 +50,8 @@ export default function EditCoachProfile() {
   const [stripeOnboarded, setStripeOnboarded] = useState(false);
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const addSlot = (day: string) => {
     setAvailability((prev) => [...prev, { day, start: "09:00", end: "17:00" }]);
@@ -358,23 +361,87 @@ export default function EditCoachProfile() {
                 </div>
               </div>
 
-              {/* Highlight URL */}
+              {/* Highlight Video Upload */}
               <div>
                 <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 ml-1">
-                   Highlight Reel (URL)
+                  🎬 Highlight Clip (15 sec)
                 </label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+
+                {highlightUrl ? (
+                  <div className="space-y-3">
+                    <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
+                      <video
+                        src={highlightUrl}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-40 object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
+                      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-pink-400 bg-pink-400/10 px-3 py-1 rounded-full border border-pink-400/20">
+                          Live Preview
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setHighlightUrl("");
+                          }}
+                          className="text-[9px] font-black uppercase tracking-widest text-rose-400 bg-rose-400/10 px-3 py-1 rounded-full border border-rose-400/20 hover:bg-rose-400/20 transition-all"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <input
-                    type="url"
-                    value={highlightUrl}
-                    onChange={(e) => setHighlightUrl(e.target.value)}
-                    placeholder="https://youtube.com/..."
-                    className="w-full p-4 pl-12 bg-slate-950 border border-slate-800 rounded-[1.25rem] focus:ring-2 ring-pink-400/20 outline-none text-white text-sm font-medium transition-all"
-                  />
-                </div>
+                ) : (
+                  <div
+                    onClick={() => videoInputRef.current?.click()}
+                    className="relative cursor-pointer border-2 border-dashed border-slate-800 hover:border-pink-400/40 rounded-2xl p-8 text-center transition-all duration-500 hover:bg-pink-400/[0.02] group/upload"
+                  >
+                    {uploadingVideo ? (
+                      <div className="flex flex-col items-center gap-3">
+                        <span className="w-8 h-8 border-2 border-pink-400/30 border-t-pink-400 rounded-full animate-spin" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-pink-400">Uploading...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 mx-auto mb-3 bg-slate-900 rounded-2xl flex items-center justify-center text-2xl border border-slate-800 group-hover/upload:border-pink-400/30 group-hover/upload:scale-110 transition-all">
+                          🎥
+                        </div>
+                        <p className="text-sm font-bold text-slate-400 mb-1">Upload a 15-second highlight clip</p>
+                        <p className="text-[10px] text-slate-600 font-medium">
+                          MP4, MOV, or WebM · Max 50MB
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/mp4,video/quicktime,video/webm"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setUploadingVideo(true);
+                    setMessage(null);
+                    const fd = new FormData();
+                    fd.append("file", file);
+                    const result = await uploadHighlightReel(fd);
+                    if (result.error) {
+                      setMessage({ type: "error", text: result.error });
+                    } else if (result.url) {
+                      setHighlightUrl(result.url);
+                      setMessage({ type: "success", text: "Highlight video uploaded! It will show on your coach card." });
+                    }
+                    setUploadingVideo(false);
+                    e.target.value = "";
+                  }}
+                />
               </div>
             </div>
 

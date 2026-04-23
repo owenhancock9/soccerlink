@@ -62,3 +62,59 @@ export async function uploadVodForBooking(
 
   return { success: true, url: publicUrl };
 }
+
+export async function uploadHighlightReel(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const file = formData.get("file") as File;
+  if (!file) return { error: "No file provided" };
+
+  // 50MB limit for short clips
+  if (file.size > 50 * 1024 * 1024) {
+    return { error: "File too large. Please upload a video under 50MB." };
+  }
+
+  const allowed = ["video/mp4", "video/quicktime", "video/webm"];
+  if (!allowed.includes(file.type)) {
+    return { error: "Invalid format. Please upload an MP4, MOV, or WebM file." };
+  }
+
+  const fileExt = file.name.split(".").pop();
+  const fileName = `highlights/${user.id}-${Date.now()}.${fileExt}`;
+
+  const arrayBuffer = await file.arrayBuffer();
+
+  const { error: uploadError } = await supabase.storage
+    .from("vods")
+    .upload(fileName, arrayBuffer, {
+      contentType: file.type,
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.error("Highlight upload error:", uploadError);
+    return { error: "Failed to upload video. Make sure the 'vods' bucket exists." };
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("vods").getPublicUrl(fileName);
+
+  // Save the URL to the coach's profile
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({ highlight_reel_url: publicUrl })
+    .eq("id", user.id);
+
+  if (updateError) {
+    console.error("Profile update error:", updateError);
+    return { error: "Uploaded, but failed to save to your profile." };
+  }
+
+  return { success: true, url: publicUrl };
+}
