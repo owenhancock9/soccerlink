@@ -2,7 +2,7 @@
 
 import { Resend } from "resend";
 
-const FROM_EMAIL = "CoachMatching <notifications@coachmatching.io>";
+const FROM_EMAIL = "CoachingMatch <notifications@coachingmatch.co>";
 
 async function send(to: string, subject: string, html: string) {
   if (!process.env.RESEND_API_KEY) {
@@ -24,13 +24,13 @@ function wrap(body: string) {
   return `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 24px; background: #0a0a0a; color: #e2e8f0;">
       <div style="text-align: center; margin-bottom: 32px;">
-        <span style="font-size: 18px; font-weight: 900; letter-spacing: -0.5px; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CoachMatching</span>
+        <span style="font-size: 18px; font-weight: 900; letter-spacing: -0.5px; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CoachingMatch</span>
       </div>
       <div style="background: #111827; border: 1px solid #1e293b; border-radius: 16px; padding: 32px;">
         ${body}
       </div>
       <p style="text-align: center; font-size: 11px; color: #475569; margin-top: 24px;">
-        © ${new Date().getFullYear()} CoachMatching · <a href="https://coachingmatch.co" style="color: #6366f1;">coachingmatch.co</a>
+        © ${new Date().getFullYear()} CoachingMatch · <a href="https://coachingmatch.co" style="color: #6366f1;">coachingmatch.co</a>
       </p>
     </div>
   `;

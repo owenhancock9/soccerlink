@@ -15,7 +15,7 @@ export function getStripe() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     apiVersion: ("2024-12-18.acacia" as any),
     appInfo: {
-      name: "CoachMatching",
+      name: "CoachingMatch",
       version: "1.0.0",
     },
   });

@@ -148,6 +148,18 @@ function CoachCard({
       {/* Background Ambient Glow */}
       <div className={`absolute inset-0 bg-gradient-to-br ${coach.gradient} opacity-[0.02] blur-3xl rounded-full transition-opacity duration-1000 group-hover:opacity-[0.08] pointer-events-none`} />
 
+      {/* Video Snippet Background */}
+      {coach.highlightUrl && (
+        <video 
+          src={coach.highlightUrl} 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-luminosity group-hover:opacity-40 transition-opacity duration-1000 pointer-events-none rounded-[2rem] z-0"
+        />
+      )}
+
       <div className="relative z-10">
         {/* Superior Header */}
         <div className="flex justify-between items-start mb-10">
@@ -477,11 +489,15 @@ export default function SoccerPlatform() {
   }, []);
 
   const handleBookingClick = useCallback((coach: Coach) => {
+    if (!currentUser.isAuthenticated) {
+      window.location.href = "/signup";
+      return;
+    }
     setSelectedCoach(coach);
     setSelectedDate(null);
     setSelectedTime(null);
     setActiveModal("schedule");
-  }, []);
+  }, [currentUser.isAuthenticated]);
 
   const closeModal = useCallback(() => {
     setActiveModal(null);
@@ -878,11 +894,11 @@ export default function SoccerPlatform() {
                 <div className="space-y-6">
                   <div className="p-8 bg-slate-950/60 rounded-[2rem] border border-slate-800 shadow-2xl">
                     <strong className="text-white text-lg block mb-3 uppercase tracking-tighter">1. Two-Way Confirmation System</strong>
-                    <p className="text-slate-400 leading-relaxed font-medium">To ensure security for both sides, session funds are held in CoachMatching&apos;s secure vault. After your session is completed, both the coach and the player must click &quot;Confirm Session Complete&quot; for funds to be released. If either party does not confirm, the funds remain held and our support team will assist.</p>
+                    <p className="text-slate-400 leading-relaxed font-medium">To ensure security for both sides, session funds are held in CoachingMatch&apos;s secure vault. After your session is completed, both the coach and the player must click &quot;Confirm Session Complete&quot; for funds to be released. If either party does not confirm, the funds remain held and our support team will assist.</p>
                   </div>
                   <div className="p-8 bg-rose-950/10 rounded-[2rem] border border-rose-900/30 shadow-2xl">
                     <strong className="text-rose-400 text-lg block mb-3 uppercase tracking-tighter">2. Off-Platform Protection</strong>
-                    <p className="text-rose-300/60 leading-relaxed font-medium">Attempting to book coaching sessions outside of CoachMatching is strictly prohibited. This is for your own safety; sessions outside our portal are not protected by our escrow guarantee and will result in immediate permanent account suspension.</p>
+                    <p className="text-rose-300/60 leading-relaxed font-medium">Attempting to book coaching sessions outside of CoachingMatch is strictly prohibited. This is for your own safety; sessions outside our portal are not protected by our escrow guarantee and will result in immediate permanent account suspension.</p>
                   </div>
                   <div className="p-8 bg-amber-950/10 rounded-[2rem] border border-amber-900/30 shadow-2xl">
                     <strong className="text-amber-400 text-lg block mb-3 uppercase tracking-tighter">3. Reviews &amp; Ratings</strong>
@@ -911,7 +927,7 @@ export default function SoccerPlatform() {
             )
           }
         >
-          CoachMatching
+          CoachingMatch
         </h1>
 
         {/* Desktop Nav */}
@@ -2074,7 +2090,7 @@ export default function SoccerPlatform() {
           ═══════════════ */}
       <footer className="mt-24 py-8 border-t border-slate-800/30 text-center px-4 relative z-10">
         <p className="text-[11px] text-slate-500 max-w-2xl mx-auto leading-loose">
-          By using CoachMatching, you agree to our{" "}
+          By using CoachingMatch, you agree to our{" "}
           <button
             id="tos-link"
             onClick={() => setActiveModal("tos")}

@@ -32,7 +32,7 @@ export default function LoginPage() {
         <div className="text-center mb-10">
           <Link href="/">
             <h1 className="text-2xl font-black tracking-tighter gradient-text inline-block cursor-pointer">
-              CoachMatching
+              CoachingMatch
             </h1>
           </Link>
           <p className="text-slate-500 text-sm mt-2">Sign in to your account</p>

@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "CoachMatching — Find Your Perfect Coach",
+  title: "CoachingMatch — Find Your Perfect Coach",
   description:
     "Connect with verified soccer coaches for personalized VOD reviews, tactical analysis, and 1-on-1 training. Secure escrow payments, pro-level feedback.",
 };

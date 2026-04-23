@@ -18,14 +18,26 @@ export async function createBooking(formData: FormData) {
   const coachId = formData.get("coachId") as string;
   const sessionDate = formData.get("sessionDate") as string;
   const sessionTime = formData.get("sessionTime") as string;
-  const rate = parseInt(formData.get("rate") as string);
+  const baseRate = parseInt(formData.get("rate") as string);
 
-  if (!coachId || !sessionDate || !sessionTime || !rate) {
+  if (!coachId || !sessionDate || !sessionTime || !baseRate) {
     return { error: "Missing booking details." };
   }
 
-  // Calculate fees
-  const platformFee = rate * 0.13;
+  // Check if this is the player's first session
+  const { data: pastBookings } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("player_id", user.id)
+    .limit(1);
+
+  const isFirstSession = !pastBookings || pastBookings.length === 0;
+
+  // 1. Tactical Pricing: 50% off for first session
+  const rate = isFirstSession ? Math.max(1, Math.round(baseRate * 0.5)) : baseRate;
+
+  // 2. Launch Promo: 0% Platform Commission
+  const platformFee = 0;
   const total = rate + platformFee;
 
   const { data, error } = await supabase
