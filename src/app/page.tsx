@@ -96,7 +96,7 @@ function Stars({ rating }: { rating: number }) {
   const full = Math.floor(rating);
   const hasHalf = rating - full >= 0.5;
   return (
-    <span className="inline-flex gap-[1px] text-amber-400 text-xs">
+    <span className="inline-flex gap-px text-amber-400 text-xs">
       {Array.from({ length: full }).map((_, i) => (
         <span key={i}>★</span>
       ))}
@@ -143,139 +143,123 @@ function CoachCard({
 }) {
   return (
     <div
-      className="glass-card p-8 flex flex-col justify-between group overflow-visible relative border-slate-800/60 hover:border-pink-400/30 transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] hover:-translate-y-2"
-      style={{ animationDelay: `${index * 80}ms` }}
+      className="glass-card p-6 flex flex-col justify-between group"
+      style={{ animationDelay: `${index * 50}ms` }}
     >
-      {/* Background Ambient Glow */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${coach.gradient} opacity-[0.02] blur-3xl rounded-full transition-opacity duration-1000 group-hover:opacity-[0.08] pointer-events-none`} />
-
-      {/* Video Snippet Background */}
-      {coach.highlightUrl && (
-        <video 
-          src={coach.highlightUrl} 
-          autoPlay 
-          loop 
-          muted 
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-luminosity group-hover:opacity-40 transition-opacity duration-1000 pointer-events-none rounded-[2rem] z-0"
-        />
-      )}
-
-      <div className="relative z-10">
-        {/* Superior Header */}
-        <div className="flex justify-between items-start mb-10">
-          <div className="flex items-center gap-6">
-            <div className="relative group/avatar">
-              <div
-                className={`w-16 h-16 rounded-[1.5rem] bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-black text-2xl shadow-2xl shrink-0 transition-all duration-700 group-hover/avatar:scale-110 group-hover/avatar:rotate-6 z-10 relative border-2 border-white/10 overflow-hidden`}
-              >
-                {coach.avatarUrl ? (
-                  <img src={coach.avatarUrl} alt={coach.name} className="w-full h-full object-cover" />
-                ) : (
-                  coach.avatar
-                )}
-              </div>
-              <div className={`absolute inset-0 bg-gradient-to-br ${coach.gradient} blur-2xl opacity-0 group-hover/avatar:opacity-60 transition-opacity duration-1000 rounded-full scale-150`} />
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-pink-400 rounded-full border-4 border-slate-900 z-20 shadow-lg" title="Online now" />
+      <div>
+        {/* Header */}
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex items-center gap-4">
+            <div
+              className={`w-12 h-12 rounded-xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-bold text-lg shrink-0 overflow-hidden`}
+            >
+              {coach.avatarUrl ? (
+                <img src={coach.avatarUrl} alt={coach.name} className="w-full h-full object-cover" />
+              ) : (
+                coach.avatar
+              )}
             </div>
 
             <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-3 mb-1.5 flex-wrap">
-                <h3 className="text-2xl font-black text-white tracking-tighter leading-none group-hover:text-pink-400 transition-colors">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <h3 className="text-lg font-bold text-white leading-tight">
                   {titleCase(coach.name)}
                 </h3>
                 {coach.verified && (
-                  <div className="shrink-0 flex items-center gap-1.5 text-[10px] bg-pink-400/20 text-pink-400 px-3 py-1 rounded-full border border-pink-400/30 font-black uppercase tracking-widest shadow-lg shadow-pink-400/10">
-                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
-                    VERIFIED
-                  </div>
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-md border border-indigo-500/20 font-semibold uppercase tracking-wider">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
+                    Verified
+                  </span>
                 )}
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 text-sm">
+                <div className="flex items-center gap-1.5">
                   <Stars rating={coach.rating} />
-                  <span className="text-sm text-white font-black font-mono tracking-tighter">
+                  <span className="text-zinc-300 font-semibold font-mono text-xs">
                     {coach.rating}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-slate-700" />
-                  <span className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] opacity-80">
-                    {coach.reviews} reviews
-                  </span>
-                </div>
+                <span className="text-zinc-600">·</span>
+                <span className="text-xs text-zinc-500">
+                  {coach.reviews} reviews
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col items-end leading-none">
-            <span className="text-3xl font-black text-white font-mono tracking-tighter">
+          <div className="flex flex-col items-end">
+            <span className="text-xl font-bold text-white font-mono">
               ${coach.rate}
             </span>
-            <span className="text-[9px] text-slate-600 uppercase font-black tracking-[0.25em] mt-2 opacity-60">PER SESSION</span>
+            <span className="text-[10px] text-zinc-500 mt-0.5">per session</span>
           </div>
         </div>
 
         {/* Location */}
         {coach.location && (
-          <div className="flex items-center gap-2 mb-4 text-slate-400">
+          <div className="flex items-center gap-1.5 mb-3 text-zinc-400">
             <span className="text-xs">📍</span>
-            <span className="text-[11px] font-medium">{coach.location}</span>
+            <span className="text-xs">{coach.location}</span>
           </div>
         )}
 
-        {/* Technical Profile Tags */}
-        <div className="flex flex-wrap gap-2.5 mb-8">
-          <span className="bg-slate-950/80 text-slate-200 text-[10px] px-4 py-2 rounded-xl font-black uppercase tracking-[0.2em] border border-slate-800 shadow-[inset_0_2px_10px_rgba(0,0,0,0.4)]">
+        {/* Tags */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          <span className="text-xs text-zinc-300 px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700">
             {coach.role}
           </span>
-          <span className="text-indigo-400 text-[10px] font-black font-mono uppercase tracking-[0.2em] bg-indigo-500/10 px-4 py-2 rounded-xl border border-indigo-500/20 shadow-lg shadow-indigo-500/5">
+          <span className="text-xs text-indigo-400 px-2.5 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20">
             {coach.style}
           </span>
         </div>
 
-        {/* Coach Bio */}
-        <div className="relative mb-10 group/bio">
-          <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-slate-800 to-transparent opacity-50 group-hover/bio:via-pink-400/50 transition-all duration-700" />
-          <p className="text-sm text-slate-400 leading-relaxed line-clamp-3 font-medium tracking-tight italic pl-2">
-            &quot;{coach.bio || "Experienced coach available for sessions and video analysis."}&quot;
-          </p>
-        </div>
+        {/* Bio */}
+        <p className="text-sm text-zinc-400 leading-relaxed line-clamp-3 mb-5">
+          {coach.bio || "Experienced coach available for sessions and video analysis."}
+        </p>
 
-        {/* Real-time Schedule Status */}
+        {/* Availability */}
         {coach.availability && coach.availability.length > 0 && (
-          <div className="mb-10 bg-slate-950/50 rounded-2xl p-4 border border-slate-900 shadow-inner group/schedule">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-[9px] text-slate-600 font-black uppercase tracking-[0.3em]">Availability</span>
-              <span className="text-[9px] text-pink-400 font-black uppercase tracking-widest animate-pulse">Available</span>
+          <div className="mb-5 bg-zinc-900 rounded-lg p-3 border border-zinc-800">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">Availability</span>
+              <span className="text-[10px] text-emerald-500 font-medium">Available</span>
             </div>
-            <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
+            <div className="flex gap-2 overflow-x-auto pb-1">
               {coach.availability.map((slot: AvailabilitySlot, i: number) => (
                 <div
                   key={i}
-                  className="flex flex-col items-center bg-slate-900 border border-slate-800/80 rounded-xl px-4 py-2.5 min-w-[80px] transition-all hover:border-pink-400/30 hover:bg-pink-400/[0.03]"
+                  className="flex flex-col items-center bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 min-w-[70px]"
                 >
-                  <span className="text-[8px] text-slate-500 font-black uppercase tracking-widest mb-1.5">{slot.day?.substring(0, 3)}</span>
-                  <span className="text-[10px] text-slate-200 font-black font-mono">{slot.start}</span>
+                  <span className="text-[10px] text-zinc-500 font-medium mb-0.5">{slot.day?.substring(0, 3)}</span>
+                  <span className="text-[11px] text-zinc-300 font-mono font-medium">{slot.start}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
+
+        {/* Video */}
+        {coach.highlightUrl && (
+          <a
+            href={coach.highlightUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 text-xs text-zinc-400 hover:text-indigo-400 transition-colors mb-5"
+          >
+            ▶ Watch highlight reel
+          </a>
+        )}
       </div>
 
-      {/* Primary Action Trigger */}
-      <div className="relative mt-auto">
-        <button
-          id={`book-coach-${coach.id}`}
-          onClick={() => onBook(coach)}
-          className="relative w-full py-5 bg-white text-black hover:bg-pink-400 hover:text-white rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] transition-all duration-500 active:scale-[0.98] overflow-hidden group/btn shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_25px_50px_rgba(236,132,191,0.3)] hover:-translate-y-1 block text-center"
-        >
-          {/* Shimmer Intensity */}
-          <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1s_infinite] pointer-events-none" />
-          <span className="relative z-10">Book Now</span>
-        </button>
-      </div>
+      {/* Book Button */}
+      <button
+        id={`book-coach-${coach.id}`}
+        onClick={() => onBook(coach)}
+        className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold text-sm transition-colors active:scale-[0.98]"
+      >
+        Book Session
+      </button>
     </div>
   );
 }
@@ -617,105 +601,94 @@ export default function SoccerPlatform() {
      RENDER
      ═══════════════════ */
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-slate-100 relative">
-      {/* ── Ambient Background Glow ── */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-[40%] -left-[20%] w-[60%] h-[60%] bg-indigo-600/[0.04] rounded-full blur-[120px]" />
-        <div className="absolute -bottom-[30%] -right-[20%] w-[50%] h-[50%] bg-violet-600/[0.03] rounded-full blur-[120px]" />
-      </div>
+    <div className="min-h-screen bg-[var(--bg-primary)] text-zinc-100 relative">
 
       {/* ═══════════════
           MODALS
           ═══════════════ */}
       {activeModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div
-            className="bg-slate-900 border border-slate-800 p-7 md:p-10 rounded-[2.5rem] max-w-5xl w-full shadow-[0_0_100px_rgba(0,0,0,0.8)] relative anim-scale-in overflow-hidden"
+            className="bg-zinc-900 border border-zinc-800 p-6 md:p-8 rounded-xl max-w-5xl w-full  relative anim-scale-in overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Background Glows for Modal */}
-            <div className="absolute -top-[20%] -right-[10%] w-[40%] h-[40%] bg-pink-400/10 rounded-full blur-[80px] pointer-events-none" />
-            <div className="absolute -bottom-[20%] -left-[10%] w-[30%] h-[30%] bg-cyan-500/5 rounded-full blur-[60px] pointer-events-none" />
-
             <button
               id="modal-close"
               onClick={closeModal}
-              className="absolute top-6 right-6 w-10 h-10 rounded-2xl bg-slate-800/80 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-all z-20 border border-slate-700/50"
+              className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white transition-colors z-20"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
 
             {/* Schedule Modal */}
             {activeModal === "schedule" && selectedCoach && (
-              <div className="anim-fade-in flex flex-col md:flex-row gap-10 relative z-10">
+              <div className="anim-fade-in flex flex-col md:flex-row gap-8 relative z-10">
                 {/* Left Side: Coach Info */}
                 <div className="flex-1">
-                  <div className="flex gap-6 mb-10">
-                    <div className="relative shrink-0">
+                  <div className="flex gap-4 mb-6">
+                    <div className="shrink-0">
                       <div
-                        className={`w-24 h-24 rounded-[2rem] bg-gradient-to-br ${selectedCoach.gradient} flex items-center justify-center text-white font-black text-4xl shadow-2xl relative z-10 border-2 border-white/10`}
+                        className={`w-16 h-16 rounded-xl bg-gradient-to-br ${selectedCoach.gradient} flex items-center justify-center text-white font-bold text-2xl`}
                       >
                         {selectedCoach.avatar}
                       </div>
-                      <div className={`absolute inset-0 bg-gradient-to-br ${selectedCoach.gradient} blur-3xl opacity-40 rounded-full`} />
                     </div>
                     <div className="flex flex-col justify-center">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h2 className="text-3xl font-black text-white tracking-tighter">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h2 className="text-xl font-bold text-white">
                           {selectedCoach.name}
                         </h2>
                         {selectedCoach.verified && (
-                          <span className="flex items-center gap-1.5 text-[10px] bg-pink-400/20 text-pink-400 px-3 py-1 rounded-full border border-pink-400/30 font-black uppercase tracking-widest">
-                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
-                            VERIFIED PRO
+                          <span className="inline-flex items-center gap-1 text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-md border border-indigo-500/20 font-semibold">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
+                            Verified
                           </span>
                         )}
                       </div>
 
-                      <p className="text-sm text-pink-400/90 font-bold uppercase tracking-widest mb-3">
+                      <p className="text-sm text-zinc-400 mb-2">
                         {selectedCoach.experience || "Experienced Coach"}
                       </p>
 
-                      <div className="flex items-center gap-3 text-sm">
+                      <div className="flex items-center gap-2 text-sm">
                         <Stars rating={selectedCoach.rating} />
-                        <span className="font-extrabold text-white text-lg leading-none">
+                        <span className="font-semibold text-white">
                           {selectedCoach.rating}
                         </span>
-                        <span className="text-slate-500 font-bold uppercase tracking-tighter text-xs">({selectedCoach.reviews} reviews)</span>
+                        <span className="text-zinc-500 text-xs">({selectedCoach.reviews} reviews)</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 mb-8">
-                    <span className="bg-slate-800/80 text-slate-200 text-[11px] px-4 py-2 rounded-xl font-black uppercase tracking-widest border border-slate-700/50 shadow-lg">
+                  <div className="flex items-center gap-2 mb-5">
+                    <span className="text-xs text-zinc-300 px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700">
                       {selectedCoach.role}
                     </span>
-                    <span className="bg-cyan-500/10 text-cyan-400 text-[11px] px-4 py-2 rounded-xl border border-cyan-500/20 font-black uppercase tracking-widest shadow-lg">
+                    <span className="text-xs text-indigo-400 px-2.5 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20">
                       {selectedCoach.style}
                     </span>
                   </div>
 
-                  <p className="text-slate-300 text-base leading-relaxed mb-10 bg-slate-950/30 p-6 rounded-[2rem] border border-slate-800/50 font-medium whitespace-pre-wrap">
+                  <p className="text-zinc-300 text-sm leading-relaxed mb-6 bg-zinc-800/50 p-4 rounded-lg border border-zinc-800 whitespace-pre-wrap">
                     {selectedCoach.bio}
                   </p>
 
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {selectedCoach.availability && selectedCoach.availability.length > 0 && (
                       <div>
-                        <p className="text-[11px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />
-                          Coach&apos;s Weekly Hours
+                        <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-3">
+                          Weekly Availability
                         </p>
-                        <div className="flex flex-wrap gap-2.5">
+                        <div className="flex flex-wrap gap-2">
                           {selectedCoach.availability.map((slot: AvailabilitySlot, i: number) => (
                             <span
                               key={i}
-                              className="text-[10px] bg-slate-950 text-slate-200 px-3 py-2 rounded-xl border-l-2 border-pink-400 font-mono font-bold shadow-2xl flex items-center gap-2"
+                              className="text-xs bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded-lg border border-zinc-700 font-mono flex items-center gap-1.5"
                             >
-                              <span className="text-pink-400/50">{slot.day}</span>
+                              <span className="text-zinc-500">{slot.day}</span>
                               {slot.start} - {slot.end}
                             </span>
                           ))}
@@ -728,34 +701,29 @@ export default function SoccerPlatform() {
                         href={selectedCoach.highlightUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center justify-center gap-4 w-full bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 py-4 rounded-[1.5rem] text-sm font-black uppercase tracking-widest transition-all shadow-xl hover:-translate-y-1 hover:shadow-red-500/10 active:scale-[0.98]"
+                        className="flex items-center justify-center gap-2 w-full bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-600 py-3 rounded-lg text-sm font-medium transition-colors"
                       >
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" /></svg>
-                        Watch Highlight Reel
+                        ▶ Watch Highlight Reel
                       </a>
                     )}
                   </div>
                 </div>
 
-                {/* Right Side: Simple Selection & Receipt */}
-                <div className="md:w-[22rem] shrink-0">
-                  <div className="bg-slate-950/80 border border-slate-800 rounded-[2.5rem] p-8 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] relative overflow-hidden group/receipt h-full transition-all hover:border-pink-400/20">
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-pink-400/[0.03] blur-3xl rounded-full -mr-24 -mt-24 pointer-events-none group-hover/receipt:bg-pink-400/[0.08] transition-all duration-700" />
-
-                    <h3 className="text-white font-black text-xl mb-8 tracking-tighter flex items-center gap-3">
-                      <span className="w-2 h-7 bg-pink-400 rounded-full shadow-[0_0_15px_rgba(236,132,191,0.5)]" />
-                      Confirm Session
+                <div className="md:w-[20rem] shrink-0">
+                  <div className="bg-zinc-800/50 border border-zinc-800 rounded-xl p-6 h-full">
+                    <h3 className="text-white font-bold text-lg mb-6">
+                      Book Session
                     </h3>
 
-                    <div className="space-y-10">
+                    <div className="space-y-6">
                       {/* Step 1: Date Picker */}
                       <div>
-                        <label className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black block mb-4 ml-1">
-                          1 • Pick a Date
+                        <label className="text-xs text-zinc-500 uppercase tracking-wider font-medium block mb-3">
+                          1. Pick a Date
                         </label>
-                        <div className="grid grid-cols-7 gap-1.5 text-center bg-slate-900/40 p-3 rounded-2xl border border-slate-800/60">
+                        <div className="grid grid-cols-7 gap-1 text-center bg-zinc-900 p-2 rounded-lg border border-zinc-800">
                           {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                            <div key={`day-${i}`} className="text-[10px] text-slate-600 font-bold py-2">
+                            <div key={`day-${i}`} className="text-[10px] text-zinc-600 font-medium py-1.5">
                               {d}
                             </div>
                           ))}
@@ -773,10 +741,10 @@ export default function SoccerPlatform() {
                                 <button
                                   key={i}
                                   onClick={() => { setSelectedDate(d.date.getDate()); setSelectedMonth(d.date.getMonth()); setSelectedYear(d.date.getFullYear()); }}
-                                  className={`h-9 w-9 flex items-center justify-center rounded-xl text-[13px] font-black transition-all ${
+                                  className={`h-8 w-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
                                     isSel
-                                      ? "bg-pink-400 text-white shadow-[0_0_20px_rgba(236,132,191,0.4)] scale-110 z-10"
-                                      : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                                      ? "bg-indigo-600 text-white"
+                                      : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
                                   }`}
                                 >
                                   {d.label}
@@ -787,49 +755,47 @@ export default function SoccerPlatform() {
                         </div>
                       </div>
 
-                      {/* Step 2: Time Slots */}
                       <div className={selectedDate ? "anim-fade-in" : "opacity-30 pointer-events-none transition-opacity"}>
-                        <label className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black block mb-4 ml-1">
-                          2 • Preferred Time
+                        <label className="text-xs text-zinc-500 uppercase tracking-wider font-medium block mb-3">
+                          2. Select Time
                         </label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-2">
                           {getAvailableSlots(selectedCoach.availability || [], new Date(selectedYear || 2025, selectedMonth ?? 0, selectedDate || 1)).length > 0 ? (
                             getAvailableSlots(selectedCoach.availability || [], new Date(selectedYear || 2025, selectedMonth ?? 0, selectedDate || 1)).map((t) => (
                               <button
                                 key={t}
                                 type="button"
                                 onClick={() => setSelectedTime(t)}
-                                className={`py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all border-2 ${selectedTime === t
-                                    ? "bg-pink-400/10 border-pink-400/50 text-pink-400 shadow-[0_0_20px_rgba(236,132,191,0.2)]"
-                                    : "bg-slate-900/50 border-slate-800/40 text-slate-500 hover:border-slate-700 hover:text-slate-300"
+                                className={`py-3 rounded-lg text-xs font-medium transition-colors border ${selectedTime === t
+                                    ? "bg-indigo-500/10 border-indigo-500/50 text-indigo-400"
+                                    : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
                                   }`}
                               >
                                 {t}
                               </button>
                             ))
                           ) : (
-                            <div className="col-span-2 py-8 bg-slate-950/40 rounded-2xl border border-slate-800 border-dashed text-center">
-                              <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest">No availability on this day</p>
+                            <div className="col-span-2 py-6 bg-zinc-900 rounded-lg border border-zinc-800 border-dashed text-center">
+                              <p className="text-xs text-zinc-600">No availability on this day</p>
                             </div>
                           )}
                         </div>
                       </div>
 
-                      {/* Step 3: Receipt */}
                       {selectedDate && selectedTime ? (
-                        <div className="anim-fade-in pt-8 border-t-2 border-dashed border-slate-800/80">
-                          <div className="space-y-4 mb-8">
-                            <div className="flex justify-between text-sm font-bold">
-                              <span className="text-slate-500 uppercase tracking-widest text-[10px]">Coaching Session</span>
-                              <span className="text-white">${selectedCoach.rate}.00</span>
+                        <div className="anim-fade-in pt-6 border-t border-zinc-800">
+                          <div className="space-y-3 mb-6">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-zinc-500">Coaching Session</span>
+                              <span className="text-white font-medium">${selectedCoach.rate}.00</span>
                             </div>
-                             <div className="flex justify-between text-sm font-bold">
-                              <span className="text-slate-500 uppercase tracking-widest text-[10px]">Service Fee</span>
-                              <span className="text-white">${Math.round(selectedCoach.rate * PLATFORM_CUT)}.00</span>
+                             <div className="flex justify-between text-sm">
+                              <span className="text-zinc-500">Service Fee</span>
+                              <span className="text-white font-medium">${Math.round(selectedCoach.rate * PLATFORM_CUT)}.00</span>
                             </div>
-                            <div className="flex justify-between items-end pt-5 border-t border-slate-800/50">
-                              <span className="text-slate-400 font-black uppercase text-[11px] tracking-[0.2em]">TOTAL DUE</span>
-                              <span className="text-white text-3xl font-black tracking-tighter leading-none">${selectedCoach.rate + Math.round(selectedCoach.rate * PLATFORM_CUT)}.00</span>
+                            <div className="flex justify-between items-end pt-3 border-t border-zinc-800">
+                              <span className="text-zinc-400 font-medium text-sm">Total</span>
+                              <span className="text-white text-xl font-bold">${selectedCoach.rate + Math.round(selectedCoach.rate * PLATFORM_CUT)}.00</span>
                             </div>
                           </div>
 
@@ -860,25 +826,22 @@ export default function SoccerPlatform() {
                                 window.location.href = result.url;
                               }
                             }}
-                            className="gradient-btn w-full py-5 text-[15px] uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(236,132,191,0.3)] hover:shadow-[0_25px_50px_rgba(236,132,191,0.4)] transition-all hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:grayscale group-hover/receipt:scale-[1.02]"
+                            className="gradient-btn w-full py-3.5 text-sm disabled:opacity-50"
                           >
-                            {bookingLoading ? "Connecting Securely..." : "Book Now"}
+                            {bookingLoading ? "Connecting..." : "Book Now"}
                           </button>
 
-                          <div className="mt-8 flex flex-col items-center gap-3">
-                            <div className="flex items-center gap-4 opacity-40 grayscale hover:grayscale-0 transition-all">
-                              <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-5 brightness-200" />
-                            </div>
-                            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.25em] text-center leading-loose">
-                              Payment Secured<br />
-                              Released when both parties confirm session
+                          <div className="mt-5 flex flex-col items-center gap-2">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-4 opacity-30 brightness-200" />
+                            <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
+                              Payment secured. Released when both parties confirm.
                             </p>
                           </div>
                         </div>
                       ) : (
-                        <div className="pt-20 text-center opacity-20">
-                          <svg className="w-16 h-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                          <p className="text-[10px] uppercase font-black tracking-widest leading-loose">Complete steps above<br />to calculate totals</p>
+                        <div className="pt-12 text-center opacity-20">
+                          <svg className="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                          <p className="text-xs">Select a date and time</p>
                         </div>
                       )}
                     </div>
@@ -890,24 +853,24 @@ export default function SoccerPlatform() {
             {/* TOS Modal */}
             {activeModal === "tos" && (
               <div className="anim-fade-in relative z-10 py-4 max-w-2xl mx-auto">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center text-xl shadow-xl border border-indigo-500/30">📜</div>
-                  <h3 className="text-3xl font-black text-white tracking-tighter">
-                    Terms of <span className="gradient-text-accent">Platform</span>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-zinc-800 text-zinc-400 rounded-lg flex items-center justify-center text-lg border border-zinc-700">📜</div>
+                  <h3 className="text-xl font-bold text-white">
+                    Terms of Service
                   </h3>
                 </div>
-                <div className="space-y-6">
-                  <div className="p-8 bg-slate-950/60 rounded-[2rem] border border-slate-800 shadow-2xl">
-                    <strong className="text-white text-lg block mb-3 uppercase tracking-tighter">1. Two-Way Confirmation System</strong>
-                    <p className="text-slate-400 leading-relaxed font-medium">To ensure security for both sides, session funds are held in CoachingMatch&apos;s secure vault. After your session is completed, both the coach and the player must click &quot;Confirm Session Complete&quot; for funds to be released. If either party does not confirm, the funds remain held and our support team will assist.</p>
+                <div className="space-y-4">
+                  <div className="p-5 bg-zinc-800/50 rounded-lg border border-zinc-800">
+                    <strong className="text-white text-sm block mb-2">1. Two-Way Confirmation System</strong>
+                    <p className="text-zinc-400 text-sm leading-relaxed">To ensure security for both sides, session funds are held in CoachingMatch&apos;s secure vault. After your session is completed, both the coach and the player must click &quot;Confirm Session Complete&quot; for funds to be released. If either party does not confirm, the funds remain held and our support team will assist.</p>
                   </div>
-                  <div className="p-8 bg-rose-950/10 rounded-[2rem] border border-rose-900/30 shadow-2xl">
-                    <strong className="text-rose-400 text-lg block mb-3 uppercase tracking-tighter">2. Off-Platform Protection</strong>
-                    <p className="text-rose-300/60 leading-relaxed font-medium">Attempting to book coaching sessions outside of CoachingMatch is strictly prohibited. This is for your own safety; sessions outside our portal are not protected by our escrow guarantee and will result in immediate permanent account suspension.</p>
+                  <div className="p-5 bg-zinc-800/50 rounded-lg border border-red-900/30">
+                    <strong className="text-red-400 text-sm block mb-2">2. Off-Platform Protection</strong>
+                    <p className="text-zinc-400 text-sm leading-relaxed">Attempting to book coaching sessions outside of CoachingMatch is strictly prohibited. This is for your own safety; sessions outside our portal are not protected by our escrow guarantee and will result in immediate permanent account suspension.</p>
                   </div>
-                  <div className="p-8 bg-amber-950/10 rounded-[2rem] border border-amber-900/30 shadow-2xl">
-                    <strong className="text-amber-400 text-lg block mb-3 uppercase tracking-tighter">3. Reviews &amp; Ratings</strong>
-                    <p className="text-amber-300/60 leading-relaxed font-medium">After a session is completed, players are encouraged to leave a star rating and review. This helps future players make informed decisions and helps coaches build their reputation on the platform.</p>
+                  <div className="p-5 bg-zinc-800/50 rounded-lg border border-zinc-800">
+                    <strong className="text-amber-400 text-sm block mb-2">3. Reviews &amp; Ratings</strong>
+                    <p className="text-zinc-400 text-sm leading-relaxed">After a session is completed, players are encouraged to leave a star rating and review. This helps future players make informed decisions and helps coaches build their reputation on the platform.</p>
                   </div>
                 </div>
               </div>
@@ -921,7 +884,7 @@ export default function SoccerPlatform() {
           ═══════════════ */}
       <nav className="max-w-6xl mx-auto flex justify-between items-center nav-glass p-4 md:px-7 md:py-4 md:rounded-full sticky top-0 md:top-6 z-50 transition-all duration-300">
         <h1
-          className="text-lg font-black tracking-tighter gradient-text cursor-pointer"
+          className="text-lg font-bold text-white cursor-pointer"
           onClick={() =>
             switchView(
               currentUser.role === "coach"
@@ -955,15 +918,14 @@ export default function SoccerPlatform() {
               </>
             )}
             {currentUser.role === "coach" && (
-              <NavBtn
+                <NavBtn
                 active={view === "dashboard"}
                 onClick={() => switchView("dashboard")}
-                accent="rose"
               >
                 <div className="flex items-center gap-2">
-                  <span>COACH HUB</span>
+                  <span>Coach Hub</span>
                   {stripeOnboarded === false && (
-                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
                   )}
                 </div>
               </NavBtn>
@@ -972,36 +934,28 @@ export default function SoccerPlatform() {
               <NavBtn
                 active={view === "admin"}
                 onClick={() => switchView("admin")}
-                accent="rose"
               >
-                Disputes
+                Admin
               </NavBtn>
             )}
           </div>
 
-          <div className="h-5 w-px bg-slate-700/50" />
+          <div className="h-5 w-px bg-zinc-700/50" />
 
           {currentUser.isAuthenticated ? (
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <div
-                  className={`w-7 h-7 rounded-lg bg-gradient-to-br ${currentUser.role === "coach"
-                      ? "from-pink-400 to-purple-500"
-                      : currentUser.role === "admin"
-                        ? "from-rose-500 to-pink-600"
-                        : "from-indigo-500 to-violet-600"
-                    } flex items-center justify-center text-white font-bold text-xs`}
-                >
+              <div className="w-7 h-7 rounded-lg bg-zinc-700 flex items-center justify-center text-white font-medium text-xs">
                   {currentUser.name.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-[11px] text-slate-400 font-medium max-w-[100px] truncate">
+                <span className="text-xs text-zinc-400">
                   {currentUser.name}
                 </span>
               </div>
               <form action={signOut}>
                 <button
                   type="submit"
-                  className="bg-slate-800/70 border border-slate-700/50 text-[11px] font-medium px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/70 transition-colors"
+                  className="text-xs text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg hover:bg-zinc-800 transition-colors"
                 >
                   Sign Out
                 </button>
@@ -1010,7 +964,7 @@ export default function SoccerPlatform() {
           ) : (
             <Link
               href="/login"
-              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-[11px] font-semibold px-4 py-2 rounded-lg text-white transition-all shadow-lg shadow-indigo-600/20"
+              className="bg-indigo-600 hover:bg-indigo-500 text-xs font-medium px-4 py-2 rounded-lg text-white transition-colors"
             >
               Sign In
             </Link>
@@ -1020,7 +974,7 @@ export default function SoccerPlatform() {
         {/* Mobile Menu Toggle */}
         <button
           id="mobile-menu-toggle"
-          className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/60 text-slate-400 hover:text-white transition-colors"
+          className="md:hidden w-10 h-10 flex items-center justify-center rounded-lg bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           <span
@@ -1036,7 +990,7 @@ export default function SoccerPlatform() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-[68px] bg-slate-950/98 backdrop-blur-xl z-30 p-6 anim-fade-in-down">
+        <div className="md:hidden fixed inset-0 top-[68px] bg-zinc-950/98 backdrop-blur-sm z-30 p-6 anim-fade-in-down">
           <div className="flex flex-col gap-5 text-lg font-bold">
             {currentUser.role === "player" && (
               <>
@@ -1048,7 +1002,7 @@ export default function SoccerPlatform() {
                 </button>
                 <button
                   onClick={() => switchView("session")}
-                  className="text-left text-slate-300 hover:text-white transition-colors"
+                  className="text-left text-zinc-300 hover:text-white transition-colors"
                 >
                   My Sessions
                 </button>
@@ -1057,32 +1011,29 @@ export default function SoccerPlatform() {
             {currentUser.role === "coach" && (
               <button
                 onClick={() => switchView("dashboard")}
-                className="text-left text-pink-400 flex items-center justify-between gap-3 w-full"
+                className="text-left text-indigo-400 flex items-center justify-between gap-3 w-full"
               >
                 <span>COACH HUB</span>
                 {stripeOnboarded === false && (
-                  <span className="text-[10px] bg-amber-500 text-black px-2 py-0.5 rounded-full font-black animate-pulse">ACTION REQUIRED</span>
+                  <span className="text-[10px] bg-amber-500 text-black px-2 py-0.5 rounded-full font-semibold ">ACTION REQUIRED</span>
                 )}
               </button>
             )}
             {currentUser.role === "admin" && (
               <button
                 onClick={() => switchView("admin")}
-                className="text-left text-rose-400"
+                className="text-left text-red-400"
               >
                 Admin
               </button>
             )}
 
-            <hr className="border-slate-800/50 my-2" />
+            <hr className="border-zinc-800/50 my-2" />
             {currentUser.isAuthenticated ? (
               <>
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-8 h-8 rounded-lg bg-gradient-to-br ${currentUser.role === "coach"
-                        ? "from-pink-400 to-purple-500"
-                        : "from-indigo-500 to-violet-600"
-                      } flex items-center justify-center text-white font-bold text-sm`}
+                    className="w-8 h-8 rounded-lg bg-zinc-700 flex items-center justify-center text-white font-medium text-sm"
                   >
                     {currentUser.name.charAt(0).toUpperCase()}
                   </div>
@@ -1090,7 +1041,7 @@ export default function SoccerPlatform() {
                     <p className="text-sm font-semibold text-white">
                       {currentUser.name}
                     </p>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
                       {currentUser.role}
                     </p>
                   </div>
@@ -1098,7 +1049,7 @@ export default function SoccerPlatform() {
                 <form action={signOut}>
                   <button
                     type="submit"
-                    className="text-left text-sm text-slate-400 hover:text-rose-400 transition-colors"
+                    className="text-left text-sm text-zinc-400 hover:text-red-400 transition-colors"
                   >
                     Sign Out
                   </button>
@@ -1115,7 +1066,7 @@ export default function SoccerPlatform() {
                 </Link>
                 <Link
                   href="/signup"
-                  className="text-left text-slate-300 hover:text-white transition-colors"
+                  className="text-left text-zinc-300 hover:text-white transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Create Account
@@ -1136,17 +1087,17 @@ export default function SoccerPlatform() {
         {/* Global Alert System */}
         {bookingMessage && (
           <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-xl px-4 anim-fade-in">
-            <div className={`glass-card p-4 border flex items-center justify-between gap-4 shadow-2xl ${bookingMessage.type === "error"
-                ? "border-rose-500/50 bg-rose-500/10 text-rose-400"
-                : "border-pink-400/50 bg-pink-400/10 text-pink-400"
+            <div className={`bg-zinc-900 border rounded-xl p-4 flex items-center justify-between gap-4  ${bookingMessage.type === "error"
+                ? "border-red-500/40 text-red-400"
+                : "border-emerald-500/40 text-emerald-400"
               }`}>
               <div className="flex items-center gap-3">
-                <span className="text-xl">{bookingMessage.type === "error" ? "🚨" : "✅"}</span>
-                <p className="text-sm font-black uppercase tracking-tight">{bookingMessage.text}</p>
+                <span className="text-lg">{bookingMessage.type === "error" ? "🚨" : "✅"}</span>
+                <p className="text-sm font-medium">{bookingMessage.text}</p>
               </div>
               <button
                 onClick={() => setBookingMessage(null)}
-                className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
+                className="w-7 h-7 rounded-md hover:bg-zinc-800 flex items-center justify-center transition-colors text-zinc-400"
               >
                 ✕
               </button>
@@ -1158,55 +1109,43 @@ export default function SoccerPlatform() {
         {view === "discovery" && currentUser.role === "player" && (
           <section className="anim-fade-in-up pb-32">
             {/* Hero Section */}
-            <div className="pt-20 md:pt-32 pb-24 relative">
-              {/* Dynamic Background Elements */}
-              <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-                <div className="absolute top-1/4 -left-20 w-[40rem] h-[40rem] bg-indigo-600/[0.07] blur-[120px] rounded-full animate-pulse" />
-                <div className="absolute bottom-0 right-1/4 w-[30rem] h-[30rem] bg-pink-500/[0.05] blur-[100px] rounded-full animate-[pulse_8s_infinite]" />
-              </div>
-
-              <div className="flex flex-col items-center text-center max-w-4xl mx-auto px-4">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 border border-slate-800/80 mb-10 transition-all hover:border-indigo-500/30 group cursor-default">
-                  <span className="w-2 h-2 rounded-full bg-pink-400 animate-pulse shadow-[0_0_10px_rgba(236,132,191,0.8)]" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 group-hover:text-pink-400 transition-colors">Find Your Coach</span>
-                </div>
-
-                <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter mb-8 text-white leading-[0.9] drop-shadow-2xl">
-                  Level Up <br /> <span className="gradient-text-accent">Your Game.</span>
+            <div className="pt-16 md:pt-24 pb-16">
+              <div className="flex flex-col items-center text-center max-w-3xl mx-auto px-4">
+                <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white leading-tight">
+                  Level Up <br /> <span className="text-indigo-400">Your Game.</span>
                 </h1>
 
-                <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl leading-relaxed mb-16 drop-shadow-sm opacity-90">
+                <p className="text-zinc-400 text-base md:text-lg max-w-xl leading-relaxed mb-12">
                   Connect with experienced coaches for personalized training sessions, film analysis, and skill development.
                 </p>
 
-                {/* Search & Filter Bar */}
-                <div className="w-full max-w-3xl glass-card p-4 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] border-slate-800/40 relative group/search overflow-visible transition-all hover:border-indigo-500/20">
-                  <div className="flex flex-col md:flex-row gap-4 items-center">
-                    <div className="relative w-full group">
-                      <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-600 group-focus-within:text-indigo-400 transition-colors">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <div className="w-full max-w-2xl bg-zinc-900 border border-zinc-800 rounded-xl p-3 relative overflow-visible">
+                  <div className="flex flex-col md:flex-row gap-3 items-center">
+                    <div className="relative w-full">
+                      <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-zinc-500">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                       </div>
                       <input
                         id="coach-search"
-                        className="w-full bg-slate-950/40 border border-slate-800 focus:border-indigo-500/50 rounded-2xl py-4.5 pl-14 pr-6 outline-none text-white font-bold text-sm tracking-tight transition-all shadow-inner placeholder:text-slate-600"
+                        className="w-full bg-zinc-800 border border-zinc-700 focus:border-indigo-500/50 rounded-lg py-3 pl-11 pr-4 outline-none text-white text-sm transition-colors placeholder:text-zinc-600"
                         placeholder="Search by position, style, or coach name..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                       />
                     </div>
 
-                    <div className="shrink-0 flex items-center gap-3 w-full md:w-auto">
+                    <div className="shrink-0 flex items-center gap-2 w-full md:w-auto">
                       <button
                         id="filter-toggle"
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className={`flex items-center justify-between md:justify-start gap-3 w-full md:w-auto px-6 py-4.5 rounded-2xl font-black text-[11px] uppercase tracking-widest border transition-all ${isFilterOpen || activeFilter !== "All Roles"
-                            ? "bg-indigo-500/10 border-indigo-500/40 text-indigo-400 shadow-lg shadow-indigo-500/5"
-                            : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700"
+                        className={`flex items-center justify-between md:justify-start gap-2 w-full md:w-auto px-4 py-3 rounded-lg text-xs font-medium border transition-colors ${isFilterOpen || activeFilter !== "All Roles"
+                            ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400"
+                            : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600"
                           }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
-                          {activeFilter === "All Roles" ? "Filters" : activeFilter}
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                          {activeFilter === "All Roles" ? "Filter" : activeFilter}
                         </div>
                         <span className={`text-[8px] transition-transform ${isFilterOpen ? 'rotate-180' : ''}`}>▼</span>
                       </button>
@@ -1214,7 +1153,7 @@ export default function SoccerPlatform() {
                   </div>
 
                   {isFilterOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-4 bg-slate-900 border border-slate-800 rounded-[2rem] p-6 shadow-3xl z-50 anim-scale-in grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-800 rounded-xl p-4  z-50 anim-scale-in grid grid-cols-2 md:grid-cols-5 gap-2">
                       {["All Roles", "Forward", "Midfielder", "Defender", "Goalkeeper"].map((f) => (
                         <button
                           key={f}
@@ -1222,9 +1161,9 @@ export default function SoccerPlatform() {
                             setActiveFilter(f);
                             setIsFilterOpen(false);
                           }}
-                          className={`py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${activeFilter === f
-                              ? "bg-indigo-500 text-white shadow-xl shadow-indigo-600/20"
-                              : "bg-slate-950 border border-slate-800 text-slate-500 hover:text-white hover:border-slate-700"
+                          className={`py-2.5 rounded-lg text-xs font-medium transition-colors ${activeFilter === f
+                              ? "bg-indigo-600 text-white"
+                              : "bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600"
                             }`}
                         >
                           {f}
@@ -1237,7 +1176,7 @@ export default function SoccerPlatform() {
             </div>
 
             {/* Coach Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 relative z-10 stagger-children">
+            <div className="grid md:grid-cols-2 gap-6 stagger-children">
               {filteredCoaches.map((coach, i) => (
                 <CoachCard
                   key={coach.id}
@@ -1251,8 +1190,8 @@ export default function SoccerPlatform() {
             {filteredCoaches.length === 0 && allCoaches.length === 0 && coachesLoaded && (
               <div className="text-center py-32 anim-fade-in glass-card border-dashed">
                 <p className="text-6xl mb-8">🏟️</p>
-                <h3 className="text-2xl font-black text-white mb-4 tracking-tighter">No Coaches Available Yet</h3>
-                <p className="text-slate-400 max-w-sm mx-auto leading-relaxed font-bold uppercase text-[10px] tracking-[0.2em]">
+                <h3 className="text-2xl font-semibold text-white mb-4 ">No Coaches Available Yet</h3>
+                <p className="text-zinc-400 max-w-sm mx-auto leading-relaxed font-bold uppercase text-[10px] tracking-wider">
                   Be the first coach on the platform.
                 </p>
                 {!currentUser.isAuthenticated && (
@@ -1268,7 +1207,7 @@ export default function SoccerPlatform() {
 
             {filteredCoaches.length === 0 && allCoaches.length > 0 && (
               <div className="text-center py-32 anim-fade-in glass-card">
-                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mb-4">
+                <p className="text-zinc-500 text-[10px] font-semibold uppercase tracking-wider mb-4">
                   0 RESULTS FOUND FOR QUERY
                 </p>
                 <button
@@ -1276,7 +1215,7 @@ export default function SoccerPlatform() {
                     setSearch("");
                     setActiveFilter("All Roles");
                   }}
-                  className="text-indigo-400 text-[12px] font-bold uppercase tracking-widest hover:underline decoration-2"
+                  className="text-indigo-400 text-[12px] font-bold uppercase tracking-wider hover:underline decoration-2"
                 >
                   Clear Filters
                 </button>
@@ -1284,33 +1223,30 @@ export default function SoccerPlatform() {
             )}
 
             {/* Tactical Lifecycle Section */}
-            <div className="mt-40 mb-20">
-              <div className="text-center mb-20 flex flex-col items-center">
-                <span className="text-[10px] font-black tracking-[0.4em] uppercase text-pink-400 mb-6 bg-pink-400/10 px-6 py-2 rounded-full border border-pink-400/20 shadow-xl shadow-pink-400/5">How It Works</span>
-                <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-white mb-6">Simple & <span className="gradient-text-accent">Secure.</span></h2>
-                <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-[11px] max-w-lg leading-loose opacity-70">Book a session, train together, and both confirm when you're done. Easy.</p>
+            <div className="mt-24 mb-16">
+              <div className="text-center mb-12">
+                <span className="text-xs font-medium text-indigo-400 mb-3 inline-block">How It Works</span>
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Simple & Secure.</h2>
+                <p className="text-zinc-500 text-sm max-w-md mx-auto">Book a session, train together, and both confirm when you&apos;re done.</p>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
-                <div className="glass-card p-10 relative group hover:border-indigo-500/30 transition-all duration-700">
-                  <div className="absolute top-0 right-0 p-8 text-6xl font-black text-slate-800/20 group-hover:text-indigo-500/10 transition-colors">01</div>
-                  <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-2xl mb-8 border border-indigo-500/20 shadow-xl shadow-indigo-500/5 group-hover:scale-110 transition-transform">🎯</div>
-                  <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Find a Coach</h4>
-                  <p className="text-sm text-slate-400 leading-relaxed font-medium">Browse verified coaches by position, style, and availability. Pick one that fits your goals and book a time that works for you.</p>
+              <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                <div className="glass-card p-6">
+                  <div className="text-2xl mb-4">🎯</div>
+                  <h4 className="text-base font-semibold text-white mb-2">Find a Coach</h4>
+                  <p className="text-sm text-zinc-400 leading-relaxed">Browse verified coaches by position, style, and availability. Pick one that fits your goals and book a time that works for you.</p>
                 </div>
 
-                <div className="glass-card p-10 relative group hover:border-pink-400/30 transition-all duration-700">
-                  <div className="absolute top-0 right-0 p-8 text-6xl font-black text-slate-800/20 group-hover:text-pink-400/10 transition-colors">02</div>
-                  <div className="w-14 h-14 bg-pink-400/10 rounded-2xl flex items-center justify-center text-2xl mb-8 border border-pink-400/20 shadow-xl shadow-pink-400/5 group-hover:scale-110 transition-transform">🔐</div>
-                  <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Secure Payment</h4>
-                  <p className="text-sm text-slate-400 leading-relaxed font-medium">Your payment is held securely until the session is complete. Both you and the coach confirm it happened, then the coach gets paid.</p>
+                <div className="glass-card p-6">
+                  <div className="text-2xl mb-4">🔐</div>
+                  <h4 className="text-base font-semibold text-white mb-2">Secure Payment</h4>
+                  <p className="text-sm text-zinc-400 leading-relaxed">Your payment is held securely until the session is complete. Both you and the coach confirm it happened, then the coach gets paid.</p>
                 </div>
 
-                <div className="glass-card p-10 relative group hover:border-cyan-500/30 transition-all duration-700">
-                  <div className="absolute top-0 right-0 p-8 text-6xl font-black text-slate-800/20 group-hover:text-cyan-500/10 transition-colors">03</div>
-                  <div className="w-14 h-14 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-2xl mb-8 border border-cyan-500/20 shadow-xl shadow-cyan-500/5 group-hover:scale-110 transition-transform">📊</div>
-                  <h4 className="text-xl font-black text-white mb-4 tracking-tight uppercase">Get Better</h4>
-                  <p className="text-sm text-slate-400 leading-relaxed font-medium">Train with your coach, get personalized feedback, and watch your game improve. Leave a review to help other players find great coaches.</p>
+                <div className="glass-card p-6">
+                  <div className="text-2xl mb-4">📊</div>
+                  <h4 className="text-base font-semibold text-white mb-2">Get Better</h4>
+                  <p className="text-sm text-zinc-400 leading-relaxed">Train with your coach, get personalized feedback, and watch your game improve. Leave a review to help other players find great coaches.</p>
                 </div>
               </div>
             </div>
@@ -1320,8 +1256,8 @@ export default function SoccerPlatform() {
         {/* ── VIEW 2: VOD PORTAL ── */}
         {view === "session" && currentUser.role === "player" && (
           <div className="space-y-6 anim-fade-in-up">
-            <h2 className="text-2xl font-extrabold tracking-tight mb-8">
-              My <span className="gradient-text">Booked Sessions</span>
+            <h2 className="text-xl font-bold mb-6">
+              My Sessions
             </h2>
 
             {/* bookingMessage was here, now moved to global top */}
@@ -1336,40 +1272,40 @@ export default function SoccerPlatform() {
                       <h3 className="text-lg font-bold text-white mb-2">
                         Session with Coach {b.coach?.full_name || "Unknown"}
                       </h3>
-                      <p className="text-slate-400 text-sm mb-3">
+                      <p className="text-zinc-400 text-sm mb-3">
                         {new Date(b.session_date).toLocaleDateString()} at {b.session_time}
                       </p>
                       <div className="flex items-center gap-3 flex-wrap">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${
                           b.status === "pending" ? "bg-amber-950/30 text-amber-500 border-amber-900/50" :
-                          b.status === "confirmed" ? "bg-cyan-950/30 text-cyan-400 border-cyan-900/50" :
-                          b.status === "completed" ? "bg-pink-950/30 text-pink-400 border-pink-900/50" :
-                          "bg-slate-900 text-slate-400 border-slate-700"
+                          b.status === "confirmed" ? "bg-indigo-950/30 text-indigo-400 border-indigo-900/50" :
+                          b.status === "completed" ? "bg-pink-950/30 text-indigo-400 border-pink-900/50" :
+                          "bg-zinc-900 text-zinc-400 border-zinc-700"
                         }`}>
                           {b.status === "pending" ? "Awaiting Checkout" :
                            b.status === "confirmed" ? "Session Paid — Confirm When Done" :
                            b.status === "completed" ? "Completed ✓" :
                            b.status}
                         </span>
-                        <span className="font-mono text-pink-400 font-bold">${b.total}</span>
+                        <span className="font-mono text-indigo-400 font-bold">${b.total}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Two-Way Confirmation Status */}
                   {b.status === "confirmed" && (
-                    <div className="bg-slate-950/60 rounded-2xl p-5 border border-slate-800/80">
-                      <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-4">Session Confirmation Status</p>
+                    <div className="bg-zinc-950/60 rounded-xl p-5 border border-zinc-800/80">
+                      <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider mb-4">Session Confirmation Status</p>
                       <div className="grid grid-cols-2 gap-4 mb-5">
-                        <div className={`rounded-xl p-4 border text-center ${b.coach_confirmed_at ? "bg-pink-400/10 border-pink-400/30" : "bg-slate-900 border-slate-800"}`}>
-                          <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Coach</p>
-                          <p className={`text-sm font-black ${b.coach_confirmed_at ? "text-pink-400" : "text-slate-600"}`}>
+                        <div className={`rounded-xl p-4 border text-center ${b.coach_confirmed_at ? "bg-indigo-500/10 border-indigo-500/30" : "bg-zinc-900 border-zinc-800"}`}>
+                          <p className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider mb-2">Coach</p>
+                          <p className={`text-sm font-semibold ${b.coach_confirmed_at ? "text-indigo-400" : "text-zinc-600"}`}>
                             {b.coach_confirmed_at ? "✓ Confirmed" : "⏳ Pending"}
                           </p>
                         </div>
-                        <div className={`rounded-xl p-4 border text-center ${b.player_confirmed_at ? "bg-pink-400/10 border-pink-400/30" : "bg-slate-900 border-slate-800"}`}>
-                          <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">You (Player)</p>
-                          <p className={`text-sm font-black ${b.player_confirmed_at ? "text-pink-400" : "text-slate-600"}`}>
+                        <div className={`rounded-xl p-4 border text-center ${b.player_confirmed_at ? "bg-indigo-500/10 border-indigo-500/30" : "bg-zinc-900 border-zinc-800"}`}>
+                          <p className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider mb-2">You (Player)</p>
+                          <p className={`text-sm font-semibold ${b.player_confirmed_at ? "text-indigo-400" : "text-zinc-600"}`}>
                             {b.player_confirmed_at ? "✓ Confirmed" : "⏳ Pending"}
                           </p>
                         </div>
@@ -1380,7 +1316,7 @@ export default function SoccerPlatform() {
                         <button
                           onClick={() => handleConfirmSession(b.id)}
                           disabled={confirmingSession === b.id}
-                          className="w-full py-4 bg-white text-black hover:bg-pink-400 hover:text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 active:scale-[0.98]"
+                          className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium text-sm transition-all  disabled:opacity-50 active:scale-[0.98]"
                         >
                           {confirmingSession === b.id ? "Confirming..." : "✓ Confirm Session Complete"}
                         </button>
@@ -1393,8 +1329,8 @@ export default function SoccerPlatform() {
 
                   {/* Rating Form (After completion) */}
                   {b.status === "completed" && !b.player_rating && (
-                    <div className="bg-gradient-to-br from-amber-500/5 to-transparent rounded-2xl p-6 border border-amber-500/20">
-                      <p className="text-sm font-black text-white mb-4">Rate Your Session</p>
+                    <div className="bg-gradient-to-br from-amber-500/5 to-transparent rounded-xl p-6 border border-amber-500/20">
+                      <p className="text-sm font-semibold text-white mb-4">Rate Your Session</p>
                       <div className="flex gap-2 mb-4">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <button
@@ -1405,7 +1341,7 @@ export default function SoccerPlatform() {
                             className={`text-3xl transition-all hover:scale-125 ${
                               star <= (ratingHover || (ratingBookingId === b.id ? ratingValue : 0))
                                 ? "text-amber-400"
-                                : "text-slate-700"
+                                : "text-zinc-700"
                             }`}
                           >
                             ★
@@ -1420,12 +1356,12 @@ export default function SoccerPlatform() {
                             placeholder="Tell us about your experience (optional)"
                             maxLength={500}
                             rows={3}
-                            className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm placeholder:text-slate-700 outline-none focus:border-amber-500/30 resize-none"
+                            className="w-full p-4 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-sm placeholder:text-zinc-700 outline-none focus:border-amber-500/30 resize-none"
                           />
                           <button
                             onClick={() => handleSubmitRating(b.id)}
                             disabled={submittingRating}
-                            className="w-full py-3 bg-amber-500 text-black rounded-xl font-black text-xs uppercase tracking-widest hover:bg-amber-400 transition-all disabled:opacity-50"
+                            className="w-full py-3 bg-amber-500 text-black rounded-xl font-semibold text-xs uppercase tracking-wider hover:bg-amber-400 transition-all disabled:opacity-50"
                           >
                             {submittingRating ? "Submitting..." : `Submit ${ratingValue}-Star Review`}
                           </button>
@@ -1438,26 +1374,26 @@ export default function SoccerPlatform() {
                   {!!b.player_rating && (
                     <div className="flex items-center gap-2 text-sm">
                       <span className="text-amber-400">{"★".repeat(b.player_rating)}{"☆".repeat(5 - b.player_rating)}</span>
-                      <span className="text-slate-500 font-bold">Your Review</span>
-                      {!!b.player_review && <span className="text-slate-400 italic text-xs">— "{b.player_review}"</span>}
+                      <span className="text-zinc-500 font-bold">Your Review</span>
+                      {!!b.player_review && <span className="text-zinc-400 italic text-xs">— "{b.player_review}"</span>}
                     </div>
                   )}
 
                   {/* Optional: VOD Upload (separate feature, not gating payment) */}
                   {b.status === "confirmed" && (
-                    <div className="border-t border-slate-800/50 pt-4">
-                      <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mb-3">Optional: Upload Match Footage for Analysis</p>
+                    <div className="border-t border-zinc-800/50 pt-4">
+                      <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-wider mb-3">Optional: Upload Match Footage for Analysis</p>
                       <div className="flex gap-3">
                         <label className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold text-xs transition-all cursor-pointer border border-dashed ${
                           uploadingVod === b.id
                             ? "bg-indigo-600/20 text-indigo-400 border-indigo-500/50"
-                            : "bg-slate-900/50 text-slate-500 border-slate-800 hover:text-indigo-400 hover:border-indigo-500/30"
+                            : "bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:text-indigo-400 hover:border-indigo-500/30"
                         }`}>
                           {uploadingVod === b.id ? "Uploading..." : "📎 Upload MP4"}
                           <input type="file" accept="video/*" className="hidden" disabled={!!uploadingVod} onChange={(e) => handleVodUpload(e, b.id)} />
                         </label>
                         {!!b.vod_url && (
-                          <a href={b.vod_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 py-3 px-4 bg-slate-800 text-white rounded-xl font-semibold text-xs hover:bg-slate-700 transition-colors border border-slate-700">
+                          <a href={b.vod_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 py-3 px-4 bg-zinc-800 text-white rounded-xl font-semibold text-xs hover:bg-zinc-700 transition-colors border border-zinc-700">
                             ▶ Watch VOD
                           </a>
                         )}
@@ -1471,7 +1407,7 @@ export default function SoccerPlatform() {
 
             {realBookings.length === 0 && (
               <div className="text-center py-20 glass-card">
-                <p className="text-slate-400 mb-4">You haven&apos;t booked any sessions yet.</p>
+                <p className="text-zinc-400 mb-4">You haven&apos;t booked any sessions yet.</p>
                 <button onClick={() => setView("discovery")} className="text-indigo-400 font-semibold hover:text-indigo-300">
                   Find a Coach →
                 </button>
@@ -1489,10 +1425,10 @@ export default function SoccerPlatform() {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-amber-500/20 rounded-2xl flex items-center justify-center text-xl shrink-0">⚠️</div>
+                    <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center text-xl shrink-0">⚠️</div>
                     <div>
-                      <p className="font-black text-lg tracking-tight text-white mb-1">Financial Link Missing</p>
-                      <p className="text-xs font-medium text-slate-400 leading-relaxed max-w-xl">
+                      <p className="font-semibold text-lg tracking-tight text-white mb-1">Financial Link Missing</p>
+                      <p className="text-xs font-medium text-zinc-400 leading-relaxed max-w-xl">
                         You must complete your Stripe onboarding to receive session payouts. Your profile is currently hidden from players until this connection is verified.
                       </p>
                     </div>
@@ -1501,7 +1437,7 @@ export default function SoccerPlatform() {
                     <button
                       onClick={refreshStripeStatus}
                       disabled={isSyncingStripe}
-                      className="flex-1 md:flex-none bg-slate-900 border border-slate-800 hover:border-cyan-500/50 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="flex-1 md:flex-none bg-zinc-900 border border-zinc-800 hover:border-indigo-500/50 text-white px-6 py-3 rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {isSyncingStripe ? <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : "Refresh Status"}
                     </button>
@@ -1520,7 +1456,7 @@ export default function SoccerPlatform() {
                         }
                       }}
                       disabled={isInitiatingStripe}
-                      className="flex-1 md:flex-none bg-red-500/10 border border-red-500/50 hover:bg-red-500/20 text-red-500 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="flex-1 md:flex-none bg-red-500/10 border border-red-500/50 hover:bg-red-500/20 text-red-500 px-6 py-3 rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       Reset & Start Over
                     </button>
@@ -1546,7 +1482,7 @@ export default function SoccerPlatform() {
                         }
                       }}
                       disabled={isInitiatingStripe}
-                      className="flex-1 md:flex-none bg-white text-black hover:bg-slate-200 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl block text-center disabled:opacity-50"
+                      className="flex-1 md:flex-none bg-white text-black hover:bg-zinc-200 px-6 py-3 rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-all  block text-center disabled:opacity-50"
                     >
                       {isInitiatingStripe ? "Processing..." : "Complete Setup"}
                     </button>
@@ -1556,17 +1492,17 @@ export default function SoccerPlatform() {
             )}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4">
               <div>
-                <h2 className="text-4xl font-black tracking-tighter text-white mb-2">
-                  COACH <span className="text-pink-400">DASHBOARD</span>
+                <h2 className="text-2xl font-bold text-white mb-1">
+                  Coach Dashboard
                 </h2>
-                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">
+                <p className="text-zinc-500 text-xs">
                   Your Dashboard
                 </p>
               </div>
               <div className="flex gap-4">
-                <div className="glass-card px-6 py-3 border-pink-400/20 bg-pink-400/5">
-                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Total Career Revenue</p>
-                  <p className="text-xl font-black text-white font-mono">
+                <div className="glass-card px-6 py-3 border-indigo-500/20 bg-indigo-500/5">
+                  <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider mb-1">Total Career Revenue</p>
+                  <p className="text-xl font-semibold text-white font-mono">
                     ${realBookings
                       .filter((b: Booking) => b.status === "completed")
                       .reduce((acc: number, b: Booking) => acc + Number(b.amount || 0), 0)
@@ -1577,7 +1513,7 @@ export default function SoccerPlatform() {
                   href="/coach/edit"
                   className="glass-card px-6 py-3 border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 transition-all flex items-center gap-2 group/edit"
                 >
-                  <span className="text-[9px] text-indigo-400 font-black uppercase tracking-widest">Edit Profile</span>
+                  <span className="text-[9px] text-indigo-400 font-semibold uppercase tracking-wider">Edit Profile</span>
                   <svg className="w-3 h-3 text-indigo-400 group-hover/edit:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </Link>
               </div>
@@ -1600,7 +1536,7 @@ export default function SoccerPlatform() {
                     .filter((b: Booking) => !!b.payout_id)
                     .reduce((sum: number, b: Booking) => sum + Number(b.amount || 0) * (1 - PLATFORM_CUT), 0)
                     .toFixed(2)}`,
-                  color: "text-pink-400",
+                  color: "text-indigo-400",
                 },
                 {
                   label: "Sessions",
@@ -1613,20 +1549,20 @@ export default function SoccerPlatform() {
                     .filter((b: Booking) => b.payout_id)
                     .reduce((sum, b: Booking) => sum + Number(b.amount || 0) * PLATFORM_CUT, 0)
                     .toFixed(2)}`,
-                  color: "text-slate-500",
+                  color: "text-zinc-500",
                 },
               ].map((stat, i) => (
                 <div key={i} className="glass-card p-6">
-                  <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-3">{stat.label}</p>
-                  <p className={`text-2xl font-black font-mono tracking-tighter ${stat.color}`}>{stat.val}</p>
+                  <p className="text-[10px] text-zinc-500 uppercase font-semibold tracking-wider mb-3">{stat.label}</p>
+                  <p className={`text-2xl font-semibold font-mono  ${stat.color}`}>{stat.val}</p>
                 </div>
               ))}
             </div>
 
             {/* Action Queue */}
             <div>
-              <h3 className="text-sm font-black mb-6 text-slate-400 flex items-center gap-3 uppercase tracking-[0.2em]">
-                <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.6)] animate-pulse" />
+              <h3 className="text-sm font-semibold mb-6 text-zinc-400 flex items-center gap-3 uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.6)] " />
                 Sessions Requiring Action
               </h3>
               {realBookings.filter((b: Booking) => b.status === 'confirmed' && !b.coach_confirmed_at).length > 0 ? (
@@ -1637,26 +1573,26 @@ export default function SoccerPlatform() {
                       <div className="p-6 md:p-8">
                         <div className="flex flex-col md:flex-row justify-between md:items-center gap-6 mb-5">
                           <div className="flex items-center gap-6">
-                            <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-500 text-xl font-black shadow-2xl">
+                            <div className="w-14 h-14 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-indigo-500 text-xl font-semibold ">
                               {booking.player_name?.charAt(0) || "P"}
                             </div>
                             <div>
                               <div className="flex items-center gap-3 mb-1">
-                                <h4 className="text-lg font-black text-white tracking-tight">{booking.player_name || "Player"}</h4>
-                                <span className="text-[9px] bg-cyan-500/10 text-cyan-400 px-2.5 py-1 rounded-full border border-cyan-500/30 font-black uppercase tracking-widest">Confirm Session</span>
+                                <h4 className="text-lg font-semibold text-white tracking-tight">{booking.player_name || "Player"}</h4>
+                                <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-2.5 py-1 rounded-full border border-indigo-500/30 font-semibold uppercase tracking-wider">Confirm Session</span>
                               </div>
                               <div className="flex items-center gap-4">
-                                <p className="text-xs text-slate-500 font-bold font-mono tracking-tighter opacity-80">{booking.player_email}</p>
-                                <span className="w-1 h-1 rounded-full bg-slate-800" />
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Session: {new Date(booking.session_date).toLocaleDateString()}</p>
+                                <p className="text-xs text-zinc-500 font-bold font-mono  opacity-80">{booking.player_email}</p>
+                                <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                                <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Session: {new Date(booking.session_date).toLocaleDateString()}</p>
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className={`text-[9px] px-3 py-1.5 rounded-lg font-black uppercase tracking-widest ${
+                            <span className={`text-[9px] px-3 py-1.5 rounded-lg font-semibold uppercase tracking-wider ${
                               booking.player_confirmed_at 
-                                ? "bg-pink-400/10 text-pink-400 border border-pink-400/30"
-                                : "bg-slate-800 text-slate-500 border border-slate-700"
+                                ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/30"
+                                : "bg-zinc-800 text-zinc-500 border border-zinc-700"
                             }`}>
                               Player: {booking.player_confirmed_at ? "✓ Confirmed" : "Pending"}
                             </span>
@@ -1665,7 +1601,7 @@ export default function SoccerPlatform() {
                         <button
                           onClick={() => handleConfirmSession(booking.id)}
                           disabled={confirmingSession === booking.id}
-                          className="w-full py-4 bg-white text-black hover:bg-pink-400 hover:text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 active:scale-[0.98]"
+                          className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium text-sm transition-all  disabled:opacity-50 active:scale-[0.98]"
                         >
                           {confirmingSession === booking.id ? "Confirming..." : "✓ Confirm Session Complete"}
                         </button>
@@ -1674,11 +1610,11 @@ export default function SoccerPlatform() {
                   ))}
                 </div>
               ) : (
-                <div className="glass-card p-12 text-center border-dashed border-slate-800 bg-slate-900/10 container-blur">
-                  <div className="w-16 h-16 bg-slate-900 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-slate-800 shadow-2xl">
+                <div className="glass-card p-12 text-center border-dashed border-zinc-800 bg-zinc-900/10 container-blur">
+                  <div className="w-16 h-16 bg-zinc-900 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-zinc-800 ">
                     <span className="text-2xl">⚡</span>
                   </div>
-                  <p className="text-slate-500 text-xs font-black uppercase tracking-widest">No sessions awaiting confirmation. You're all caught up!</p>
+                  <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider">No sessions awaiting confirmation. You're all caught up!</p>
                 </div>
               )}
             </div>
@@ -1691,25 +1627,25 @@ export default function SoccerPlatform() {
             <div>
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
                 <div>
-                  <h2 className="text-4xl font-black tracking-tighter text-white mb-2">
+                  <h2 className="text-4xl font-semibold  text-white mb-2">
                     Admin <span className="gradient-text">Dashboard</span>
                   </h2>
-                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] opacity-80">
+                  <p className="text-zinc-500 text-[10px] font-semibold uppercase tracking-wider opacity-80">
                     Platform Overview & Management
                   </p>
                 </div>
               </div>
 
               {/* ── Admin Tabs ── */}
-              <div className="flex gap-2 mb-10 border-b border-slate-800/50 pb-4">
+              <div className="flex gap-2 mb-10 border-b border-zinc-800/50 pb-4">
                 {(["overview", "coaches", "bookings"] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setAdminTab(tab)}
-                    className={`px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all ${
+                    className={`px-5 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-wider transition-all ${
                       adminTab === tab
-                        ? "bg-pink-400/10 text-pink-400 border border-pink-400/30"
-                        : "text-slate-500 hover:text-white hover:bg-slate-800/40 border border-transparent"
+                        ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/30"
+                        : "text-zinc-500 hover:text-white hover:bg-zinc-800/40 border border-transparent"
                     }`}
                   >
                     {tab === "overview" ? "📊 Overview" : tab === "coaches" ? "👥 Coaches" : "📅 Bookings"}
@@ -1720,7 +1656,7 @@ export default function SoccerPlatform() {
               {adminLoading ? (
                 <div className="glass-card p-24 text-center">
                   <div className="w-10 h-10 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mx-auto mb-6" />
-                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Loading data...</p>
+                  <p className="text-zinc-500 text-[10px] font-semibold uppercase tracking-wider">Loading data...</p>
                 </div>
               ) : (
                 <>
@@ -1739,7 +1675,7 @@ export default function SoccerPlatform() {
                           {
                             label: "Active Coaches",
                             val: adminCoaches.filter((c: AdminCoach) => !c.banned).length.toString(),
-                            color: "text-pink-400",
+                            color: "text-indigo-400",
                             unit: "LIVE",
                           },
                           {
@@ -1759,13 +1695,13 @@ export default function SoccerPlatform() {
                           },
                         ].map((stat, i) => (
                           <div key={i} className="glass-card p-6 relative overflow-hidden group/stat">
-                            <div className={`absolute top-0 right-0 w-24 h-24 blur-3xl rounded-full -mr-12 -mt-12 opacity-10 transition-all group-hover/stat:opacity-20 ${stat.color === 'text-indigo-400' ? 'bg-indigo-500' : stat.color === 'text-pink-400' ? 'bg-pink-400' : stat.color === 'text-purple-400' ? 'bg-purple-400' : 'bg-white'}`} />
-                            <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-4">
+                            <div className={`absolute top-0 right-0 w-24 h-24 blur-3xl rounded-full -mr-12 -mt-12 opacity-10 transition-all group-hover/stat:opacity-20 ${stat.color === 'text-indigo-400' ? 'bg-indigo-500' : stat.color === 'text-indigo-400' ? 'bg-indigo-500' : stat.color === 'text-purple-400' ? 'bg-purple-400' : 'bg-white'}`} />
+                            <p className="text-[10px] text-zinc-500 uppercase font-semibold tracking-wider mb-4">
                               {stat.label}
                             </p>
                             <div className="flex items-baseline gap-2 mb-1">
-                              <span className={`text-4xl font-black font-mono tracking-tighter ${stat.color}`}>{stat.val}</span>
-                              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{stat.unit}</span>
+                              <span className={`text-4xl font-semibold font-mono  ${stat.color}`}>{stat.val}</span>
+                              <span className="text-[9px] font-semibold text-zinc-600 uppercase tracking-wider">{stat.unit}</span>
                             </div>
                           </div>
                         ))}
@@ -1773,9 +1709,9 @@ export default function SoccerPlatform() {
 
                       {/* Upcoming Sessions */}
                       <div>
-                        <h3 className="text-sm font-black mb-6 text-slate-400 flex items-center gap-4 uppercase tracking-[0.3em]">
-                          <span className="w-2.5 h-2.5 rounded-full bg-pink-400/30 border border-pink-400 flex items-center justify-center p-0.5">
-                            <span className="w-full h-full rounded-full bg-pink-400" />
+                        <h3 className="text-sm font-semibold mb-6 text-zinc-400 flex items-center gap-4 uppercase tracking-wider">
+                          <span className="w-2.5 h-2.5 rounded-full bg-indigo-500/30 border border-indigo-500 flex items-center justify-center p-0.5">
+                            <span className="w-full h-full rounded-full bg-indigo-500" />
                           </span>
                           Upcoming Sessions
                         </h3>
@@ -1790,9 +1726,9 @@ export default function SoccerPlatform() {
 
                           if (upcoming.length === 0) {
                             return (
-                              <div className="glass-card p-12 text-center border-dashed border-slate-800">
+                              <div className="glass-card p-12 text-center border-dashed border-zinc-800">
                                 <p className="text-3xl mb-4 opacity-30">📅</p>
-                                <p className="text-slate-500 text-sm font-bold">No upcoming sessions scheduled</p>
+                                <p className="text-zinc-500 text-sm font-bold">No upcoming sessions scheduled</p>
                               </div>
                             );
                           }
@@ -1803,7 +1739,7 @@ export default function SoccerPlatform() {
                                 const coach = b.coach as Record<string, string> | null;
                                 const player = b.player as Record<string, string> | null;
                                 return (
-                                  <div key={i} className="glass-card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-pink-400/20">
+                                  <div key={i} className="glass-card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-indigo-500/20">
                                     <div className="flex items-center gap-4">
                                       <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">
                                         📅
@@ -1811,19 +1747,19 @@ export default function SoccerPlatform() {
                                       <div>
                                         <p className="text-white font-bold text-sm">
                                           {new Date(String(b.session_date)).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                                          {!!b.session_time && <span className="text-slate-500 ml-2">@ {String(b.session_time)}</span>}
+                                          {!!b.session_time && <span className="text-zinc-500 ml-2">@ {String(b.session_time)}</span>}
                                         </p>
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
                                           {coach?.full_name || "Unknown Coach"} → {player?.full_name || String(b.player_name) || "Player"}
-                                          {!!b.location && <span className="ml-2 text-pink-400/70">📍 {String(b.location)}</span>}
+                                          {!!b.location && <span className="ml-2 text-indigo-400/70">📍 {String(b.location)}</span>}
                                         </p>
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                      <span className="text-white font-black font-mono">${Number(b.rate)}</span>
-                                      <span className={`text-[9px] px-3 py-1 rounded-lg font-black uppercase tracking-widest border ${
+                                      <span className="text-white font-semibold font-mono">${Number(b.rate)}</span>
+                                      <span className={`text-[9px] px-3 py-1 rounded-lg font-semibold uppercase tracking-wider border ${
                                         b.status === "confirmed"
-                                          ? "bg-pink-400/10 text-pink-400 border-pink-400/20"
+                                          ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
                                           : "bg-amber-500/10 text-amber-400 border-amber-500/20"
                                       }`}>{String(b.status)}</span>
                                     </div>
@@ -1837,7 +1773,7 @@ export default function SoccerPlatform() {
 
                       {/* Recent Completed */}
                       <div>
-                        <h3 className="text-sm font-black mb-6 text-slate-400 flex items-center gap-4 uppercase tracking-[0.3em]">
+                        <h3 className="text-sm font-semibold mb-6 text-zinc-400 flex items-center gap-4 uppercase tracking-wider">
                           <span className="w-2.5 h-2.5 rounded-full bg-green-500/30 border border-green-500 flex items-center justify-center p-0.5">
                             <span className="w-full h-full rounded-full bg-green-500" />
                           </span>
@@ -1850,9 +1786,9 @@ export default function SoccerPlatform() {
 
                           if (completed.length === 0) {
                             return (
-                              <div className="glass-card p-12 text-center border-dashed border-slate-800">
+                              <div className="glass-card p-12 text-center border-dashed border-zinc-800">
                                 <p className="text-3xl mb-4 opacity-30">✅</p>
-                                <p className="text-slate-500 text-sm font-bold">No completed sessions yet</p>
+                                <p className="text-zinc-500 text-sm font-bold">No completed sessions yet</p>
                               </div>
                             );
                           }
@@ -1872,15 +1808,15 @@ export default function SoccerPlatform() {
                                         <p className="text-white font-bold text-sm">
                                           {new Date(String(b.session_date)).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                                         </p>
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
                                           {coach?.full_name || "Coach"} → {player?.full_name || String(b.player_name) || "Player"}
                                           {!!b.player_rating && <span className="ml-2 text-amber-400">{"★".repeat(Number(b.player_rating))}</span>}
                                         </p>
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                      <span className="text-slate-400 font-bold font-mono text-sm">${Number(b.rate)}</span>
-                                      <span className="text-[9px] text-slate-600 font-bold">→ ${Math.round((Number(b.rate)) * PLATFORM_CUT)} fee</span>
+                                      <span className="text-zinc-400 font-bold font-mono text-sm">${Number(b.rate)}</span>
+                                      <span className="text-[9px] text-zinc-600 font-bold">→ ${Math.round((Number(b.rate)) * PLATFORM_CUT)} fee</span>
                                     </div>
                                   </div>
                                 );
@@ -1895,7 +1831,7 @@ export default function SoccerPlatform() {
                   {/* ═══════════════ COACHES TAB ═══════════════ */}
                   {adminTab === "coaches" && (
                     <div>
-                      <h3 className="text-sm font-black mb-8 text-slate-400 flex items-center gap-4 uppercase tracking-[0.3em]">
+                      <h3 className="text-sm font-semibold mb-8 text-zinc-400 flex items-center gap-4 uppercase tracking-wider">
                         <span className="w-2.5 h-2.5 rounded-full bg-indigo-500/30 border border-indigo-500 flex items-center justify-center p-0.5">
                           <span className="w-full h-full rounded-full bg-indigo-500" />
                         </span>
@@ -1903,51 +1839,51 @@ export default function SoccerPlatform() {
                       </h3>
 
                       {adminCoaches.length === 0 ? (
-                        <div className="glass-card p-20 text-center border-dashed border-slate-800">
+                        <div className="glass-card p-20 text-center border-dashed border-zinc-800">
                           <p className="text-5xl mb-6 opacity-30">🏟️</p>
-                          <p className="text-slate-400 font-black uppercase tracking-widest mb-2">No Coaches Yet</p>
-                          <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">No coach profiles have been created yet.</p>
+                          <p className="text-zinc-400 font-semibold uppercase tracking-wider mb-2">No Coaches Yet</p>
+                          <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-wider">No coach profiles have been created yet.</p>
                         </div>
                       ) : (
                         <div className="space-y-4">
                           {adminCoaches.map((coach: AdminCoach) => (
                             <div
                               key={coach.id}
-                              className={`glass-card overflow-hidden transition-all duration-500 group/personnel ${coach.banned ? "opacity-60 border-rose-900/40 bg-rose-500/[0.01]" : "hover:border-indigo-500/30"}`}
+                              className={`glass-card overflow-hidden transition-all duration-500 group/personnel ${coach.banned ? "opacity-60 border-red-900/40 bg-red-500/[0.01]" : "hover:border-indigo-500/30"}`}
                             >
                               <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-8">
                                 <div className="flex items-center gap-6">
-                                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-black text-xl shadow-2xl relative z-10 border border-white/10 ${coach.banned ? "grayscale" : ""}`}>
+                                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-semibold text-xl  relative z-10 border border-white/10 ${coach.banned ? "grayscale" : ""}`}>
                                     {coach.avatar}
                                   </div>
                                   <div>
                                     <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                      <h4 className="text-xl font-black text-white tracking-tighter">
+                                      <h4 className="text-xl font-semibold text-white ">
                                         {coach.name}
                                       </h4>
                                       <div className="flex gap-2">
                                         {coach.banned ? (
-                                          <span className="text-[9px] bg-rose-500/10 text-rose-400 px-3 py-1 rounded-lg border border-rose-500/20 font-black tracking-widest">BANNED</span>
+                                          <span className="text-[9px] bg-red-500/10 text-red-400 px-3 py-1 rounded-lg border border-red-500/20 font-semibold tracking-wider">BANNED</span>
                                         ) : (
                                           <>
                                             {coach.verified ? (
-                                              <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-lg border border-indigo-500/20 font-black tracking-widest leading-none flex items-center">✓ VERIFIED</span>
+                                              <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-lg border border-indigo-500/20 font-semibold tracking-wider leading-none flex items-center">✓ VERIFIED</span>
                                             ) : (
-                                              <span className="text-[9px] bg-slate-800 text-slate-500 px-3 py-1 rounded-lg border border-slate-700/50 font-black tracking-widest leading-none flex items-center">PENDING</span>
+                                              <span className="text-[9px] bg-zinc-800 text-zinc-500 px-3 py-1 rounded-lg border border-zinc-700/50 font-semibold tracking-wider leading-none flex items-center">PENDING</span>
                                             )}
                                             {coach.stripeConnected && (
-                                              <span className="text-[9px] bg-pink-400/10 text-pink-400 px-3 py-1 rounded-lg border border-pink-400/20 font-black tracking-widest leading-none flex items-center">STRIPE ✓</span>
+                                              <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-lg border border-indigo-500/20 font-semibold tracking-wider leading-none flex items-center">STRIPE ✓</span>
                                             )}
                                           </>
                                         )}
                                       </div>
                                     </div>
-                                    <div className="flex items-center gap-5 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                                    <div className="flex items-center gap-5 text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
                                       <span className="flex items-center gap-1.5"><Stars rating={coach.rating} /> {coach.rating}</span>
-                                      <span className="w-1 h-1 rounded-full bg-slate-800" />
+                                      <span className="w-1 h-1 rounded-full bg-zinc-800" />
                                       <span>${coach.rate}/session</span>
-                                      <span className="w-1 h-1 rounded-full bg-slate-800" />
-                                      <span className="text-slate-600 lowercase font-mono">{coach.email}</span>
+                                      <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                                      <span className="text-zinc-600 lowercase font-mono">{coach.email}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -1965,7 +1901,7 @@ export default function SoccerPlatform() {
                                         setBanningCoach(null);
                                       }}
                                       disabled={banningCoach === coach.id}
-                                      className="bg-pink-400 text-black hover:bg-pink-300 px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50"
+                                      className="bg-indigo-500 text-black hover:bg-pink-300 px-8 py-3.5 rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-all  disabled:opacity-50"
                                     >
                                       {banningCoach === coach.id ? "RESTORING..." : "RESTORE ACCESS"}
                                     </button>
@@ -1981,7 +1917,7 @@ export default function SoccerPlatform() {
                                         setBanningCoach(null);
                                       }}
                                       disabled={banningCoach === coach.id}
-                                      className="bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-rose-500/30 hover:border-transparent disabled:opacity-50"
+                                      className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-8 py-3.5 rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-all border border-red-500/30 hover:border-transparent disabled:opacity-50"
                                     >
                                       {banningCoach === coach.id ? "BANNING..." : "BAN COACH"}
                                     </button>
@@ -1998,7 +1934,7 @@ export default function SoccerPlatform() {
                   {/* ═══════════════ BOOKINGS TAB ═══════════════ */}
                   {adminTab === "bookings" && (
                     <div>
-                      <h3 className="text-sm font-black mb-8 text-slate-400 flex items-center gap-4 uppercase tracking-[0.3em]">
+                      <h3 className="text-sm font-semibold mb-8 text-zinc-400 flex items-center gap-4 uppercase tracking-wider">
                         <span className="w-2.5 h-2.5 rounded-full bg-purple-500/30 border border-purple-500 flex items-center justify-center p-0.5">
                           <span className="w-full h-full rounded-full bg-purple-500" />
                         </span>
@@ -2006,10 +1942,10 @@ export default function SoccerPlatform() {
                       </h3>
 
                       {adminBookings.length === 0 ? (
-                        <div className="glass-card p-20 text-center border-dashed border-slate-800">
+                        <div className="glass-card p-20 text-center border-dashed border-zinc-800">
                           <p className="text-5xl mb-6 opacity-30">📋</p>
-                          <p className="text-slate-400 font-black uppercase tracking-widest mb-2">No Bookings Yet</p>
-                          <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">Bookings will appear here once players start booking sessions.</p>
+                          <p className="text-zinc-400 font-semibold uppercase tracking-wider mb-2">No Bookings Yet</p>
+                          <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-wider">Bookings will appear here once players start booking sessions.</p>
                         </div>
                       ) : (
                         <div className="space-y-3">
@@ -2020,7 +1956,7 @@ export default function SoccerPlatform() {
                               pending: "bg-amber-500/10 text-amber-400 border-amber-500/20",
                               confirmed: "bg-blue-500/10 text-blue-400 border-blue-500/20",
                               completed: "bg-green-500/10 text-green-400 border-green-500/20",
-                              cancelled: "bg-slate-800 text-slate-500 border-slate-700/50",
+                              cancelled: "bg-zinc-800 text-zinc-500 border-zinc-700/50",
                             };
                             const status = String(b.status);
                             return (
@@ -2030,7 +1966,7 @@ export default function SoccerPlatform() {
                                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm border ${
                                       status === "completed" ? "bg-green-500/10 border-green-500/20" :
                                       status === "confirmed" ? "bg-blue-500/10 border-blue-500/20" :
-                                      "bg-slate-800/50 border-slate-700/30"
+                                      "bg-zinc-800/50 border-zinc-700/30"
                                     }`}>
                                       {status === "completed" ? "✅" : status === "confirmed" ? "📅" : "⏳"}
                                     </div>
@@ -2039,30 +1975,30 @@ export default function SoccerPlatform() {
                                         <p className="text-white font-bold text-sm truncate">
                                           {coach?.full_name || "Unknown Coach"}
                                         </p>
-                                        <span className="text-slate-700">→</span>
-                                        <p className="text-slate-300 font-medium text-sm truncate">
+                                        <span className="text-zinc-700">→</span>
+                                        <p className="text-zinc-300 font-medium text-sm truncate">
                                           {player?.full_name || String(b.player_name) || "Player"}
                                         </p>
                                       </div>
-                                      <div className="flex items-center gap-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest flex-wrap">
+                                      <div className="flex items-center gap-3 text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex-wrap">
                                         <span>
                                           {b.session_date ? new Date(String(b.session_date)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "No date"}
                                         </span>
                                         {!!b.session_time && (
                                           <>
-                                            <span className="w-1 h-1 rounded-full bg-slate-800" />
+                                            <span className="w-1 h-1 rounded-full bg-zinc-800" />
                                             <span>{String(b.session_time)}</span>
                                           </>
                                         )}
                                         {!!b.location && (
                                           <>
-                                            <span className="w-1 h-1 rounded-full bg-slate-800" />
-                                            <span className="text-pink-400/70">📍 {String(b.location)}</span>
+                                            <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                                            <span className="text-indigo-400/70">📍 {String(b.location)}</span>
                                           </>
                                         )}
                                         {!!b.player_rating && (
                                           <>
-                                            <span className="w-1 h-1 rounded-full bg-slate-800" />
+                                            <span className="w-1 h-1 rounded-full bg-zinc-800" />
                                             <span className="text-amber-400">{"★".repeat(Number(b.player_rating))}</span>
                                           </>
                                         )}
@@ -2070,8 +2006,8 @@ export default function SoccerPlatform() {
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-4">
-                                    <span className="text-white font-black font-mono">${Number(b.rate)}</span>
-                                    <span className={`text-[9px] px-3 py-1.5 rounded-lg font-black uppercase tracking-widest border ${statusColors[status] || statusColors.pending}`}>
+                                    <span className="text-white font-semibold font-mono">${Number(b.rate)}</span>
+                                    <span className={`text-[9px] px-3 py-1.5 rounded-lg font-semibold uppercase tracking-wider border ${statusColors[status] || statusColors.pending}`}>
                                       {status}
                                     </span>
                                   </div>
@@ -2093,13 +2029,13 @@ export default function SoccerPlatform() {
       {/* ═══════════════
           FOOTER
           ═══════════════ */}
-      <footer className="mt-24 py-8 border-t border-slate-800/30 text-center px-4 relative z-10">
-        <p className="text-[11px] text-slate-500 max-w-2xl mx-auto leading-loose">
+      <footer className="mt-24 py-8 border-t border-zinc-800/30 text-center px-4 relative z-10">
+        <p className="text-[11px] text-zinc-500 max-w-2xl mx-auto leading-loose">
           By using CoachingMatch, you agree to our{" "}
           <button
             id="tos-link"
             onClick={() => setActiveModal("tos")}
-            className="text-slate-400 hover:text-indigo-400 underline underline-offset-4 decoration-slate-700 hover:decoration-indigo-500/50 transition-colors mx-1"
+            className="text-zinc-400 hover:text-indigo-400 underline underline-offset-4 decoration-slate-700 hover:decoration-indigo-500/50 transition-colors mx-1"
           >
             Terms of Service
           </button>
@@ -2115,29 +2051,20 @@ function NavBtn({
   active,
   onClick,
   children,
-  accent = "indigo",
 }: {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
-  accent?: "indigo" | "emerald" | "rose";
+  accent?: string;
 }) {
-  const colors = {
-    indigo: active
-      ? "text-indigo-400 bg-indigo-500/10"
-      : "text-slate-400 hover:text-white hover:bg-slate-800/60",
-    emerald: active
-      ? "text-pink-400 bg-pink-400/10"
-      : "text-slate-400 hover:text-white hover:bg-slate-800/60",
-    rose: active
-      ? "text-pink-400 bg-pink-400/10"
-      : "text-slate-400 hover:text-white hover:bg-slate-800/60",
-  };
-
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${colors[accent]}`}
+      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+        active
+          ? "text-white bg-zinc-800"
+          : "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
+      }`}
     >
       {children}
     </button>
