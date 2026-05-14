@@ -28,7 +28,12 @@ interface AdminCoach {
   rating: number;
   reviews: number;
   bio: string;
+  experience: string;
+  highlightUrl: string;
+  availability: { day: string; start: string; end: string }[];
+  location: string;
   avatar: string;
+  avatarUrl: string;
   gradient: string;
   stripeConnected: boolean;
 }
@@ -136,15 +141,18 @@ function CoachCard({
   coach,
   index,
   onBook,
+  onViewProfile,
 }: {
   coach: Coach;
   index: number;
   onBook: (c: Coach) => void;
+  onViewProfile: (c: Coach) => void;
 }) {
   return (
     <div
-      className="glass-card p-6 flex flex-col justify-between group"
+      className="glass-card p-6 flex flex-col justify-between group cursor-pointer hover:border-indigo-500/40 transition-all duration-200"
       style={{ animationDelay: `${index * 50}ms` }}
+      onClick={() => onViewProfile(coach)}
     >
       <div>
         {/* Header */}
@@ -238,28 +246,203 @@ function CoachCard({
             </div>
           </div>
         )}
-
-        {/* Video */}
-        {coach.highlightUrl && (
-          <a
-            href={coach.highlightUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 text-xs text-zinc-400 hover:text-indigo-400 transition-colors mb-5"
-          >
-            ▶ Watch highlight reel
-          </a>
-        )}
       </div>
 
       {/* Book Button */}
       <button
         id={`book-coach-${coach.id}`}
-        onClick={() => onBook(coach)}
+        onClick={(e) => { e.stopPropagation(); onBook(coach); }}
         className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold text-sm transition-colors active:scale-[0.98]"
       >
         Book Session
       </button>
+    </div>
+  );
+}
+
+/* ─── Coach Profile Modal ─── */
+function CoachProfileModal({
+  coach,
+  onClose,
+  onBook,
+  isPlayer,
+  isAdmin,
+  onBan,
+  onUnban,
+}: {
+  coach: Coach | AdminCoach;
+  onClose: () => void;
+  onBook?: (c: Coach) => void;
+  isPlayer: boolean;
+  isAdmin: boolean;
+  onBan?: (id: string) => void;
+  onUnban?: (id: string) => void;
+}) {
+  const adminCoach = isAdmin ? (coach as AdminCoach) : null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-0 md:p-6 bg-black/80 backdrop-blur-md anim-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl anim-fade-in-up max-h-[92vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Hero / Profile Photo */}
+        <div className={`relative h-52 bg-gradient-to-br ${coach.gradient} shrink-0`}>
+          {coach.avatarUrl ? (
+            <img src={coach.avatarUrl} alt={coach.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-8xl font-black text-white/20">{coach.avatar}</span>
+            </div>
+          )}
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/30 to-transparent" />
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-9 h-9 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-colors text-sm"
+          >
+            ✕
+          </button>
+          {/* Name overlay */}
+          <div className="absolute bottom-5 left-6 right-6">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h2 className="text-2xl font-black text-white">{titleCase(coach.name)}</h2>
+              {coach.verified && (
+                <span className="text-[10px] bg-indigo-500 text-white px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">✓ Verified</span>
+              )}
+              {adminCoach?.banned && (
+                <span className="text-[10px] bg-red-500/80 text-white px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Banned</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <Stars rating={coach.rating} />
+              <span className="text-white/80 text-xs font-mono">{coach.rating}</span>
+              <span className="text-white/40 text-xs">· {coach.reviews} reviews</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Scrollable content */}
+        <div className="overflow-y-auto flex-1 p-6 space-y-5">
+          {/* Rate + Position + Location row */}
+          <div className="flex flex-wrap gap-3">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex flex-col items-center">
+              <span className="text-xl font-black text-white font-mono">${coach.rate}</span>
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">per session</span>
+            </div>
+            {coach.role && (
+              <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-4 py-3 flex flex-col items-center">
+                <span className="text-sm font-bold text-indigo-400">{coach.role}</span>
+                <span className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">Position</span>
+              </div>
+            )}
+            {(coach as any).experience && (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 flex flex-col items-center">
+                <span className="text-sm font-bold text-zinc-300">{(coach as any).experience}</span>
+                <span className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">Experience</span>
+              </div>
+            )}
+          </div>
+
+          {/* Location */}
+          {(coach as any).location && (
+            <div className="flex items-center gap-2 text-zinc-400">
+              <span>📍</span>
+              <span className="text-sm">{(coach as any).location}</span>
+            </div>
+          )}
+
+          {/* Bio */}
+          {coach.bio && (
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+              <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-3">About</p>
+              <p className="text-sm text-zinc-300 leading-relaxed">{coach.bio}</p>
+            </div>
+          )}
+
+          {/* Availability */}
+          {(coach as any).availability?.length > 0 && (
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+              <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-3">Availability</p>
+              <div className="flex flex-wrap gap-2">
+                {(coach as any).availability.map((slot: AvailabilitySlot, i: number) => (
+                  <div key={i} className="flex flex-col items-center bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2">
+                    <span className="text-[10px] text-zinc-500 font-medium">{slot.day}</span>
+                    <span className="text-xs text-zinc-300 font-mono mt-0.5">{slot.start} – {slot.end}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Highlight Reel */}
+          {(coach as any).highlightUrl && (
+            <a
+              href={(coach as any).highlightUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 hover:border-indigo-500/40 rounded-2xl p-4 transition-colors group/video"
+            >
+              <div className="w-10 h-10 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400 group-hover/video:bg-indigo-500/20 transition-colors">
+                ▶
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">Watch Highlight Reel</p>
+                <p className="text-[11px] text-zinc-500">Opens in new tab</p>
+              </div>
+            </a>
+          )}
+
+          {/* Admin-only section */}
+          {isAdmin && adminCoach && (
+            <div className="bg-red-950/20 border border-red-900/30 rounded-2xl p-5 space-y-4">
+              <p className="text-[10px] text-red-400 uppercase tracking-widest font-bold">Admin Controls</p>
+              <div className="flex items-center gap-3 text-sm text-zinc-400">
+                <span>📧</span>
+                <span className="font-mono">{adminCoach.email}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] px-3 py-1.5 rounded-lg font-bold uppercase tracking-wider ${
+                  adminCoach.stripeConnected ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-zinc-800 text-zinc-500 border border-zinc-700"
+                }`}>
+                  {adminCoach.stripeConnected ? "Stripe ✓ Connected" : "Stripe ✗ Not Connected"}
+                </span>
+              </div>
+              {adminCoach.banned ? (
+                <button
+                  onClick={() => onUnban?.(adminCoach.id)}
+                  className="w-full py-3 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-400 hover:text-white border border-indigo-500/30 rounded-xl text-xs font-bold uppercase tracking-wider transition-all"
+                >
+                  Restore Access
+                </button>
+              ) : (
+                <button
+                  onClick={() => onBan?.(adminCoach.id)}
+                  className="w-full py-3 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 rounded-xl text-xs font-bold uppercase tracking-wider transition-all"
+                >
+                  Ban Coach
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Book button footer (players only) */}
+        {isPlayer && onBook && (
+          <div className="p-4 border-t border-zinc-800 shrink-0">
+            <button
+              onClick={() => { onClose(); onBook(coach as Coach); }}
+              className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold text-sm transition-colors active:scale-[0.98]"
+            >
+              Book a Session — ${coach.rate}/hr
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -366,6 +549,7 @@ export default function SoccerPlatform() {
   const [adminCoaches, setAdminCoaches] = useState<AdminCoach[]>([]);
   const [adminBookings, setAdminBookings] = useState<Record<string, unknown>[]>([]);
   const [adminLoading, setAdminLoading] = useState(false);
+  const [selectedProfileCoach, setSelectedProfileCoach] = useState<Coach | AdminCoach | null>(null);
   const [banningCoach, setBanningCoach] = useState<string | null>(null);
   const [adminTab, setAdminTab] = useState<"overview" | "coaches" | "bookings">("overview");
 
@@ -1177,12 +1361,13 @@ export default function SoccerPlatform() {
 
             {/* Coach Grid */}
             <div className="grid md:grid-cols-2 gap-6 stagger-children">
-              {filteredCoaches.map((coach, i) => (
+            {filteredCoaches.map((coach, i) => (
                 <CoachCard
                   key={coach.id}
                   coach={coach}
                   index={i}
                   onBook={handleBookingClick}
+                  onViewProfile={(c) => setSelectedProfileCoach(c)}
                 />
               ))}
             </div>
@@ -1849,12 +2034,18 @@ export default function SoccerPlatform() {
                           {adminCoaches.map((coach: AdminCoach) => (
                             <div
                               key={coach.id}
-                              className={`glass-card overflow-hidden transition-all duration-500 group/personnel ${coach.banned ? "opacity-60 border-red-900/40 bg-red-500/[0.01]" : "hover:border-indigo-500/30"}`}
+                              className={`glass-card overflow-hidden transition-all duration-300 cursor-pointer group/personnel ${coach.banned ? "opacity-60 border-red-900/40 bg-red-500/[0.01]" : "hover:border-indigo-500/30"}`}
+                              onClick={() => setSelectedProfileCoach(coach as unknown as Coach)}
                             >
                               <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-8">
                                 <div className="flex items-center gap-6">
-                                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-semibold text-xl  relative z-10 border border-white/10 ${coach.banned ? "grayscale" : ""}`}>
-                                    {coach.avatar}
+                                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${coach.gradient} flex items-center justify-center text-white font-semibold text-xl relative z-10 border border-white/10 ${coach.banned ? "grayscale" : ""} overflow-hidden`}>
+                                    {coach.avatarUrl ? (
+                                      <img src={coach.avatarUrl} alt={coach.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                      coach.avatar
+                                    )}
+
                                   </div>
                                   <div>
                                     <div className="flex items-center gap-3 mb-2 flex-wrap">
@@ -2042,7 +2233,41 @@ export default function SoccerPlatform() {
           .
         </p>
       </footer>
+
+      {/* ═══════════════
+          COACH PROFILE MODAL
+          ═══════════════ */}
+      {selectedProfileCoach && (
+        <CoachProfileModal
+          coach={selectedProfileCoach}
+          onClose={() => setSelectedProfileCoach(null)}
+          onBook={currentUser.role === "player" ? (c) => { setSelectedProfileCoach(null); handleBookingClick(c); } : undefined}
+          isPlayer={currentUser.role === "player"}
+          isAdmin={currentUser.role === "admin"}
+          onBan={async (id) => {
+            setBanningCoach(id);
+            await banCoach(id);
+            const updated = await getAllCoachesAdmin();
+            setAdminCoaches(updated as unknown as AdminCoach[]);
+            const publicCoaches = await getCoaches();
+            setDbCoaches(publicCoaches as unknown as Coach[]);
+            setBanningCoach(null);
+            setSelectedProfileCoach(null);
+          }}
+          onUnban={async (id) => {
+            setBanningCoach(id);
+            await unbanCoach(id);
+            const updated = await getAllCoachesAdmin();
+            setAdminCoaches(updated as unknown as AdminCoach[]);
+            const publicCoaches = await getCoaches();
+            setDbCoaches(publicCoaches as unknown as Coach[]);
+            setBanningCoach(null);
+            setSelectedProfileCoach(null);
+          }}
+        />
+      )}
     </div>
+
   );
 }
 

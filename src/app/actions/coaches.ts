@@ -164,17 +164,24 @@ export async function getAllCoachesAdmin() {
     id: coach.id,
     name: coach.profiles?.full_name || "Coach",
     email: coach.profiles?.email || "",
-    style: coach.style,
-    role: coach.specialty,
-    rate: coach.rate,
-    verified: coach.verified,
-    banned: coach.banned,
+    style: coach.style || "",
+    role: coach.specialty || "All Positions",
+    rate: coach.rate || 50,
+    verified: coach.verified || false,
+    banned: coach.banned || false,
     rating: Number(coach.rating) || 0,
     reviews: coach.review_count || 0,
-    avatar: "C",
+    bio: coach.bio || "",
+    experience: coach.experience || "",
+    highlightUrl: coach.highlight_reel_url || "",
+    availability: coach.availability || [],
+    location: coach.location || "",
+    avatar: (coach.profiles?.full_name as string)?.charAt(0)?.toUpperCase() || "C",
+    avatarUrl: coach.profiles?.avatar_url || "",
     gradient: getGradient(coach.id),
-    stripeConnected: !!(coach.stripe_onboarding_complete)
+    stripeConnected: !!(coach.stripe_onboarding_complete),
   }));
+
 }
 
 export async function banCoach(coachId: string) {
