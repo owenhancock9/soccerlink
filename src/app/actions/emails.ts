@@ -71,7 +71,7 @@ export async function sendBookingNotification(
         </div>
       </div>
       <p style="color: #64748b; font-size: 13px; line-height: 1.6;">
-        After the session, both you and the player must click <strong style="color: white;">"Confirm Session Complete"</strong> for funds to be released.
+        Payment is held in escrow and will be <strong style="color: white;">automatically released to you 24 hours after the session</strong>. You can also confirm early by logging into your dashboard.
       </p>
     `),
   );
@@ -100,14 +100,18 @@ export async function sendSessionConfirmedEmail(
 }
 
 /** Notify coach that funds have been released */
-export async function sendFundsReleasedEmail(coachEmail: string, amount: number) {
+export async function sendFundsReleasedEmail(coachEmail: string, amount: number, autoReleased = false) {
+  const heading = autoReleased ? "Funds Auto-Released 💰" : "Funds Released 💰";
+  const subtext = autoReleased
+    ? `24 hours have passed since your session, so payment was automatically released. <strong style="color: #10b981; font-size: 24px;">$${amount.toFixed(2)}</strong> has been transferred to your Stripe account.`
+    : `Both parties confirmed. <strong style="color: #10b981; font-size: 24px;">$${amount.toFixed(2)}</strong> has been transferred to your Stripe account.`;
   return send(
     coachEmail,
     `Payment Released — $${amount.toFixed(2)}`,
     wrap(`
-      <h2 style="color: #10b981; font-size: 20px; font-weight: 800; margin: 0 0 16px;">Funds Released 💰</h2>
+      <h2 style="color: #10b981; font-size: 20px; font-weight: 800; margin: 0 0 16px;">${heading}</h2>
       <p style="color: #94a3b8; margin: 0 0 16px; line-height: 1.6;">
-        Both parties confirmed. <strong style="color: #10b981; font-size: 24px;">$${amount.toFixed(2)}</strong> has been transferred to your Stripe account.
+        ${subtext}
       </p>
       <p style="color: #64748b; font-size: 13px;">Funds will arrive in your bank account within 1 business day.</p>
     `),
