@@ -203,10 +203,10 @@ export default function EditCoachProfile() {
         <div className="flex items-center justify-between mb-12">
           <div>
             <h1 className="text-4xl font-black tracking-tighter text-white mb-2">
-              PROFILE <span className="text-pink-400">LAB</span>
+              EDIT <span className="text-pink-400">PROFILE</span>
             </h1>
             <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em] opacity-80">
-              Configure your marketplace presence
+              Edit your coach profile
             </p>
           </div>
           <Link
@@ -214,7 +214,7 @@ export default function EditCoachProfile() {
             className="group flex items-center gap-2 bg-slate-900/80 border border-slate-800 text-[10px] font-black uppercase tracking-widest px-5 py-2.5 rounded-2xl text-slate-400 hover:text-white hover:border-slate-700 transition-all shadow-xl"
           >
             <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
-            Back to Arena
+            Back to Home
           </Link>
         </div>
 
@@ -295,51 +295,26 @@ export default function EditCoachProfile() {
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Playing Style */}
-            <div className="glass-card p-8 group/card">
-              <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-5 ml-1">
-                Athetic Philosophy
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {STYLES.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setStyle(s)}
-                    className={`px-3 py-3 rounded-xl text-[11px] font-black uppercase tracking-tighter transition-all duration-300 border-2 ${
-                      style === s
-                        ? "bg-pink-400/10 border-pink-400/50 text-pink-400 shadow-[0_0_20px_rgba(236,132,191,0.15)]"
-                        : "bg-slate-950 border-slate-800/60 text-slate-500 hover:border-slate-700 hover:text-slate-300"
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Specialty Position */}
-            <div className="glass-card p-8 group/card">
-              <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-5 ml-1">
-                Dominant Specialty
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {SPECIALTIES.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setSpecialty(s)}
-                    className={`px-3 py-3 rounded-xl text-[11px] font-black uppercase tracking-tighter transition-all duration-300 border-2 ${
-                      specialty === s
-                        ? "bg-pink-400/10 border-pink-400/50 text-pink-400 shadow-[0_0_20px_rgba(236,132,191,0.15)]"
-                        : "bg-slate-950 border-slate-800/60 text-slate-500 hover:border-slate-700 hover:text-slate-300"
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
+          {/* Position */}
+          <div className="glass-card p-8 group/card">
+            <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-5 ml-1">
+              Position
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {SPECIALTIES.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setSpecialty(s)}
+                  className={`px-3 py-3 rounded-xl text-[11px] font-black uppercase tracking-tighter transition-all duration-300 border-2 ${
+                    specialty === s
+                      ? "bg-pink-400/10 border-pink-400/50 text-pink-400 shadow-[0_0_20px_rgba(236,132,191,0.15)]"
+                      : "bg-slate-950 border-slate-800/60 text-slate-500 hover:border-slate-700 hover:text-slate-300"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -348,7 +323,7 @@ export default function EditCoachProfile() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-pink-400/5 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
             <div className="flex justify-between items-center mb-6">
               <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black ml-1">
-                Contract Rate
+                Hourly Rate
               </label>
               <div className="flex items-center gap-1.5">
                 <span className="text-3xl font-black text-white tracking-tighter">
@@ -370,7 +345,7 @@ export default function EditCoachProfile() {
             </div>
             <div className="flex justify-between text-[9px] text-slate-600 font-bold uppercase tracking-widest mt-2 px-1">
               <span>Min $20</span>
-              <span>Academy Standard</span>
+              <span>Average</span>
               <span>Max $250</span>
             </div>
           </div>
@@ -391,11 +366,11 @@ export default function EditCoachProfile() {
                 onChange={(e) => setBio(e.target.value)}
                 rows={4}
                 maxLength={300}
-                placeholder="What defines your coaching style? (e.g. Focus on ball mastery and tactical awareness)"
+                placeholder="Tell players about yourself and your coaching style..."
                 className="w-full p-5 bg-slate-950/80 border border-slate-800 rounded-2xl focus:ring-2 ring-pink-400/20 outline-none text-white text-[15px] leading-relaxed placeholder:text-slate-700 transition-all duration-300 focus:border-pink-400/30 resize-none"
               />
               <div className="flex justify-between items-center mt-2 px-1">
-                <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">Maximum Impact: 300 Characters</span>
+                <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">300 characters max</span>
                 <span className={`text-[10px] font-black ${bio.length > 250 ? 'text-pink-400' : 'text-slate-600'}`}>
                   {bio.length}/300
                 </span>
@@ -414,11 +389,11 @@ export default function EditCoachProfile() {
                     onChange={(e) => setExperience(e.target.value)}
                     className="w-full p-4 bg-slate-950 border border-slate-800 rounded-[1.25rem] appearance-none focus:ring-2 ring-pink-400/20 outline-none text-white text-sm font-bold tracking-tight cursor-pointer"
                   >
-                    <option value="" className="bg-slate-900">Select Credentials...</option>
-                    <option value="Pro/Semi-Pro Player" className="bg-slate-900">Elite: Pro / Semi-Pro</option>
-                    <option value="College Player (D1/D2/D3)" className="bg-slate-900">High Level Collegiate</option>
-                    <option value="Certified Youth Coach" className="bg-slate-900">Tactical: Certified Coach</option>
-                    <option value="High School Varsity" className="bg-slate-900">Varsity Veteran</option>
+                    <option value="" className="bg-slate-900">Select experience...</option>
+                    <option value="Pro/Semi-Pro Player" className="bg-slate-900">Pro / Semi-Pro Player</option>
+                    <option value="College Player (D1/D2/D3)" className="bg-slate-900">College Player (D1/D2/D3)</option>
+                    <option value="Certified Youth Coach" className="bg-slate-900">Certified Coach</option>
+                    <option value="High School Varsity" className="bg-slate-900">High School Varsity</option>
                   </select>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 group-hover/select:text-pink-400 transition-colors">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -627,14 +602,14 @@ export default function EditCoachProfile() {
           <div className="glass-card p-8 border-cyan-500/20 bg-cyan-500/[0.02] relative overflow-hidden group/payout">
             <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
             <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-5 ml-1">
-              Escrow & Payout Integration
+              Payment Setup
             </label>
             {stripeOnboarded ? (
               <div className="flex items-center gap-5 text-pink-400 bg-pink-400/5 p-6 rounded-[1.5rem] border border-pink-400/20 shadow-xl">
                 <div className="w-12 h-12 bg-pink-400/20 rounded-2xl flex items-center justify-center text-xl">✅</div>
                 <div>
-                  <p className="font-black text-base tracking-tight text-white">Stripe Vault Connected</p>
-                  <p className="text-[10px] uppercase font-bold tracking-widest text-pink-400/60 mt-1">Operational & Ready for Deposits</p>
+                  <p className="font-black text-base tracking-tight text-white">Stripe Connected</p>
+                  <p className="text-[10px] uppercase font-bold tracking-widest text-pink-400/60 mt-1">Ready to receive payments</p>
                 </div>
               </div>
             ) : (
@@ -642,8 +617,8 @@ export default function EditCoachProfile() {
                 <div className="flex items-start gap-5 text-amber-400 bg-amber-500/5 p-6 rounded-[1.5rem] border border-amber-500/20">
                   <div className="w-12 h-12 bg-amber-500/20 rounded-2xl flex items-center justify-center text-xl shrink-0">⚠️</div>
                   <div>
-                    <p className="font-black text-base tracking-tight text-white mb-1">Financial Link Missing</p>
-                    <p className="text-xs font-medium text-slate-400 leading-relaxed">You must connect your bank profile via Stripe to receive session payments. All funds are secured in escrow until session completion.</p>
+                    <p className="font-black text-base tracking-tight text-white mb-1">Payment Setup Needed</p>
+                    <p className="text-xs font-medium text-slate-400 leading-relaxed">Connect your bank account through Stripe to get paid for sessions.</p>
                   </div>
                 </div>
                 
@@ -654,7 +629,7 @@ export default function EditCoachProfile() {
                     onClick={handleStripeConnect}
                     className="flex-1 bg-white text-black hover:bg-slate-200 py-4 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl flex items-center justify-center gap-3 group/stripe"
                   >
-                    {connectingStripe ? "Processing Link..." : "Stripe Connection Flow"}
+                    {connectingStripe ? "Connecting..." : "Connect Stripe"}
                     <svg className="w-4 h-4 transition-transform group-hover/stripe:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                   </button>
 
@@ -734,7 +709,7 @@ export default function EditCoachProfile() {
                 </div>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed font-medium italic opacity-80 border-l-2 border-pink-400/30 pl-4 py-1">
-                {bio || "Your mission statement will be displayed here for all prospective athletes..."}
+                {bio || "Your bio will show here for players to read..."}
               </p>
             </div>
           </div>
@@ -748,7 +723,7 @@ export default function EditCoachProfile() {
             {saving ? (
               <span className="flex items-center justify-center gap-4">
                 <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                Encrypting Profile...
+                Saving...
               </span>
             ) : (
               "Save Profile & Go Live"
