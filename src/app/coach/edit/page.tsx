@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { updateCoachProfile, getMyCoachProfile } from "@/app/actions/coaches";
 import { createStripeConnectAccount } from "@/app/actions/stripe";
@@ -55,6 +55,98 @@ export default function EditCoachProfile() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const videoInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  /* ── Address Autocomplete State ── */
+  const [locationQuery, setLocationQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<{ displayLines: string[]; coordinate?: { latitude: number; longitude: number } }[]>([]);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [mapkitReady, setMapkitReady] = useState(false);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchRef = useRef<any>(null);
+
+  /* ── Initialize Apple MapKit JS ── */
+  useEffect(() => {
+    // Check if mapkit is already loaded
+    if (typeof window !== "undefined" && (window as any).mapkit) {
+      initMapkit();
+      return;
+    }
+
+    // Load MapKit JS script
+    const script = document.createElement("script");
+    script.src = "https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.core.js";
+    script.crossOrigin = "anonymous";
+    script.async = true;
+    script.dataset.libraries = "services";
+    script.addEventListener("load", initMapkit);
+    script.addEventListener("error", () => {
+      console.warn("Failed to load MapKit JS — autocomplete disabled");
+    });
+    document.head.appendChild(script);
+
+    async function initMapkit() {
+      try {
+        const res = await fetch("/api/mapkit-token");
+        const data = await res.json();
+        if (data.error || !data.token) {
+          console.warn("MapKit token not available:", data.error);
+          return;
+        }
+        const mk = (window as any).mapkit;
+        mk.init({
+          authorizationCallback: (done: (token: string) => void) => {
+            done(data.token);
+          },
+        });
+        searchRef.current = new mk.Search();
+        setMapkitReady(true);
+      } catch (err) {
+        console.warn("MapKit init failed:", err);
+      }
+    }
+  }, []);
+
+  /* ── Debounced Autocomplete ── */
+  const handleLocationInput = useCallback((value: string) => {
+    setLocationQuery(value);
+    setLocation(value);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (!mapkitReady || !searchRef.current || value.trim().length < 3) {
+      setSuggestions([]);
+      setSuggestionsOpen(false);
+      return;
+    }
+
+    setSuggestionsLoading(true);
+    debounceRef.current = setTimeout(() => {
+      searchRef.current.autocomplete(value, (error: any, data: any) => {
+        setSuggestionsLoading(false);
+        if (error) {
+          console.warn("Autocomplete error:", error);
+          setSuggestions([]);
+          return;
+        }
+        setSuggestions(data.results?.slice(0, 5) || []);
+        setSuggestionsOpen(true);
+      });
+    }, 300);
+  }, [mapkitReady]);
+
+  /* ── Click outside to close suggestions ── */
+  useEffect(() => {
+    if (!suggestionsOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
+        setSuggestionsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [suggestionsOpen]);
 
   const addSlot = (day: string) => {
     setAvailability((prev) => [...prev, { day, start: "09:00", end: "17:00" }]);
@@ -485,18 +577,63 @@ export default function EditCoachProfile() {
               </div>
             </div>
 
-            {/* Location */}
-            <div>
+            {/* Location with Autocomplete */}
+            <div ref={suggestionsRef} className="relative">
               <label className="block text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 ml-1">
                 📍 Training Location
               </label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g. Memorial Park, Houston TX"
-                className="w-full p-4 bg-slate-950 border border-slate-800 rounded-[1.25rem] focus:ring-2 ring-pink-400/20 outline-none text-white text-sm font-medium transition-all focus:border-pink-400/30 placeholder:text-slate-700"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => handleLocationInput(e.target.value)}
+                  onFocus={() => { if (suggestions.length > 0) setSuggestionsOpen(true); }}
+                  onKeyDown={(e) => { if (e.key === "Escape") setSuggestionsOpen(false); }}
+                  placeholder="Start typing an address..."
+                  className="w-full p-4 bg-slate-950 border border-slate-800 rounded-[1.25rem] focus:ring-2 ring-pink-400/20 outline-none text-white text-sm font-medium transition-all focus:border-pink-400/30 placeholder:text-slate-700"
+                />
+                {suggestionsLoading && (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <span className="w-4 h-4 border-2 border-pink-400/30 border-t-pink-400 rounded-full animate-spin block" />
+                  </div>
+                )}
+              </div>
+
+              {/* Autocomplete Dropdown */}
+              {suggestionsOpen && suggestions.length > 0 && (
+                <div className="absolute z-50 w-full mt-2 bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl shadow-black/40 anim-fade-in">
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        const fullAddress = s.displayLines?.join(", ") || "";
+                        setLocation(fullAddress);
+                        setLocationQuery(fullAddress);
+                        setSuggestionsOpen(false);
+                        setSuggestions([]);
+                      }}
+                      className="w-full text-left px-5 py-3.5 hover:bg-slate-900 transition-colors border-b border-slate-800/50 last:border-b-0 flex items-start gap-3 group/suggestion"
+                    >
+                      <span className="text-pink-400/60 text-sm mt-0.5 shrink-0 group-hover/suggestion:text-pink-400 transition-colors">📍</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-white truncate">
+                          {s.displayLines?.[0] || "Unknown"}
+                        </p>
+                        {s.displayLines?.[1] && (
+                          <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                            {s.displayLines[1]}
+                          </p>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                  <div className="px-4 py-2 bg-slate-900/50 border-t border-slate-800">
+                    <span className="text-[9px] text-slate-600 font-medium">Powered by Apple Maps</span>
+                  </div>
+                </div>
+              )}
+
               <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest mt-2 ml-1">Where do you normally hold sessions?</p>
             </div>
 
