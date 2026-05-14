@@ -56,85 +56,55 @@ export default function EditCoachProfile() {
   const videoInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
-  /* ── Address Autocomplete State ── */
-  const [locationQuery, setLocationQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<{ displayLines: string[]; coordinate?: { latitude: number; longitude: number } }[]>([]);
+  /* ── Address Autocomplete State (Photon / OpenStreetMap) ── */
+  const [suggestions, setSuggestions] = useState<{ displayLines: string[]; place: string }[]>([]);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
-  const [mapkitReady, setMapkitReady] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const searchRef = useRef<any>(null);
 
-  /* ── Initialize Apple MapKit JS ── */
-  useEffect(() => {
-    // Check if mapkit is already loaded
-    if (typeof window !== "undefined" && (window as any).mapkit) {
-      initMapkit();
-      return;
-    }
-
-    // Load MapKit JS script
-    const script = document.createElement("script");
-    script.src = "https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.core.js";
-    script.crossOrigin = "anonymous";
-    script.async = true;
-    script.dataset.libraries = "services";
-    script.addEventListener("load", initMapkit);
-    script.addEventListener("error", () => {
-      console.warn("Failed to load MapKit JS — autocomplete disabled");
-    });
-    document.head.appendChild(script);
-
-    async function initMapkit() {
-      try {
-        const res = await fetch("/api/mapkit-token");
-        const data = await res.json();
-        if (data.error || !data.token) {
-          console.warn("MapKit token not available:", data.error);
-          return;
-        }
-        const mk = (window as any).mapkit;
-        mk.init({
-          authorizationCallback: (done: (token: string) => void) => {
-            done(data.token);
-          },
-        });
-        searchRef.current = new mk.Search();
-        setMapkitReady(true);
-      } catch (err) {
-        console.warn("MapKit init failed:", err);
-      }
-    }
-  }, []);
-
-  /* ── Debounced Autocomplete ── */
+  /* ── Debounced Photon Autocomplete ── */
   const handleLocationInput = useCallback((value: string) => {
-    setLocationQuery(value);
     setLocation(value);
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    if (!mapkitReady || !searchRef.current || value.trim().length < 3) {
+    if (value.trim().length < 3) {
       setSuggestions([]);
       setSuggestionsOpen(false);
       return;
     }
 
     setSuggestionsLoading(true);
-    debounceRef.current = setTimeout(() => {
-      searchRef.current.autocomplete(value, (error: any, data: any) => {
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://photon.komoot.io/api/?q=${encodeURIComponent(value)}&limit=5&lang=en`
+        );
+        const data = await res.json();
+        const results = (data.features || []).map((f: any) => {
+          const p = f.properties;
+          const name = p.name || p.street || "";
+          const city = p.city || p.town || p.village || "";
+          const state = p.state || "";
+          const country = p.country || "";
+          const line1 = [name, p.housenumber].filter(Boolean).join(" ");
+          const line2 = [city, state, country].filter(Boolean).join(", ");
+          return {
+            place: [line1 || city, line2].filter(Boolean).join(", "),
+            displayLines: [line1 || city || name, line2].filter(Boolean),
+          };
+        });
+        setSuggestions(results);
+        setSuggestionsOpen(results.length > 0);
+      } catch (err) {
+        console.warn("Photon autocomplete error:", err);
+        setSuggestions([]);
+      } finally {
         setSuggestionsLoading(false);
-        if (error) {
-          console.warn("Autocomplete error:", error);
-          setSuggestions([]);
-          return;
-        }
-        setSuggestions(data.results?.slice(0, 5) || []);
-        setSuggestionsOpen(true);
-      });
-    }, 300);
-  }, [mapkitReady]);
+      }
+    }, 350);
+  }, []);
 
   /* ── Click outside to close suggestions ── */
   useEffect(() => {
@@ -607,9 +577,7 @@ export default function EditCoachProfile() {
                       key={i}
                       type="button"
                       onClick={() => {
-                        const fullAddress = s.displayLines?.join(", ") || "";
-                        setLocation(fullAddress);
-                        setLocationQuery(fullAddress);
+                        setLocation(s.place || s.displayLines?.join(", ") || "");
                         setSuggestionsOpen(false);
                         setSuggestions([]);
                       }}
@@ -629,7 +597,7 @@ export default function EditCoachProfile() {
                     </button>
                   ))}
                   <div className="px-4 py-2 bg-slate-900/50 border-t border-slate-800">
-                    <span className="text-[9px] text-slate-600 font-medium">Powered by Apple Maps</span>
+                    <span className="text-[9px] text-slate-600 font-medium">Powered by OpenStreetMap</span>
                   </div>
                 </div>
               )}
