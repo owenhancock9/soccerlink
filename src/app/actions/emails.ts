@@ -135,7 +135,7 @@ export async function sendRatingReceivedEmail(
     `New ${rating}-Star Review from ${playerName}`,
     wrap(`
       <h2 style="color: #d97706; font-size: 18px; font-weight: 700; margin: 0 0 16px;">New Review Received ⭐</h2>
-      <div style="text-align: center; margin: 20px 0; background: #f59e0b/8; padding: 12px; border-radius: 4px;">
+      <div style="text-align: center; margin: 20px 0; background: rgba(245, 158, 11, 0.08); padding: 12px; border-radius: 4px;">
         <span style="font-size: 24px; color: #f59e0b; letter-spacing: 4px;">${stars}</span>
       </div>
       <p style="color: #4b5563; margin: 0 0 8px; font-size: 14px;">
