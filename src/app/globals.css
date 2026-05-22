@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
-/* ─── Design Tokens ─── */
+/* ─── Vinted-esque Design Tokens ─── */
 :root {
-  --bg-primary: #09090b;
-  --bg-card: #18181b;
-  --bg-card-hover: #1f1f23;
-  --bg-input: #111113;
-  --border-default: #27272a;
-  --border-hover: #3f3f46;
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --accent-subtle: rgba(99, 102, 241, 0.1);
-  --text-primary: #fafafa;
-  --text-secondary: #a1a1aa;
-  --text-tertiary: #71717a;
-  --text-muted: #52525b;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f6f8; /* Soft Vinted gray background */
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  --border-default: #e5e7eb; /* Soft borders */
+  --border-hover: #09b1ba;   /* Vinted Teal */
+  --accent: #09b1ba;         /* Signature Vinted Teal */
+  --accent-hover: #079fa7;
+  --accent-subtle: rgba(9, 177, 186, 0.08);
+  --text-primary: #111827;   /* Charcoal / Dark Gray text */
+  --text-secondary: #4b5563;
+  --text-tertiary: #9ca3af;
+  --text-muted: #6b7280;
   --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -29,6 +29,7 @@
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  box-sizing: border-box;
 }
 
 html {
@@ -36,7 +37,7 @@ html {
 }
 
 body {
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   color: var(--text-primary);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
@@ -46,22 +47,23 @@ body {
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: #d1d5db;
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #52525b;
+  background: #9ca3af;
 }
 
 /* ─── Selection ─── */
 ::selection {
-  background: rgba(99, 102, 241, 0.3);
-  color: #e0e7ff;
+  background: rgba(9, 177, 186, 0.2);
+  color: #044b4e;
 }
 
 /* ─── Keyframe Animations ─── */
@@ -81,7 +83,7 @@ body {
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.97); }
   to { opacity: 1; transform: scale(1); }
 }
 
@@ -90,7 +92,7 @@ body {
 }
 
 /* ─── Animation Utility Classes ─── */
-.anim-fade-in { animation: fadeIn 0.3s ease both; }
+.anim-fade-in { animation: fadeIn 0.25s ease both; }
 .anim-fade-in-up { animation: fadeInUp 0.35s var(--ease-smooth) both; }
 .anim-fade-in-down { animation: fadeInDown 0.3s var(--ease-smooth) both; }
 .anim-scale-in { animation: scaleIn 0.25s var(--ease-smooth) both; }
@@ -98,59 +100,102 @@ body {
 /* Staggered children */
 .stagger-children > * { animation: fadeInUp 0.35s var(--ease-smooth) both; }
 .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-.stagger-children > *:nth-child(2) { animation-delay: 50ms; }
-.stagger-children > *:nth-child(3) { animation-delay: 100ms; }
-.stagger-children > *:nth-child(4) { animation-delay: 150ms; }
-.stagger-children > *:nth-child(5) { animation-delay: 200ms; }
-.stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 40ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 80ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 160ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 200ms; }
 
-/* ─── Card ─── */
+/* ─── Vinted Flat-Card Styling ─── */
 .glass-card {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: 4px; /* Vinted uses sharp/minimalist roundness */
   position: relative;
   overflow: hidden;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .glass-card:hover {
   border-color: var(--border-hover);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* ─── Gradient Text (simplified — static, no animation) ─── */
+/* ─── Vinted Style Inputs ─── */
+.vinted-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  padding: 10px 14px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.vinted-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(9, 177, 186, 0.15);
+}
+
+/* ─── Text Accents ─── */
 .gradient-text {
-  background: linear-gradient(135deg, #e0e7ff, #a5b4fc);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
 }
 
 .gradient-text-accent {
   color: var(--accent);
-  -webkit-text-fill-color: var(--accent);
 }
 
-/* ─── Primary Button ─── */
+/* ─── Primary Button (Vinted Teal Solid) ─── */
 .gradient-btn {
   background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  transition: background 0.15s ease;
+  color: #ffffff;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-weight: 500;
+  padding: 10px 20px;
+  font-size: 14px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .gradient-btn:hover {
   background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.gradient-btn:active {
+  transform: translateY(0);
+}
+
+/* ─── Secondary Outline Button ─── */
+.outline-btn {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-weight: 500;
+  padding: 8px 16px;
+  font-size: 14px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.outline-btn:hover {
+  background: var(--accent-subtle);
 }
 
 /* ─── Nav ─── */
 .nav-glass {
-  background: rgba(9, 9, 11, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-default);
+  background: #ffffff;
+  border-bottom: 1px solid var(--border-default);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 
 /* ─── Stat Bar Fill ─── */
@@ -158,12 +203,11 @@ body {
   animation: bar-fill 0.8s var(--ease-smooth) both;
 }
 
-/* ─── Focus Visible ─── */
+/* ─── Focus States ─── */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
-
 input:focus-visible,
 textarea:focus-visible,
 button:focus-visible {

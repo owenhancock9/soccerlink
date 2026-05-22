@@ -62,6 +62,24 @@ export async function getCoaches() {
  * Retrieves the current user's profile and MUST ALWAYS RETURN AN OBJECT 
  * if a user session exists, to prevent UI null-crashes.
  */
+export interface CoachProfileData {
+  id: string;
+  stripe_onboarding_complete: boolean;
+  stripe_account_id?: string | null;
+  isFallback?: boolean;
+  dbError?: string | null;
+  stripeDiagnostic?: string | null;
+  avatar_url?: string | null;
+  style?: string | null;
+  specialty?: string | null;
+  rate?: number | null;
+  bio?: string | null;
+  experience?: string | null;
+  highlight_reel_url?: string | null;
+  availability?: unknown;
+  location?: string | null;
+}
+
 export async function getMyCoachProfile() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -74,11 +92,12 @@ export async function getMyCoachProfile() {
     .single();
 
   // If we get an error from DB (and it's not simply "no row found"), capture it.
-  let dbErr = error && error.code !== "PGRST116" ? error.message : null;
-  const currentData: any = data || { 
-    id: user.id, 
+  const dbErr = error && error.code !== "PGRST116" ? error.message : null;
+  const currentData: CoachProfileData = {
+    id: user.id,
     stripe_onboarding_complete: false,
-    isFallback: true 
+    isFallback: !data,
+    ...(data as CoachProfileData | null)
   };
   
   if (dbErr) currentData.dbError = dbErr;
@@ -107,8 +126,9 @@ export async function getMyCoachProfile() {
         // Just flag it as incomplete so the UI knows.
         currentData.stripeDiagnostic = `Stripe says incomplete (${account.id}) — try clicking Refresh in a minute`;
       }
-    } catch (err: any) {
-      currentData.stripeDiagnostic = `API Failure: ${err.message}`;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      currentData.stripeDiagnostic = `API Failure: ${msg}`;
     }
   } else if (!currentData.stripe_account_id) {
      currentData.stripeDiagnostic = "ID Missing in DB";
@@ -149,6 +169,28 @@ export async function updateCoachProfile(formData: FormData) {
   return { success: true };
 }
 
+interface AdminCoachRow {
+  id: string;
+  style: string | null;
+  specialty: string | null;
+  rate: number | null;
+  verified: boolean | null;
+  banned: boolean | null;
+  rating: number | null;
+  review_count: number | null;
+  bio: string | null;
+  experience: string | null;
+  highlight_reel_url: string | null;
+  availability: unknown;
+  location: string | null;
+  stripe_onboarding_complete: boolean | null;
+  profiles: {
+    full_name: string | null;
+    email: string | null;
+    avatar_url: string | null;
+  } | null;
+}
+
 export async function getAllCoachesAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -160,7 +202,7 @@ export async function getAllCoachesAdmin() {
   const { data, error } = await supabase.from("coach_profiles").select("*, profiles!inner(*)").order("rating", { ascending: false });
   if (error) return [];
 
-  return (data || []).map((coach: any) => ({
+  return (data as unknown as AdminCoachRow[] || []).map((coach) => ({
     id: coach.id,
     name: coach.profiles?.full_name || "Coach",
     email: coach.profiles?.email || "",

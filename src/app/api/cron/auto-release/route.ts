@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
       }
 
       // Email coach that funds were auto-released
-      const coachEmail = (booking.coach_profile as any)?.email;
+      const coachEmail = (booking.coach_profile as { email: string | null } | null)?.email;
       if (coachEmail) {
         await sendFundsReleasedEmail(coachEmail, booking.rate || 0, true);
       }

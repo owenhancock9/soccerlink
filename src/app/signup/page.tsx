@@ -28,63 +28,62 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-zinc-100 flex items-center justify-center px-4 py-12">
-
+    <div className="min-h-screen bg-[var(--bg-secondary)] text-[var(--text-primary)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md relative z-10 anim-fade-in-up">
         {/* Logo */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <Link href="/">
-            <h1 className="text-xl font-bold text-white inline-block cursor-pointer">
-              CoachingMatch
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] inline-block cursor-pointer">
+              Coaching<span className="text-[var(--accent)]">Match</span>
             </h1>
           </Link>
-          <p className="text-zinc-500 text-sm mt-2">Create your account</p>
+          <p className="text-[var(--text-muted)] text-sm mt-1">Create your athlete or trainer profile</p>
         </div>
 
         {/* Signup Card */}
-        <div className="glass-card p-8 hover:transform-none">
+        <div className="bg-white border border-[var(--border-default)] rounded-[4px] p-8 shadow-sm">
           <form action={handleSubmit} className="space-y-5">
             {/* Error Message */}
             {error && (
-              <div className="bg-red-950/30 border border-red-900/40 text-red-400 text-sm p-3 rounded-lg anim-fade-in">
+              <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-4 rounded-[4px] font-semibold anim-fade-in">
                 {error}
               </div>
             )}
 
             {/* Role Selector */}
             <div>
-              <label className="block text-[10px] text-zinc-500 uppercase tracking-wider font-semibold mb-3">
-                I am a...
+              <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold mb-3">
+                I want to join as a...
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setSelectedRole("player")}
-                  className={`p-4 rounded-lg border text-sm font-medium transition-colors ${
+                  className={`p-4 rounded-[4px] border text-sm font-bold transition-all ${
                     selectedRole === "player"
-                      ? "bg-indigo-500/10 border-indigo-500/50 text-indigo-400"
-                      : "bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-600"
+                      ? "bg-[var(--accent-subtle)] border-[var(--accent)] text-[var(--accent)]"
+                      : "bg-white border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--text-muted)]"
                   }`}
                 >
-                  <span className="text-2xl block mb-2">👤</span>
+                  <span className="text-2xl block mb-1">👤</span>
                   Player
-                  <p className="text-[10px] font-normal mt-1 opacity-60">
-                    Find a coach
+                  <p className="text-[10px] font-medium mt-0.5 opacity-80">
+                    Book elite training
                   </p>
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedRole("coach")}
-                  className={`p-4 rounded-lg border text-sm font-medium transition-colors ${
+                  className={`p-4 rounded-[4px] border text-sm font-bold transition-all ${
                     selectedRole === "coach"
-                      ? "bg-indigo-500/10 border-indigo-500/50 text-indigo-400"
-                      : "bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-600"
+                      ? "bg-[var(--accent-subtle)] border-[var(--accent)] text-[var(--accent)]"
+                      : "bg-white border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--text-muted)]"
                   }`}
                 >
-                  <span className="text-2xl block mb-2">⚽</span>
+                  <span className="text-2xl block mb-1">⚽</span>
                   Coach
-                  <p className="text-[10px] font-normal mt-1 opacity-60">
-                    Train players
+                  <p className="text-[10px] font-medium mt-0.5 opacity-80">
+                    Earn coaching revenue
                   </p>
                 </button>
               </div>
@@ -95,7 +94,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor="fullName"
-                className="block text-[10px] text-zinc-500 uppercase tracking-wider font-semibold mb-2"
+                className="block text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold mb-2"
               >
                 Full Name
               </label>
@@ -105,7 +104,7 @@ export default function SignupPage() {
                 type="text"
                 required
                 placeholder="Alex Rivera"
-                className="w-full p-4 bg-zinc-950/60 border border-zinc-700/50 rounded-xl focus:ring-2 ring-indigo-500/50 outline-none text-white placeholder:text-zinc-600 transition-all duration-300 focus:bg-zinc-900/80 focus:border-indigo-500/30 text-sm"
+                className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-[4px] focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
               />
             </div>
 
@@ -113,7 +112,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-[10px] text-zinc-500 uppercase tracking-wider font-semibold mb-2"
+                className="block text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold mb-2"
               >
                 Email Address
               </label>
@@ -123,7 +122,7 @@ export default function SignupPage() {
                 type="email"
                 required
                 placeholder="you@example.com"
-                className="w-full p-4 bg-zinc-950/60 border border-zinc-700/50 rounded-xl focus:ring-2 ring-indigo-500/50 outline-none text-white placeholder:text-zinc-600 transition-all duration-300 focus:bg-zinc-900/80 focus:border-indigo-500/30 text-sm"
+                className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-[4px] focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
               />
             </div>
 
@@ -131,7 +130,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-[10px] text-zinc-500 uppercase tracking-wider font-semibold mb-2"
+                className="block text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold mb-2"
               >
                 Password
               </label>
@@ -145,12 +144,12 @@ export default function SignupPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min. 6 characters"
-                  className="w-full p-4 bg-zinc-950/60 border border-zinc-700/50 rounded-xl focus:ring-2 ring-indigo-500/50 outline-none text-white placeholder:text-zinc-600 transition-all duration-300 focus:bg-zinc-900/80 focus:border-indigo-500/30 text-sm"
+                  className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-[4px] focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors text-sm"
                 >
                   {showPassword ? "👁️" : "👁️‍🗨️"}
                 </button>
@@ -161,7 +160,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-[10px] text-zinc-500 uppercase tracking-wider font-semibold mb-2"
+                className="block text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold mb-2"
               >
                 Confirm Password
               </label>
@@ -174,7 +173,7 @@ export default function SignupPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Repeat your password"
-                  className="w-full p-4 bg-zinc-950/60 border border-zinc-700/50 rounded-xl focus:ring-2 ring-indigo-500/50 outline-none text-white placeholder:text-zinc-600 transition-all duration-300 focus:bg-zinc-900/80 focus:border-indigo-500/30 text-sm"
+                  className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-[4px] focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
                 />
               </div>
             </div>
@@ -184,13 +183,13 @@ export default function SignupPage() {
               id="signup-submit"
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-600 py-3.5 rounded-lg font-medium text-sm transition-colors active:scale-[0.98]"
+              className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white py-3.5 rounded-[4px] font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
-                <span className="inline-flex items-center gap-2">
+                <>
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   Creating account...
-                </span>
+                </>
               ) : (
                 `Sign Up as ${selectedRole === "coach" ? "Coach" : "Player"}`
               )}
@@ -199,24 +198,24 @@ export default function SignupPage() {
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-zinc-800" />
-            <span className="text-xs text-zinc-500">
+            <div className="flex-1 h-px bg-[var(--border-default)]" />
+            <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-bold">
               Already have an account?
             </span>
-            <div className="flex-1 h-px bg-zinc-800" />
+            <div className="flex-1 h-px bg-[var(--border-default)]" />
           </div>
 
           {/* Login Link */}
           <Link
             href="/login"
-            className="block w-full py-3 rounded-lg font-medium text-sm text-center transition-colors bg-zinc-800 text-zinc-300 border border-zinc-700 hover:bg-zinc-700 hover:text-white"
+            className="block w-full py-3.5 rounded-[4px] font-bold text-xs uppercase tracking-wider text-center transition-all bg-white text-[var(--accent)] border border-[var(--accent)] hover:bg-[var(--accent-subtle)] active:scale-[0.99]"
           >
             Sign In Instead
           </Link>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-zinc-600 mt-6">
+        <p className="text-center text-[10px] text-[var(--text-muted)] font-semibold mt-8 uppercase tracking-wider">
           By signing up, you agree to our Terms of Service.
         </p>
       </div>

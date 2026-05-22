@@ -42,21 +42,14 @@ export async function createStripeConnectAccount(rootUrl?: string) {
       });
       accountId = account.id;
 
-      // Try update first (profile already exists), fall back to upsert
-      const { error: updateErr } = await supabase
-        .from("coach_profiles")
-        .update({ stripe_account_id: accountId, stripe_onboarding_complete: false })
-        .eq("id", user.id);
-      
-      if (updateErr) {
-        // Profile row might not exist yet — try upsert
-        const { error: upsertErr } = await supabase.from("coach_profiles").upsert({ 
-          id: user.id, 
-          stripe_account_id: accountId,
-          stripe_onboarding_complete: false
-        });
-        if (upsertErr) return { error: `DB Error: ${upsertErr.message}` };
-      }
+      // Upsert to handle both cases: profile row exists or doesn't exist yet
+      // (update silently succeeds with 0 rows if no coach_profiles row exists)
+      const { error: upsertErr } = await supabase.from("coach_profiles").upsert({ 
+        id: user.id, 
+        stripe_account_id: accountId,
+        stripe_onboarding_complete: false
+      });
+      if (upsertErr) return { error: `DB Error: ${upsertErr.message}` };
     }
 
     const returnPath = `${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}coach/edit?setup=success`;
@@ -68,8 +61,9 @@ export async function createStripeConnectAccount(rootUrl?: string) {
     });
 
     return { url: accountLink.url };
-  } catch (err: any) {
-    return { error: err.message };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { error: msg };
   }
 }
 

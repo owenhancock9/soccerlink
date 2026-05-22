@@ -123,6 +123,11 @@ export async function createBooking(formData: FormData) {
    TWO-WAY SESSION CONFIRMATION
    ═══════════════════════════════════ */
 
+interface ProfileJoin {
+  full_name: string | null;
+  email: string | null;
+}
+
 export async function confirmSession(bookingId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -167,11 +172,11 @@ export async function confirmSession(bookingId: string) {
   // Email the other party
   try {
     const confirmerName = isCoach
-      ? (booking.coach as any)?.full_name || "Your Coach"
-      : (booking.player as any)?.full_name || "Your Player";
+      ? (booking.coach as unknown as ProfileJoin)?.full_name || "Your Coach"
+      : (booking.player as unknown as ProfileJoin)?.full_name || "Your Player";
     const recipientEmail = isCoach
-      ? (booking.player as any)?.email
-      : (booking.coach as any)?.email;
+      ? (booking.player as unknown as ProfileJoin)?.email
+      : (booking.coach as unknown as ProfileJoin)?.email;
 
     if (recipientEmail) {
       if (coachConfirmed && playerConfirmed) {
@@ -181,7 +186,7 @@ export async function confirmSession(bookingId: string) {
           console.error("Auto-payout failed:", payoutResult.error);
         }
         // Email coach about payout
-        const coachEmail = (booking.coach as any)?.email;
+        const coachEmail = (booking.coach as unknown as ProfileJoin)?.email;
         if (coachEmail) {
           await sendFundsReleasedEmail(coachEmail, booking.rate || 0);
         }
@@ -243,7 +248,7 @@ export async function submitRating(bookingId: string, rating: number, review: st
     .not("player_rating", "is", null);
 
   if (allRatings && allRatings.length > 0) {
-    const avg = allRatings.reduce((sum: number, b: any) => sum + b.player_rating, 0) / allRatings.length;
+    const avg = allRatings.reduce((sum: number, b: { player_rating: number | null }) => sum + (b.player_rating ?? 0), 0) / allRatings.length;
     await supabase
       .from("coach_profiles")
       .update({
@@ -255,7 +260,7 @@ export async function submitRating(bookingId: string, rating: number, review: st
 
   // Email coach about the new review
   try {
-    const coachEmail = (booking.coach as any)?.email;
+    const coachEmail = (booking.coach as unknown as ProfileJoin)?.email;
     const playerName = user.user_metadata?.full_name || "A Player";
     if (coachEmail) {
       await sendRatingReceivedEmail(coachEmail, playerName, rating, review);
