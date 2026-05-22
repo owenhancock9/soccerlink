@@ -33,11 +33,11 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card */}
-        <div className="bg-white border border-[var(--border-default)] rounded-[4px] p-8 shadow-sm">
+        <div className="bg-white border border-[var(--border-default)] rounded-none p-8 shadow-sm">
           <form action={handleSubmit} className="space-y-5">
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-4 rounded-[4px] font-semibold anim-fade-in">
+              <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-4 rounded-none font-semibold anim-fade-in">
                 {error}
               </div>
             )}
@@ -56,7 +56,7 @@ export default function LoginPage() {
                 type="email"
                 required
                 placeholder="you@example.com"
-                className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-[4px] focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
+                className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-none focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
               />
             </div>
 
@@ -75,7 +75,7 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   required
                   placeholder="••••••••"
-                  className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-[4px] focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
+                  className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-none focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
                 />
                 <button
                   type="button"
@@ -92,7 +92,7 @@ export default function LoginPage() {
               id="login-submit"
               type="submit"
               disabled={loading}
-              className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white py-3.5 rounded-[4px] font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white py-3.5 rounded-none font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -117,7 +117,7 @@ export default function LoginPage() {
           {/* Sign Up Link */}
           <Link
             href="/signup"
-            className="block w-full py-3.5 rounded-[4px] font-bold text-xs uppercase tracking-wider text-center transition-all bg-white text-[var(--accent)] border border-[var(--accent)] hover:bg-[var(--accent-subtle)] active:scale-[0.99]"
+            className="block w-full py-3.5 rounded-none font-bold text-xs uppercase tracking-wider text-center transition-all bg-white text-[var(--accent)] border border-[var(--accent)] hover:bg-[var(--accent-subtle)] active:scale-[0.99]"
           >
             Create an Account
           </Link>

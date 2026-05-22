@@ -755,13 +755,13 @@ export default function SoccerPlatform() {
           onClick={closeModal}
         >
           <div
-            className="bg-white border border-[var(--border-default)] p-6 md:p-8 rounded-lg max-w-5xl w-full relative anim-scale-in overflow-hidden shadow-2xl"
+            className="bg-white border-2 border-black p-6 md:p-8 rounded-none max-w-5xl w-full relative anim-scale-in overflow-hidden shadow-sm"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               id="modal-close"
               onClick={closeModal}
-              className="absolute top-4 right-4 w-8 h-8 rounded-md bg-[var(--bg-secondary)] hover:bg-gray-200 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors z-20"
+              className="absolute top-4 right-4 w-8 h-8 rounded-none bg-[var(--bg-secondary)] hover:bg-black hover:text-white border border-[var(--border-default)] flex items-center justify-center text-[var(--text-primary)] transition-colors z-20"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
@@ -774,64 +774,64 @@ export default function SoccerPlatform() {
                   <div className="flex gap-4 mb-6">
                     <div className="shrink-0">
                       <div
-                        className={`w-16 h-16 rounded-xl bg-gradient-to-br ${selectedCoach.gradient} flex items-center justify-center text-white font-bold text-2xl`}
+                        className={`w-16 h-16 rounded-none bg-gradient-to-br ${selectedCoach.gradient} flex items-center justify-center text-white font-bold text-2xl border border-black/10`}
                       >
                         {selectedCoach.avatar}
                       </div>
                     </div>
                     <div className="flex flex-col justify-center">
                       <div className="flex items-center gap-2 mb-1">
-                        <h2 className="text-xl font-bold text-white">
+                        <h2 className="text-xl font-bold text-[var(--text-primary)]">
                           {selectedCoach.name}
                         </h2>
                         {selectedCoach.verified && (
-                          <span className="inline-flex items-center gap-1 text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-md border border-indigo-500/20 font-semibold">
+                          <span className="inline-flex items-center gap-1 text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-none border border-indigo-200 font-bold uppercase tracking-wider">
                             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
                             Verified
                           </span>
                         )}
                       </div>
 
-                      <p className="text-sm text-zinc-400 mb-2">
+                      <p className="text-sm text-[var(--text-secondary)] font-semibold mb-2">
                         {selectedCoach.experience || "Experienced Coach"}
                       </p>
 
                       <div className="flex items-center gap-2 text-sm">
                         <Stars rating={selectedCoach.rating} />
-                        <span className="font-semibold text-white">
+                        <span className="font-bold text-[var(--text-primary)]">
                           {selectedCoach.rating}
                         </span>
-                        <span className="text-zinc-500 text-xs">({selectedCoach.reviews} reviews)</span>
+                        <span className="text-[var(--text-muted)] text-xs font-medium">({selectedCoach.reviews} reviews)</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 mb-5">
-                    <span className="text-xs text-zinc-300 px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] px-2.5 py-1 rounded-none bg-[var(--bg-secondary)] border border-[var(--border-default)]">
                       {selectedCoach.role}
                     </span>
-                    <span className="text-xs text-indigo-400 px-2.5 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)] px-2.5 py-1 rounded-none bg-[var(--accent-subtle)] border border-[var(--accent)]/20">
                       {selectedCoach.style}
                     </span>
                   </div>
 
-                  <p className="text-zinc-300 text-sm leading-relaxed mb-6 bg-zinc-800/50 p-4 rounded-lg border border-zinc-800 whitespace-pre-wrap">
+                  <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-6 bg-[var(--bg-secondary)]/50 p-4 rounded-none border border-[var(--border-default)] whitespace-pre-wrap">
                     {selectedCoach.bio}
                   </p>
 
                   <div className="space-y-4">
                     {selectedCoach.availability && selectedCoach.availability.length > 0 && (
                       <div>
-                        <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-3">
+                        <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold mb-3">
                           Weekly Availability
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {selectedCoach.availability.map((slot: AvailabilitySlot, i: number) => (
                             <span
                               key={i}
-                              className="text-xs bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded-lg border border-zinc-700 font-mono flex items-center gap-1.5"
+                              className="text-xs bg-[var(--bg-secondary)] text-[var(--text-secondary)] px-3 py-1.5 rounded-none border border-[var(--border-default)] font-mono font-semibold flex items-center gap-1.5"
                             >
-                              <span className="text-zinc-500">{slot.day}</span>
+                              <span className="text-[var(--text-muted)] font-bold">{slot.day}</span>
                               {slot.start} - {slot.end}
                             </span>
                           ))}
@@ -844,7 +844,7 @@ export default function SoccerPlatform() {
                         href={selectedCoach.highlightUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center justify-center gap-2 w-full bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-600 py-3 rounded-lg text-sm font-medium transition-colors"
+                        className="flex items-center justify-center gap-2 w-full bg-white border border-black hover:bg-black hover:text-white text-black py-3 rounded-none text-xs font-bold uppercase tracking-wider transition-all shadow-sm"
                       >
                         ▶ Watch Highlight Reel
                       </a>
@@ -853,20 +853,20 @@ export default function SoccerPlatform() {
                 </div>
 
                 <div className="md:w-[20rem] shrink-0">
-                  <div className="bg-zinc-800/50 border border-zinc-800 rounded-xl p-6 h-full">
-                    <h3 className="text-white font-bold text-lg mb-6">
+                  <div className="bg-white border-2 border-black p-6 h-full">
+                    <h3 className="text-[var(--text-primary)] font-bold text-lg mb-6 uppercase tracking-wider">
                       Book Session
                     </h3>
 
                     <div className="space-y-6">
                       {/* Step 1: Date Picker */}
                       <div>
-                        <label className="text-xs text-zinc-500 uppercase tracking-wider font-medium block mb-3">
+                        <label className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-bold block mb-3">
                           1. Pick a Date
                         </label>
-                        <div className="grid grid-cols-7 gap-1 text-center bg-zinc-900 p-2 rounded-lg border border-zinc-800">
+                        <div className="grid grid-cols-7 gap-1 text-center bg-[var(--bg-secondary)] p-2 rounded-none border border-[var(--border-default)]">
                           {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                            <div key={`day-${i}`} className="text-[10px] text-zinc-600 font-medium py-1.5">
+                            <div key={`day-${i}`} className="text-[10px] text-[var(--text-muted)] font-bold py-1.5">
                               {d}
                             </div>
                           ))}
@@ -884,10 +884,10 @@ export default function SoccerPlatform() {
                                 <button
                                   key={i}
                                   onClick={() => { setSelectedDate(d.date.getDate()); setSelectedMonth(d.date.getMonth()); setSelectedYear(d.date.getFullYear()); }}
-                                  className={`h-8 w-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
+                                  className={`h-8 w-8 flex items-center justify-center rounded-none text-xs font-bold transition-all ${
                                     isSel
-                                      ? "bg-indigo-600 text-white"
-                                      : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                                      ? "bg-[var(--accent)] text-white"
+                                      : "text-[var(--text-secondary)] hover:bg-white hover:text-[var(--text-primary)] border border-transparent hover:border-[var(--border-default)]"
                                   }`}
                                 >
                                   {d.label}
@@ -899,7 +899,7 @@ export default function SoccerPlatform() {
                       </div>
 
                       <div className={selectedDate ? "anim-fade-in" : "opacity-30 pointer-events-none transition-opacity"}>
-                        <label className="text-xs text-zinc-500 uppercase tracking-wider font-medium block mb-3">
+                        <label className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-bold block mb-3">
                           2. Select Time
                         </label>
                         <div className="grid grid-cols-2 gap-2">
@@ -909,36 +909,36 @@ export default function SoccerPlatform() {
                                 key={t}
                                 type="button"
                                 onClick={() => setSelectedTime(t)}
-                                className={`py-3 rounded-lg text-xs font-medium transition-colors border ${selectedTime === t
-                                    ? "bg-indigo-500/10 border-indigo-500/50 text-indigo-400"
-                                    : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
+                                className={`py-3 rounded-none text-xs font-bold uppercase tracking-wider transition-all border ${selectedTime === t
+                                    ? "bg-[var(--accent)] border-[var(--accent)] text-white"
+                                    : "bg-white border-[var(--border-default)] text-[var(--text-secondary)] hover:border-black hover:text-[var(--text-primary)]"
                                   }`}
                               >
                                 {t}
                               </button>
                             ))
                           ) : (
-                            <div className="col-span-2 py-6 bg-zinc-900 rounded-lg border border-zinc-800 border-dashed text-center">
-                              <p className="text-xs text-zinc-600">No availability on this day</p>
+                            <div className="col-span-2 py-6 bg-[var(--bg-secondary)] rounded-none border border-[var(--border-default)] border-dashed text-center">
+                              <p className="text-xs text-[var(--text-muted)] font-medium">No availability on this day</p>
                             </div>
                           )}
                         </div>
                       </div>
 
                       {selectedDate && selectedTime ? (
-                        <div className="anim-fade-in pt-6 border-t border-zinc-800">
+                        <div className="anim-fade-in pt-6 border-t border-[var(--border-default)]">
                           <div className="space-y-3 mb-6">
                             <div className="flex justify-between text-sm">
-                              <span className="text-zinc-500">Coaching Session</span>
-                              <span className="text-white font-medium">${selectedCoach.rate}.00</span>
+                              <span className="text-[var(--text-secondary)] font-medium">Coaching Session</span>
+                              <span className="text-[var(--text-primary)] font-bold">${selectedCoach.rate}.00</span>
                             </div>
                              <div className="flex justify-between text-sm">
-                              <span className="text-zinc-500">Service Fee</span>
-                              <span className="text-white font-medium">${Math.round(selectedCoach.rate * PLATFORM_CUT)}.00</span>
+                              <span className="text-[var(--text-secondary)] font-medium">Service Fee</span>
+                              <span className="text-[var(--text-primary)] font-bold">${Math.round(selectedCoach.rate * PLATFORM_CUT)}.00</span>
                             </div>
-                            <div className="flex justify-between items-end pt-3 border-t border-zinc-800">
-                              <span className="text-zinc-400 font-medium text-sm">Total</span>
-                              <span className="text-white text-xl font-bold">${selectedCoach.rate + Math.round(selectedCoach.rate * PLATFORM_CUT)}.00</span>
+                            <div className="flex justify-between items-end pt-3 border-t border-[var(--border-default)]">
+                              <span className="text-[var(--text-primary)] font-bold text-sm uppercase tracking-wider">Total</span>
+                              <span className="text-[var(--text-primary)] text-xl font-bold">${selectedCoach.rate + Math.round(selectedCoach.rate * PLATFORM_CUT)}.00</span>
                             </div>
                           </div>
 
@@ -969,22 +969,22 @@ export default function SoccerPlatform() {
                                 window.location.href = result.url;
                               }
                             }}
-                            className="gradient-btn w-full py-3.5 text-sm disabled:opacity-50"
+                            className="gradient-btn w-full py-3.5 text-xs font-bold uppercase tracking-wider rounded-none disabled:opacity-50"
                           >
                             {bookingLoading ? "Connecting..." : "Book Now"}
                           </button>
 
                           <div className="mt-5 flex flex-col items-center gap-2">
-                            <Image src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" width={80} height={16} className="h-4 opacity-30 brightness-200" />
-                            <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
+                            <Image src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" width={80} height={16} className="h-4 opacity-40 grayscale" />
+                            <p className="text-[10px] text-[var(--text-muted)] text-center font-medium leading-relaxed">
                               Payment secured. Released when both parties confirm.
                             </p>
                           </div>
                         </div>
                       ) : (
-                        <div className="pt-12 text-center opacity-20">
+                        <div className="pt-12 text-center text-[var(--text-muted)] opacity-40">
                           <svg className="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                          <p className="text-xs">Select a date and time</p>
+                          <p className="text-xs font-bold uppercase tracking-wider">Select date and time</p>
                         </div>
                       )}
                     </div>
@@ -997,23 +997,23 @@ export default function SoccerPlatform() {
             {activeModal === "tos" && (
               <div className="anim-fade-in relative z-10 py-4 max-w-2xl mx-auto">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-zinc-800 text-zinc-400 rounded-lg flex items-center justify-center text-lg border border-zinc-700">📜</div>
-                  <h3 className="text-xl font-bold text-white">
+                  <div className="w-10 h-10 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-none flex items-center justify-center text-lg border border-[var(--border-default)]">📜</div>
+                  <h3 className="text-xl font-bold text-[var(--text-primary)] uppercase tracking-wider">
                     Terms of Service
                   </h3>
                 </div>
                 <div className="space-y-4">
-                  <div className="p-5 bg-zinc-800/50 rounded-lg border border-zinc-800">
-                    <strong className="text-white text-sm block mb-2">1. Two-Way Confirmation System</strong>
-                    <p className="text-zinc-400 text-sm leading-relaxed">To ensure security for both sides, session funds are held in CoachingMatch&apos;s secure vault. After your session is completed, both the coach and the player must click &quot;Confirm Session Complete&quot; for funds to be released. If either party does not confirm, the funds remain held and our support team will assist.</p>
+                  <div className="p-5 bg-white rounded-none border border-[var(--border-default)] shadow-xs">
+                    <strong className="text-[var(--text-primary)] text-sm block mb-2 font-bold uppercase tracking-wider">1. Two-Way Confirmation System</strong>
+                    <p className="text-[var(--text-secondary)] text-sm leading-relaxed">To ensure security for both sides, session funds are held in CoachingMatch&apos;s secure vault. After your session is completed, both the coach and the player must click &quot;Confirm Session Complete&quot; for funds to be released. If either party does not confirm, the funds remain held and our support team will assist.</p>
                   </div>
-                  <div className="p-5 bg-zinc-800/50 rounded-lg border border-red-900/30">
-                    <strong className="text-red-400 text-sm block mb-2">2. Off-Platform Protection</strong>
-                    <p className="text-zinc-400 text-sm leading-relaxed">Attempting to book coaching sessions outside of CoachingMatch is strictly prohibited. This is for your own safety; sessions outside our portal are not protected by our escrow guarantee and will result in immediate permanent account suspension.</p>
+                  <div className="p-5 bg-red-50 rounded-none border border-red-200 shadow-xs">
+                    <strong className="text-red-800 text-sm block mb-2 font-bold uppercase tracking-wider">2. Off-Platform Protection</strong>
+                    <p className="text-red-700 text-sm leading-relaxed font-medium">Attempting to book coaching sessions outside of CoachingMatch is strictly prohibited. This is for your own safety; sessions outside our portal are not protected by our escrow guarantee and will result in immediate permanent account suspension.</p>
                   </div>
-                  <div className="p-5 bg-zinc-800/50 rounded-lg border border-zinc-800">
-                    <strong className="text-amber-400 text-sm block mb-2">3. Reviews &amp; Ratings</strong>
-                    <p className="text-zinc-400 text-sm leading-relaxed">After a session is completed, players are encouraged to leave a star rating and review. This helps future players make informed decisions and helps coaches build their reputation on the platform.</p>
+                  <div className="p-5 bg-white rounded-none border border-[var(--border-default)] shadow-xs">
+                    <strong className="text-amber-800 text-sm block mb-2 font-bold uppercase tracking-wider">3. Reviews &amp; Ratings</strong>
+                    <p className="text-[var(--text-secondary)] text-sm leading-relaxed">After a session is completed, players are encouraged to leave a star rating and review. This helps future players make informed decisions and helps coaches build their reputation on the platform.</p>
                   </div>
                 </div>
               </div>

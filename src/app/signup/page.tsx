@@ -41,11 +41,11 @@ export default function SignupPage() {
         </div>
 
         {/* Signup Card */}
-        <div className="bg-white border border-[var(--border-default)] rounded-[4px] p-8 shadow-sm">
+        <div className="bg-white border border-[var(--border-default)] rounded-none p-8 shadow-sm">
           <form action={handleSubmit} className="space-y-5">
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-4 rounded-[4px] font-semibold anim-fade-in">
+              <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-4 rounded-none font-semibold anim-fade-in">
                 {error}
               </div>
             )}
@@ -59,7 +59,7 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedRole("player")}
-                  className={`p-4 rounded-[4px] border text-sm font-bold transition-all ${
+                  className={`p-4 rounded-none border text-sm font-bold transition-all ${
                     selectedRole === "player"
                       ? "bg-[var(--accent-subtle)] border-[var(--accent)] text-[var(--accent)]"
                       : "bg-white border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--text-muted)]"
@@ -74,7 +74,7 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedRole("coach")}
-                  className={`p-4 rounded-[4px] border text-sm font-bold transition-all ${
+                  className={`p-4 rounded-none border text-sm font-bold transition-all ${
                     selectedRole === "coach"
                       ? "bg-[var(--accent-subtle)] border-[var(--accent)] text-[var(--accent)]"
                       : "bg-white border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--text-muted)]"
@@ -104,7 +104,7 @@ export default function SignupPage() {
                 type="text"
                 required
                 placeholder="Alex Rivera"
-                className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-[4px] focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
+                className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-none focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
               />
             </div>
 
@@ -122,7 +122,7 @@ export default function SignupPage() {
                 type="email"
                 required
                 placeholder="you@example.com"
-                className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-[4px] focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
+                className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-none focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
               />
             </div>
 
@@ -144,7 +144,7 @@ export default function SignupPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min. 6 characters"
-                  className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-[4px] focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
+                  className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-none focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
                 />
                 <button
                   type="button"
@@ -173,7 +173,7 @@ export default function SignupPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Repeat your password"
-                  className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-[4px] focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
+                  className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-none focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all text-sm font-semibold"
                 />
               </div>
             </div>
@@ -183,7 +183,7 @@ export default function SignupPage() {
               id="signup-submit"
               type="submit"
               disabled={loading}
-              className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white py-3.5 rounded-[4px] font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white py-3.5 rounded-none font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -208,7 +208,7 @@ export default function SignupPage() {
           {/* Login Link */}
           <Link
             href="/login"
-            className="block w-full py-3.5 rounded-[4px] font-bold text-xs uppercase tracking-wider text-center transition-all bg-white text-[var(--accent)] border border-[var(--accent)] hover:bg-[var(--accent-subtle)] active:scale-[0.99]"
+            className="block w-full py-3.5 rounded-none font-bold text-xs uppercase tracking-wider text-center transition-all bg-white text-[var(--accent)] border border-[var(--accent)] hover:bg-[var(--accent-subtle)] active:scale-[0.99]"
           >
             Sign In Instead
           </Link>

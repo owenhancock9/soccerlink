@@ -284,7 +284,7 @@ export default function EditCoachProfile() {
           </div>
           <Link
             href="/"
-            className="group flex items-center gap-1.5 bg-white border border-[var(--border-default)] text-xs font-medium px-4 py-2 rounded-[4px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] transition-all shadow-sm"
+            className="group flex items-center gap-1.5 bg-white border border-[var(--border-default)] text-xs font-medium px-4 py-2 rounded-none text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] transition-all shadow-sm"
           >
             <svg className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             Back to Home
@@ -296,7 +296,7 @@ export default function EditCoachProfile() {
           {/* Messages */}
           {message && (
             <div
-              className={`p-4 rounded-[4px] text-sm border anim-fade-in ${
+              className={`p-4 rounded-none text-sm border anim-fade-in ${
                 message.type === "success"
                   ? "bg-[var(--accent-subtle)] border-[var(--accent)]/40 text-[var(--accent)] font-medium"
                   : "bg-red-50 border-red-200 text-red-700 font-medium"
@@ -307,14 +307,14 @@ export default function EditCoachProfile() {
           )}
 
           {/* Profile Picture & General details */}
-          <div className="bg-white border border-[var(--border-default)] rounded-[4px] p-6 shadow-sm">
+          <div className="bg-white border border-[var(--border-default)] rounded-none p-6 shadow-sm">
             <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold mb-4">
               📸 Profile Picture
             </label>
             <div className="flex items-center gap-6">
               <div
                 onClick={() => avatarInputRef.current?.click()}
-                className="relative w-24 h-24 rounded-[4px] bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] font-bold text-2xl shadow-sm cursor-pointer overflow-hidden border border-[var(--border-default)] hover:border-[var(--accent)] transition-all"
+                className="relative w-24 h-24 rounded-none bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] font-bold text-2xl shadow-sm cursor-pointer overflow-hidden border border-[var(--border-default)] hover:border-[var(--accent)] transition-all"
               >
                 {uploadingAvatar ? (
                   <span className="w-6 h-6 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" />
@@ -373,7 +373,7 @@ export default function EditCoachProfile() {
           </div>
 
           {/* Specialty (Position) */}
-          <div className="bg-white border border-[var(--border-default)] rounded-[4px] p-6 shadow-sm">
+          <div className="bg-white border border-[var(--border-default)] rounded-none p-6 shadow-sm">
             <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold mb-4">
               ⚽ Specialties / Positions
             </label>
@@ -383,7 +383,7 @@ export default function EditCoachProfile() {
                   key={s}
                   type="button"
                   onClick={() => setSpecialty(s)}
-                  className={`px-3 py-2.5 rounded-[4px] text-xs font-semibold transition-all border ${
+                  className={`px-3 py-2.5 rounded-none text-xs font-semibold transition-all border ${
                     specialty === s
                       ? "bg-[var(--accent-subtle)] border-[var(--accent)] text-[var(--accent)]"
                       : "bg-white border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--text-muted)]"
@@ -396,7 +396,7 @@ export default function EditCoachProfile() {
           </div>
 
           {/* Coaching Style */}
-          <div className="bg-white border border-[var(--border-default)] rounded-[4px] p-6 shadow-sm">
+          <div className="bg-white border border-[var(--border-default)] rounded-none p-6 shadow-sm">
             <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold mb-4">
               🧠 Primary Coaching Style
             </label>
@@ -406,7 +406,7 @@ export default function EditCoachProfile() {
                   key={st}
                   type="button"
                   onClick={() => setStyle(st)}
-                  className={`px-3 py-2.5 rounded-[4px] text-xs font-semibold transition-all border ${
+                  className={`px-3 py-2.5 rounded-none text-xs font-semibold transition-all border ${
                     style === st
                       ? "bg-[var(--accent-subtle)] border-[var(--accent)] text-[var(--accent)]"
                       : "bg-white border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--text-muted)]"
@@ -419,7 +419,7 @@ export default function EditCoachProfile() {
           </div>
 
           {/* Hourly Rate */}
-          <div className="bg-white border border-[var(--border-default)] rounded-[4px] p-6 shadow-sm">
+          <div className="bg-white border border-[var(--border-default)] rounded-none p-6 shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold">
                 Hourly Rate
@@ -439,7 +439,7 @@ export default function EditCoachProfile() {
                 step="5"
                 value={rate}
                 onChange={(e) => setRate(parseInt(e.target.value))}
-                className="w-full h-1.5 bg-[var(--bg-secondary)] rounded-full appearance-none cursor-pointer accent-[var(--accent)] border border-[var(--border-default)]"
+                className="w-full h-1.5 bg-[var(--bg-secondary)] rounded-none appearance-none cursor-pointer accent-[var(--accent)] border border-[var(--border-default)]"
               />
             </div>
             <div className="flex justify-between text-[10px] text-[var(--text-muted)] font-semibold uppercase mt-1">
@@ -450,7 +450,7 @@ export default function EditCoachProfile() {
           </div>
 
           {/* Bio & Details */}
-          <div className="bg-white border border-[var(--border-default)] rounded-[4px] p-6 space-y-6 shadow-sm">
+          <div className="bg-white border border-[var(--border-default)] rounded-none p-6 space-y-6 shadow-sm">
             {/* Bio */}
             <div>
               <label
@@ -466,7 +466,7 @@ export default function EditCoachProfile() {
                 rows={4}
                 maxLength={300}
                 placeholder="Describe your credentials, methodology, and coaching philosophy..."
-                className="w-full p-4 bg-white border border-[var(--border-default)] rounded-[4px] focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] text-sm leading-relaxed placeholder:text-[var(--text-tertiary)] transition-all resize-none"
+                className="w-full p-4 bg-white border border-[var(--border-default)] rounded-none focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] text-sm leading-relaxed placeholder:text-[var(--text-tertiary)] transition-all resize-none"
               />
               <div className="flex justify-between items-center mt-2">
                 <span className="text-[10px] text-[var(--text-muted)] font-medium">300 characters max</span>
@@ -486,7 +486,7 @@ export default function EditCoachProfile() {
                   <select
                     value={experience}
                     onChange={(e) => setExperience(e.target.value)}
-                    className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-[4px] appearance-none focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] text-sm font-semibold cursor-pointer"
+                    className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-none appearance-none focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] text-sm font-semibold cursor-pointer"
                   >
                     <option value="">Select experience...</option>
                     <option value="Pro/Semi-Pro Player">Pro / Semi-Pro Player</option>
@@ -508,7 +508,7 @@ export default function EditCoachProfile() {
 
                 {highlightUrl ? (
                   <div className="space-y-3">
-                    <div className="relative rounded-[4px] overflow-hidden border border-[var(--border-default)] bg-black">
+                    <div className="relative rounded-none overflow-hidden border border-[var(--border-default)] bg-black">
                       <video
                         src={highlightUrl}
                         autoPlay
@@ -518,13 +518,13 @@ export default function EditCoachProfile() {
                         className="w-full h-40 object-cover opacity-95"
                       />
                       <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)] bg-white px-3 py-1 rounded-[4px] border border-[var(--border-default)] shadow-sm">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)] bg-white px-3 py-1 rounded-none border border-[var(--border-default)] shadow-sm">
                           Preview
                         </span>
                         <button
                           type="button"
                           onClick={() => setHighlightUrl("")}
-                          className="text-[10px] font-bold uppercase tracking-wider text-red-600 bg-white px-3 py-1 rounded-[4px] border border-[var(--border-default)] shadow-sm hover:bg-red-50 transition-all"
+                          className="text-[10px] font-bold uppercase tracking-wider text-red-600 bg-white px-3 py-1 rounded-none border border-[var(--border-default)] shadow-sm hover:bg-red-50 transition-all"
                         >
                           Remove
                         </button>
@@ -534,7 +534,7 @@ export default function EditCoachProfile() {
                 ) : (
                   <div
                     onClick={() => videoInputRef.current?.click()}
-                    className="relative cursor-pointer border border-dashed border-[var(--border-default)] hover:border-[var(--accent)] rounded-[4px] p-6 text-center transition-all bg-[var(--bg-secondary)]/50 hover:bg-white"
+                    className="relative cursor-pointer border border-dashed border-[var(--border-default)] hover:border-[var(--accent)] rounded-none p-6 text-center transition-all bg-[var(--bg-secondary)]/50 hover:bg-white"
                   >
                     {uploadingVideo ? (
                       <div className="flex flex-col items-center gap-2">
@@ -543,7 +543,7 @@ export default function EditCoachProfile() {
                       </div>
                     ) : (
                       <>
-                        <div className="w-10 h-10 mx-auto mb-2 bg-white rounded-full flex items-center justify-center text-xl border border-[var(--border-default)] shadow-sm">
+                        <div className="w-10 h-10 mx-auto mb-2 bg-white rounded-none flex items-center justify-center text-xl border border-[var(--border-default)] shadow-sm">
                           🎥
                         </div>
                         <p className="text-xs font-bold text-[var(--text-secondary)] mb-0.5">Upload highlight clip</p>
@@ -594,7 +594,7 @@ export default function EditCoachProfile() {
                   onFocus={() => { if (suggestions.length > 0) setSuggestionsOpen(true); }}
                   onKeyDown={(e) => { if (e.key === "Escape") setSuggestionsOpen(false); }}
                   placeholder="Start typing an address or training field name..."
-                  className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-[4px] focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] text-sm font-semibold transition-all placeholder:text-[var(--text-tertiary)]"
+                  className="w-full p-3.5 bg-white border border-[var(--border-default)] rounded-none focus:ring-2 focus:ring-[var(--accent)]/15 focus:border-[var(--accent)] outline-none text-[var(--text-primary)] text-sm font-semibold transition-all placeholder:text-[var(--text-tertiary)]"
                 />
                 {suggestionsLoading && (
                   <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -605,7 +605,7 @@ export default function EditCoachProfile() {
 
               {/* Autocomplete Dropdown */}
               {suggestionsOpen && suggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-2 bg-white border border-[var(--border-default)] rounded-[4px] overflow-hidden shadow-lg anim-fade-in">
+                <div className="absolute z-50 w-full mt-2 bg-white border border-[var(--border-default)] rounded-none overflow-hidden shadow-lg anim-fade-in">
                   {suggestions.map((s, i) => (
                     <button
                       key={i}
@@ -650,7 +650,7 @@ export default function EditCoachProfile() {
                   return (
                     <div
                       key={day}
-                      className={`flex flex-col gap-4 p-4 rounded-[4px] border transition-all ${
+                      className={`flex flex-col gap-4 p-4 rounded-none border transition-all ${
                         isSelected
                           ? "bg-white border-[var(--accent)] shadow-sm"
                           : "bg-[var(--bg-secondary)]/40 border-[var(--border-default)] opacity-70 hover:opacity-100"
@@ -662,7 +662,7 @@ export default function EditCoachProfile() {
                           onClick={() => toggleDay(day)}
                           className="flex items-center gap-3 cursor-pointer group/toggle"
                         >
-                          <div className={`w-9 h-9 rounded-[4px] flex items-center justify-center transition-all ${
+                          <div className={`w-9 h-9 rounded-none flex items-center justify-center transition-all ${
                             isSelected ? "bg-[var(--accent)] text-white" : "bg-white text-[var(--text-secondary)] border border-[var(--border-default)]"
                           }`}>
                             <span className="text-[10px] font-bold">{day.toUpperCase()}</span>
@@ -676,7 +676,7 @@ export default function EditCoachProfile() {
                           <button
                             type="button"
                             onClick={() => addSlot(day)}
-                            className="text-[10px] bg-[var(--accent-subtle)] text-[var(--accent)] px-2.5 py-1.5 rounded-[4px] border border-[var(--accent)]/20 font-bold uppercase tracking-wider hover:bg-[var(--accent)]/10 transition-all flex items-center gap-1"
+                            className="text-[10px] bg-[var(--accent-subtle)] text-[var(--accent)] px-2.5 py-1.5 rounded-none border border-[var(--accent)]/20 font-bold uppercase tracking-wider hover:bg-[var(--accent)]/10 transition-all flex items-center gap-1"
                           >
                             <span>Add Break</span>
                             <span className="text-xs">+</span>
@@ -689,7 +689,7 @@ export default function EditCoachProfile() {
                           {availability.map((s, idx) => {
                             if (s.day !== day) return null;
                             return (
-                              <div key={`${day}-${idx}`} className="flex items-center gap-3 bg-[var(--bg-secondary)]/50 p-2.5 rounded-[4px] border border-[var(--border-default)] animate-slide-in">
+                              <div key={`${day}-${idx}`} className="flex items-center gap-3 bg-[var(--bg-secondary)]/50 p-2.5 rounded-none border border-[var(--border-default)] animate-slide-in">
                                 <div className="flex items-center gap-2">
                                   <input
                                     type="time"
@@ -699,7 +699,7 @@ export default function EditCoachProfile() {
                                         availability.map((slot, i) => (i === idx ? { ...slot, start: e.target.value } : slot)),
                                       );
                                     }}
-                                    className="bg-white border border-[var(--border-default)] rounded-[4px] px-2 py-1 focus:ring-1 focus:ring-[var(--accent)] outline-none text-[var(--text-primary)] font-mono font-bold text-xs"
+                                    className="bg-white border border-[var(--border-default)] rounded-none px-2 py-1 focus:ring-1 focus:ring-[var(--accent)] outline-none text-[var(--text-primary)] font-mono font-bold text-xs"
                                   />
                                   <span className="text-[var(--text-muted)] font-bold text-[10px] uppercase">to</span>
                                   <input
@@ -710,7 +710,7 @@ export default function EditCoachProfile() {
                                         availability.map((slot, i) => (i === idx ? { ...slot, end: e.target.value } : slot)),
                                       );
                                     }}
-                                    className="bg-white border border-[var(--border-default)] rounded-[4px] px-2 py-1 focus:ring-1 focus:ring-[var(--accent)] outline-none text-[var(--text-primary)] font-mono font-bold text-xs"
+                                    className="bg-white border border-[var(--border-default)] rounded-none px-2 py-1 focus:ring-1 focus:ring-[var(--accent)] outline-none text-[var(--text-primary)] font-mono font-bold text-xs"
                                   />
                                 </div>
                                 
@@ -718,7 +718,7 @@ export default function EditCoachProfile() {
                                   <button
                                     type="button"
                                     onClick={() => removeSlot(idx)}
-                                    className="ml-auto w-6 h-6 rounded-[4px] flex items-center justify-center text-[var(--text-muted)] hover:text-red-600 hover:bg-red-50 transition-all text-sm font-semibold"
+                                    className="ml-auto w-6 h-6 rounded-none flex items-center justify-center text-[var(--text-muted)] hover:text-red-600 hover:bg-red-50 transition-all text-sm font-semibold"
                                   >
                                     ✕
                                   </button>
@@ -736,13 +736,13 @@ export default function EditCoachProfile() {
           </div>
 
           {/* Stripe Payouts */}
-          <div className="bg-white border border-[var(--border-default)] rounded-[4px] p-6 relative overflow-hidden shadow-sm">
+          <div className="bg-white border border-[var(--border-default)] rounded-none p-6 relative overflow-hidden shadow-sm">
             <label className="block text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold mb-4">
               💳 Stripe Payment Dashboard
             </label>
             {stripeOnboarded ? (
-              <div className="flex items-center gap-4 text-[var(--accent)] bg-[var(--accent-subtle)] p-5 rounded-[4px] border border-[var(--accent)]/20">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-base border border-[var(--accent)]/10 shadow-sm">✅</div>
+              <div className="flex items-center gap-4 text-[var(--accent)] bg-[var(--accent-subtle)] p-5 rounded-none border border-[var(--accent)]/20">
+                <div className="w-10 h-10 bg-white rounded-none flex items-center justify-center text-base border border-[var(--accent)]/10 shadow-sm">✅</div>
                 <div>
                   <p className="font-bold text-sm text-[var(--text-primary)]">Stripe Connect Account Verified</p>
                   <p className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)] mt-0.5">Live and ready to receive bookings and direct payouts</p>
@@ -750,8 +750,8 @@ export default function EditCoachProfile() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex items-start gap-4 text-amber-700 bg-amber-50 p-5 rounded-[4px] border border-amber-200">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-lg shrink-0 border border-amber-200 shadow-sm">⚠️</div>
+                <div className="flex items-start gap-4 text-amber-700 bg-amber-50 p-5 rounded-none border border-amber-200">
+                  <div className="w-10 h-10 bg-white rounded-none flex items-center justify-center text-lg shrink-0 border border-amber-200 shadow-sm">⚠️</div>
                   <div>
                     <p className="font-bold text-sm text-amber-800 mb-0.5">Payout Setup Required</p>
                     <p className="text-xs text-amber-700 leading-relaxed font-medium">To activate your public coach card and accept players, you must securely link your bank account or debit card via Stripe.</p>
@@ -763,7 +763,7 @@ export default function EditCoachProfile() {
                     type="button"
                     disabled={connectingStripe}
                     onClick={handleStripeConnect}
-                    className="flex-1 bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] py-3 rounded-[4px] text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm flex items-center justify-center gap-2 group/stripe"
+                    className="flex-1 bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] py-3 rounded-none text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm flex items-center justify-center gap-2 group/stripe"
                   >
                     {connectingStripe ? "Connecting..." : "Connect Stripe Account"}
                     <svg className="w-4 h-4 transition-transform group-hover/stripe:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
@@ -773,7 +773,7 @@ export default function EditCoachProfile() {
                     type="button"
                     disabled={isSyncing}
                     onClick={refreshStripeStatus}
-                    className="flex-1 bg-white border border-[var(--border-default)] hover:border-[var(--text-muted)] text-[var(--text-secondary)] py-3 rounded-[4px] text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm flex items-center justify-center gap-2 group/sync"
+                    className="flex-1 bg-white border border-[var(--border-default)] hover:border-[var(--text-muted)] text-[var(--text-secondary)] py-3 rounded-none text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm flex items-center justify-center gap-2 group/sync"
                   >
                     {isSyncing ? (
                        <span className="w-4 h-4 border-2 border-[var(--text-muted)]/20 border-t-[var(--text-muted)] rounded-full animate-spin" />
@@ -799,7 +799,7 @@ export default function EditCoachProfile() {
                          }
                       }
                     }}
-                    className="bg-red-50 border border-red-200 hover:bg-red-100 text-red-700 py-3 px-4 rounded-[4px] text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm flex items-center justify-center group/reset"
+                    className="bg-red-50 border border-red-200 hover:bg-red-100 text-red-700 py-3 px-4 rounded-none text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm flex items-center justify-center group/reset"
                     title="Reset Stripe connection"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -810,15 +810,15 @@ export default function EditCoachProfile() {
           </div>
 
           {/* Live Preview */}
-          <div className="bg-white border border-[var(--border-default)] rounded-[4px] p-6 shadow-sm relative overflow-hidden">
+          <div className="bg-white border border-[var(--border-default)] rounded-none p-6 shadow-sm relative overflow-hidden">
             <div className="flex items-center gap-2 mb-4">
-              <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
+              <span className="w-2 h-2 rounded-none bg-[var(--accent)] animate-pulse" />
               <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold">
                 Marketplace Card Preview
               </p>
             </div>
 
-            <div className="max-w-sm mx-auto bg-white border border-[var(--border-default)] rounded-[4px] overflow-hidden shadow-sm hover:border-[var(--accent)] transition-all">
+            <div className="max-w-sm mx-auto bg-white border border-[var(--border-default)] rounded-none overflow-hidden shadow-sm hover:border-[var(--accent)] transition-all">
               <div className="relative h-48 bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-tertiary)] overflow-hidden">
                 {highlightUrl ? (
                   <video
@@ -840,11 +840,11 @@ export default function EditCoachProfile() {
                 ) : (
                   <span className="text-5xl">⚽</span>
                 )}
-                <div className="absolute top-3 left-3 bg-white px-2 py-1 rounded-[2px] text-[10px] font-bold text-[var(--text-primary)] border border-[var(--border-default)] shadow-xs">
+                <div className="absolute top-3 left-3 bg-white px-2 py-1 rounded-none text-[10px] font-bold text-[var(--text-primary)] border border-[var(--border-default)] shadow-xs">
                   {specialty || "POSITION"}
                 </div>
                 {style && (
-                  <div className="absolute top-3 right-3 bg-[var(--accent)] text-white px-2 py-1 rounded-[2px] text-[10px] font-bold shadow-xs">
+                  <div className="absolute top-3 right-3 bg-[var(--accent)] text-white px-2 py-1 rounded-none text-[10px] font-bold shadow-xs">
                     {style}
                   </div>
                 )}
@@ -878,7 +878,7 @@ export default function EditCoachProfile() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white py-4 rounded-[4px] text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 active:scale-[0.99] shadow-sm flex items-center justify-center"
+            className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white py-4 rounded-none text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 active:scale-[0.99] shadow-sm flex items-center justify-center"
           >
             {saving ? (
               <span className="flex items-center justify-center gap-2">
