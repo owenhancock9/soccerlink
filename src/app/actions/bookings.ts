@@ -25,13 +25,18 @@ export async function createBooking(formData: FormData) {
   }
 
   // Check if this is the player's first session
-  const { data: pastBookings } = await supabase
+  const { data: activeBookings } = await supabase
     .from("bookings")
-    .select("id")
-    .eq("player_id", user.id)
-    .limit(1);
+    .select("id, status, created_at")
+    .eq("player_id", user.id);
 
-  const isFirstSession = !pastBookings || pastBookings.length === 0;
+  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+  const hasPastBooking = activeBookings?.some(b => 
+    b.status === "confirmed" || 
+    b.status === "completed" || 
+    (b.status === "pending" && new Date(b.created_at) > fifteenMinutesAgo)
+  );
+  const isFirstSession = !hasPastBooking;
 
   // 1. Tactical Pricing: 50% off for first session
   const rate = isFirstSession ? Math.max(1, Math.round(baseRate * 0.5)) : baseRate;
@@ -110,11 +115,15 @@ export async function createBooking(formData: FormData) {
       client_reference_id: data.id,
       success_url: `${baseUrl}/?success=true`,
       cancel_url: `${baseUrl}/?canceled=true`,
+    }, {
+      idempotencyKey: `checkout-session-${data.id}`,
     });
 
     return { success: true, booking: data, url: session.url };
   } catch (err: unknown) {
     console.error("Stripe Checkout Error:", err);
+    // Clean up the pending booking if payment session creation fails
+    await supabase.from("bookings").delete().eq("id", data.id);
     return { error: "Failed to create payment session." };
   }
 }
@@ -169,7 +178,15 @@ export async function confirmSession(bookingId: string) {
   const coachConfirmed = isCoach ? true : !!booking.coach_confirmed_at;
   const playerConfirmed = isPlayer ? true : !!booking.player_confirmed_at;
 
-  // Email the other party
+  // 1. Release funds if both parties have confirmed
+  if (coachConfirmed && playerConfirmed) {
+    const payoutResult = await releaseFundsToCoach(bookingId, supabase);
+    if (payoutResult.error) {
+      console.error("Auto-payout failed:", payoutResult.error);
+    }
+  }
+
+  // 2. Send emails
   try {
     const confirmerName = isCoach
       ? (booking.coach as unknown as ProfileJoin)?.full_name || "Your Coach"
@@ -178,29 +195,21 @@ export async function confirmSession(bookingId: string) {
       ? (booking.player as unknown as ProfileJoin)?.email
       : (booking.coach as unknown as ProfileJoin)?.email;
 
-    if (recipientEmail) {
-      if (coachConfirmed && playerConfirmed) {
-        // Both confirmed — release funds
-        const payoutResult = await releaseFundsToCoach(bookingId);
-        if (payoutResult.error) {
-          console.error("Auto-payout failed:", payoutResult.error);
-        }
-        // Email coach about payout
-        const coachEmail = (booking.coach as unknown as ProfileJoin)?.email;
-        if (coachEmail) {
-          await sendFundsReleasedEmail(coachEmail, booking.rate || 0);
-        }
-      } else {
-        // Only one side confirmed — notify the other
-        await sendSessionConfirmedEmail(
-          recipientEmail,
-          confirmerName,
-          isCoach ? "coach" : "player",
-        );
+    if (coachConfirmed && playerConfirmed) {
+      const coachEmail = (booking.coach as unknown as ProfileJoin)?.email;
+      if (coachEmail) {
+        await sendFundsReleasedEmail(coachEmail, booking.rate || 0);
       }
+    } else if (recipientEmail) {
+      // Only one side confirmed — notify the other
+      await sendSessionConfirmedEmail(
+        recipientEmail,
+        confirmerName,
+        isCoach ? "coach" : "player",
+      );
     }
   } catch (e) {
-    console.warn("Failed to send confirmation email:", e);
+    console.warn("Failed to send confirmation emails:", e);
   }
 
   return {
@@ -332,6 +341,17 @@ export async function updateBookingStatus(bookingId: string, status: string) {
   } = await supabase.auth.getUser();
 
   if (!user) return { error: "Not authenticated" };
+
+  // Verify the user is an admin
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") {
+    return { error: "Not authorized to update booking status." };
+  }
 
   const { error } = await supabase
     .from("bookings")

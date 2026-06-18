@@ -39,6 +39,8 @@ export async function createStripeConnectAccount(rootUrl?: string) {
         type: "express",
         capabilities: { transfers: { requested: true } },
         settings: { payouts: { schedule: { interval: "daily" } } }
+      }, {
+        idempotencyKey: `stripe-connect-${user.id}`
       });
       accountId = account.id;
 

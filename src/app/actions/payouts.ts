@@ -1,12 +1,10 @@
-"use server";
-
 import { createClient } from "@/app/lib/supabase/server";
 import { getStripe } from "@/app/lib/stripe/server";
 
-export async function releaseFundsToCoach(bookingId: string) {
+export async function releaseFundsToCoach(bookingId: string, supabaseClient?: any) {
   const stripe = getStripe();
   if (!stripe) return { error: "Stripe not configured on server" };
-  const supabase = await createClient();
+  const supabase = supabaseClient || (await createClient());
 
   try {
     // 1. Fetch the booking to verify it exists and is ready for payout
@@ -18,6 +16,25 @@ export async function releaseFundsToCoach(bookingId: string) {
 
     if (bookingErr || !booking) {
       return { error: "Booking not found." };
+    }
+
+    // 2. Auth check: If there is an authenticated user session, check if they are authorized
+    // (This prevents internal server action invocation by unauthorized logged-in users)
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const isPlayer = user.id === booking.player_id;
+      const isCoach = user.id === booking.coach_id;
+      
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      const isAdmin = profile?.role === "admin";
+
+      if (!isPlayer && !isCoach && !isAdmin) {
+        return { error: "Not authorized to release funds for this booking." };
+      }
     }
 
     // Allow payout if confirmed with both-party confirmation, or legacy confirmed status
@@ -44,6 +61,8 @@ export async function releaseFundsToCoach(bookingId: string) {
       currency: "usd",
       destination: stripeAccountId,
       description: `Payout for session ${booking.id}`,
+    }, {
+      idempotencyKey: `release-funds-${bookingId}`,
     });
 
     // 2. Update the booking status to "completed" so it doesn't get paid twice
@@ -66,3 +85,4 @@ export async function releaseFundsToCoach(bookingId: string) {
     return { error: err instanceof Error ? err.message : "Failed to release funds." };
   }
 }
+

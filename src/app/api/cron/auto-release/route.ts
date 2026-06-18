@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/app/lib/supabase/server";
+import { createAdminClient } from "@/app/lib/supabase/server";
 import { releaseFundsToCoach } from "@/app/actions/payouts";
 import { sendFundsReleasedEmail } from "@/app/actions/emails";
 
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Find all confirmed bookings where session was 24+ hours ago
   // and funds haven't been released yet (status is still "confirmed")
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
         continue;
       }
 
-      const payoutResult = await releaseFundsToCoach(booking.id);
+      const payoutResult = await releaseFundsToCoach(booking.id, supabase);
 
       if (payoutResult.error) {
         results.push({ id: booking.id, result: `error: ${payoutResult.error}` });
@@ -75,3 +75,4 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ released, total: bookings.length, results });
 }
+

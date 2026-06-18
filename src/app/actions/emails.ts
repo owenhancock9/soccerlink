@@ -4,6 +4,16 @@ import { Resend } from "resend";
 
 const FROM_EMAIL = "CoachingMatch <notifications@coachingmatch.co>";
 
+function escapeHtml(str: string): string {
+  if (!str) return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 async function send(to: string, subject: string, html: string) {
   if (!process.env.RESEND_API_KEY) {
     console.warn("No RESEND_API_KEY — skipping email to", to);
@@ -48,13 +58,14 @@ export async function sendBookingNotification(
   sessionTime: string,
   amount: number,
 ) {
+  const safePlayerName = escapeHtml(playerName);
   return send(
     coachEmail,
-    `New Session Booked — ${playerName}`,
+    `New Session Booked — ${safePlayerName}`,
     wrap(`
       <h2 style="color: #09b1ba; font-size: 18px; font-weight: 700; margin: 0 0 16px;">New Session Booked 🎯</h2>
       <p style="color: #4b5563; margin: 0 0 24px; line-height: 1.6; font-size: 14px;">
-        <strong style="color: #111827;">${playerName}</strong> just booked a session with you.
+        <strong style="color: #111827;">${safePlayerName}</strong> just booked a session with you.
       </p>
       <div style="background: #f4f6f8; border: 1px solid #e5e7eb; border-radius: 4px; padding: 20px; margin-bottom: 24px;">
         <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
@@ -85,14 +96,15 @@ export async function sendSessionConfirmedEmail(
   confirmerName: string,
   role: "coach" | "player",
 ) {
+  const safeConfirmerName = escapeHtml(confirmerName);
   const otherRole = role === "coach" ? "player" : "coach";
   return send(
     recipientEmail,
-    `${confirmerName} confirmed the session`,
+    `${safeConfirmerName} confirmed the session`,
     wrap(`
       <h2 style="color: #09b1ba; font-size: 18px; font-weight: 700; margin: 0 0 16px;">Session Confirmed Completed ✓</h2>
       <p style="color: #4b5563; margin: 0 0 16px; line-height: 1.6; font-size: 14px;">
-        <strong style="color: #111827;">${confirmerName}</strong> (${role}) has confirmed that the session was completed successfully.
+        <strong style="color: #111827;">${safeConfirmerName}</strong> (${role}) has confirmed that the session was completed successfully.
       </p>
       <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 4px; padding: 16px;">
         <p style="color: #b45309; font-size: 13px; font-weight: 600; margin: 0; line-height: 1.5;">
@@ -129,21 +141,23 @@ export async function sendRatingReceivedEmail(
   rating: number,
   review: string,
 ) {
+  const safePlayerName = escapeHtml(playerName);
+  const safeReview = escapeHtml(review);
   const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
   return send(
     coachEmail,
-    `New ${rating}-Star Review from ${playerName}`,
+    `New ${rating}-Star Review from ${safePlayerName}`,
     wrap(`
       <h2 style="color: #d97706; font-size: 18px; font-weight: 700; margin: 0 0 16px;">New Review Received ⭐</h2>
       <div style="text-align: center; margin: 20px 0; background: rgba(245, 158, 11, 0.08); padding: 12px; border-radius: 4px;">
         <span style="font-size: 24px; color: #f59e0b; letter-spacing: 4px;">${stars}</span>
       </div>
       <p style="color: #4b5563; margin: 0 0 8px; font-size: 14px;">
-        <strong style="color: #111827;">${playerName}</strong> rated you <strong style="color: #d97706;">${rating} out of 5 stars</strong>
+        <strong style="color: #111827;">${safePlayerName}</strong> rated you <strong style="color: #d97706;">${rating} out of 5 stars</strong>
       </p>
-      ${review ? `
+      ${safeReview ? `
         <div style="background: #f4f6f8; border-left: 3px solid #f59e0b; padding: 16px; border-radius: 4px; margin-top: 16px;">
-          <p style="color: #111827; font-style: italic; margin: 0; line-height: 1.6; font-size: 13px;">"${review}"</p>
+          <p style="color: #111827; font-style: italic; margin: 0; line-height: 1.6; font-size: 13px;">"${safeReview}"</p>
         </div>
       ` : ""}
     `),

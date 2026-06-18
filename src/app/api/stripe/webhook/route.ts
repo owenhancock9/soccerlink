@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getStripe } from "@/app/lib/stripe/server";
-import { createClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/app/lib/supabase/server";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -13,20 +13,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Stripe not configured" }, { status: 500 });
   }
 
+  if (!webhookSecret) {
+    console.error("STRIPE_WEBHOOK_SECRET is not configured on the server.");
+    return NextResponse.json({ error: "Webhook secret missing" }, { status: 500 });
+  }
+
+  if (!sig) {
+    console.error("stripe-signature header missing in webhook request.");
+    return NextResponse.json({ error: "Missing signature header" }, { status: 400 });
+  }
+
   let event;
 
   try {
-    if (!webhookSecret) {
-      console.log(
-        "No webhook secret configured. Skipping signature validation (not recommended for production).",
-      );
-      event = JSON.parse(body);
-    } else {
-      event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-    }
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Webhook error";
-    console.error("Webhook error:", message);
+    console.error("Webhook verification error:", message);
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
@@ -36,12 +39,7 @@ export async function POST(req: Request) {
     const bookingId = session.client_reference_id;
 
     if (bookingId) {
-      // Use service role key to bypass Row Level Security since this is a server-to-server webhook
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY ||
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      );
+      const supabaseAdmin = createAdminClient();
 
       const { error } = await supabaseAdmin
         .from("bookings")
@@ -63,11 +61,7 @@ export async function POST(req: Request) {
 
     // Check if the coach has finished onboarding
     if (account.details_submitted) {
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY ||
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      );
+      const supabaseAdmin = createAdminClient();
 
       const { error } = await supabaseAdmin
         .from("coach_profiles")
@@ -86,3 +80,4 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ received: true });
 }
+
