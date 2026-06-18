@@ -271,16 +271,16 @@ function CoachProfileModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Hero / Profile Photo */}
-        <div className={`relative h-52 bg-gradient-to-br ${coach.gradient} shrink-0`}>
+        <div className={`relative h-72 bg-gradient-to-br ${coach.gradient} shrink-0`}>
           {coach.avatarUrl ? (
-            <Image src={coach.avatarUrl} alt={coach.name} width={672} height={208} className="w-full h-full object-cover" />
+            <Image src={coach.avatarUrl} alt={coach.name} width={672} height={288} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <span className="text-8xl font-black text-white/20">{coach.avatar}</span>
             </div>
           )}
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/10 to-transparent" />
+          {/* Subtle bottom gradient for text readability */}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/60 to-transparent" />
           {/* Close button */}
           <button
             onClick={onClose}
@@ -774,9 +774,13 @@ export default function SoccerPlatform() {
                   <div className="flex gap-4 mb-6">
                     <div className="shrink-0">
                       <div
-                        className={`w-16 h-16 rounded-none bg-gradient-to-br ${selectedCoach.gradient} flex items-center justify-center text-white font-bold text-2xl border border-black/10`}
+                        className={`w-16 h-16 rounded-none bg-gradient-to-br ${selectedCoach.gradient} flex items-center justify-center text-white font-bold text-2xl border border-black/10 overflow-hidden`}
                       >
-                        {selectedCoach.avatar}
+                        {selectedCoach.avatarUrl ? (
+                          <Image src={selectedCoach.avatarUrl} alt={selectedCoach.name} width={64} height={64} className="w-full h-full object-cover" />
+                        ) : (
+                          selectedCoach.avatar
+                        )}
                       </div>
                     </div>
                     <div className="flex flex-col justify-center">
