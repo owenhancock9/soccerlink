@@ -263,75 +263,79 @@ function CoachProfileModal({
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-0 md:p-6 bg-black/50 backdrop-blur-sm anim-fade-in"
+      className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-0 md:p-6 bg-black/60 backdrop-blur-sm anim-fade-in"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl bg-white border border-[var(--border-default)] rounded-t-2xl md:rounded-lg overflow-hidden shadow-2xl anim-fade-in-up max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-2xl rounded-t-2xl md:rounded-lg overflow-hidden shadow-2xl anim-fade-in-up max-h-[92vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Hero / Profile Photo */}
-        <div className={`relative h-72 bg-gradient-to-br ${coach.gradient} shrink-0`}>
-          {coach.avatarUrl ? (
-            <Image src={coach.avatarUrl} alt={coach.name} width={672} height={288} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-8xl font-black text-white/20">{coach.avatar}</span>
+        {/* Full-bleed background photo */}
+        {coach.avatarUrl ? (
+          <div className="absolute inset-0">
+            <Image src={coach.avatarUrl} alt={coach.name} width={672} height={900} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80" />
+          </div>
+        ) : (
+          <div className={`absolute inset-0 bg-gradient-to-br ${coach.gradient}`}>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[12rem] font-black text-white/10">{coach.avatar}</span>
             </div>
-          )}
-          {/* Subtle bottom gradient for text readability */}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/60 to-transparent" />
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-9 h-9 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-colors text-sm font-bold"
-          >
-            ✕
-          </button>
-          {/* Name overlay */}
-          <div className="absolute bottom-5 left-6 right-6">
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/70" />
+          </div>
+        )}
+
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 w-9 h-9 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-colors text-sm font-bold"
+        >
+          ✕
+        </button>
+
+        {/* Scrollable content over the photo */}
+        <div className="relative z-[1] overflow-y-auto flex-1 p-6 space-y-5">
+          {/* Name + rating header */}
+          <div className="pt-8 pb-2">
             <div className="flex items-center gap-3 flex-wrap">
-              <h2 className="text-2xl font-black text-[var(--text-primary)]">{titleCase(coach.name)}</h2>
+              <h2 className="text-3xl font-black text-white drop-shadow-lg">{titleCase(coach.name)}</h2>
               {coach.verified && (
-                <span className="text-[10px] bg-[var(--accent)] text-white px-2.5 py-1 rounded font-bold uppercase tracking-wider">✓ Verified</span>
+                <span className="text-[10px] bg-white/20 backdrop-blur-sm text-white px-2.5 py-1 rounded font-bold uppercase tracking-wider border border-white/20">✓ Verified</span>
               )}
               {adminCoach?.banned && (
-                <span className="text-[10px] bg-red-600 text-white px-2.5 py-1 rounded font-bold uppercase tracking-wider">Banned</span>
+                <span className="text-[10px] bg-red-600/80 backdrop-blur-sm text-white px-2.5 py-1 rounded font-bold uppercase tracking-wider">Banned</span>
               )}
             </div>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-2">
               <Stars rating={coach.rating} />
-              <span className="text-[var(--text-secondary)] text-xs font-semibold font-mono">{coach.rating}</span>
-              <span className="text-[var(--text-muted)] text-xs font-medium">· {coach.reviews} reviews</span>
+              <span className="text-white/90 text-xs font-semibold font-mono">{coach.rating}</span>
+              <span className="text-white/60 text-xs font-medium">· {coach.reviews} reviews</span>
             </div>
           </div>
-        </div>
 
-        {/* Scrollable content */}
-        <div className="overflow-y-auto flex-1 p-6 space-y-5 bg-[var(--bg-secondary)]">
-          {/* Rate + Position + Location row */}
+          {/* Rate + Position + Experience row */}
           <div className="flex flex-wrap gap-3">
-            <div className="bg-white border border-[var(--border-default)] rounded-lg px-4 py-3 flex flex-col items-center shadow-sm">
-              <span className="text-xl font-black text-[var(--text-primary)] font-mono">${coach.rate}</span>
-              <span className="text-[10px] text-[var(--text-muted)] font-semibold uppercase tracking-wider mt-0.5">per session</span>
+            <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-lg px-4 py-3 flex flex-col items-center">
+              <span className="text-xl font-black text-white font-mono">${coach.rate}</span>
+              <span className="text-[10px] text-white/60 font-semibold uppercase tracking-wider mt-0.5">per session</span>
             </div>
             {coach.role && (
-              <div className="bg-[var(--accent-subtle)] border border-[var(--accent)]/20 rounded-lg px-4 py-3 flex flex-col items-center shadow-sm">
-                <span className="text-sm font-bold text-[var(--accent)]">{coach.role}</span>
-                <span className="text-[10px] text-[var(--text-muted)] font-semibold uppercase tracking-wider mt-0.5">Position</span>
+              <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-lg px-4 py-3 flex flex-col items-center">
+                <span className="text-sm font-bold text-white">{coach.role}</span>
+                <span className="text-[10px] text-white/60 font-semibold uppercase tracking-wider mt-0.5">Position</span>
               </div>
             )}
             {coach.experience && (
-              <div className="bg-white border border-[var(--border-default)] rounded-lg px-4 py-3 flex flex-col items-center shadow-sm">
-                <span className="text-sm font-bold text-[var(--text-secondary)]">{coach.experience}</span>
-                <span className="text-[10px] text-[var(--text-muted)] font-semibold uppercase tracking-wider mt-0.5">Experience</span>
+              <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-lg px-4 py-3 flex flex-col items-center">
+                <span className="text-sm font-bold text-white">{coach.experience}</span>
+                <span className="text-[10px] text-white/60 font-semibold uppercase tracking-wider mt-0.5">Experience</span>
               </div>
             )}
           </div>
 
           {/* Location */}
           {coach.location && (
-            <div className="flex items-center gap-2 text-[var(--text-secondary)] font-medium">
+            <div className="flex items-center gap-2 text-white/80 font-medium">
               <span>📍</span>
               <span className="text-sm">{coach.location}</span>
             </div>
@@ -339,21 +343,21 @@ function CoachProfileModal({
 
           {/* Bio */}
           {coach.bio && (
-            <div className="bg-white border border-[var(--border-default)] rounded-lg p-5 shadow-sm">
-              <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-bold mb-3">About</p>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{coach.bio}</p>
+            <div className="bg-black/30 backdrop-blur-md border border-white/15 rounded-lg p-5">
+              <p className="text-[10px] text-white/50 uppercase tracking-widest font-bold mb-3">About</p>
+              <p className="text-sm text-white/90 leading-relaxed">{coach.bio}</p>
             </div>
           )}
 
           {/* Availability */}
           {coach.availability && coach.availability.length > 0 && (
-            <div className="bg-white border border-[var(--border-default)] rounded-lg p-5 shadow-sm">
-              <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-bold mb-3">Availability</p>
+            <div className="bg-black/30 backdrop-blur-md border border-white/15 rounded-lg p-5">
+              <p className="text-[10px] text-white/50 uppercase tracking-widest font-bold mb-3">Availability</p>
               <div className="flex flex-wrap gap-2">
                 {coach.availability.map((slot: AvailabilitySlot, i: number) => (
-                  <div key={i} className="flex flex-col items-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-4 py-2">
-                    <span className="text-[10px] text-[var(--text-muted)] font-semibold">{slot.day}</span>
-                    <span className="text-xs text-[var(--text-primary)] font-mono font-bold mt-0.5">{slot.start} – {slot.end}</span>
+                  <div key={i} className="flex flex-col items-center bg-white/10 backdrop-blur-sm border border-white/15 rounded-lg px-4 py-2">
+                    <span className="text-[10px] text-white/60 font-semibold">{slot.day}</span>
+                    <span className="text-xs text-white font-mono font-bold mt-0.5">{slot.start} – {slot.end}</span>
                   </div>
                 ))}
               </div>
@@ -366,29 +370,29 @@ function CoachProfileModal({
               href={coach.highlightUrl}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-3 bg-white border border-[var(--border-default)] hover:border-[var(--accent)] rounded-lg p-4 transition-colors shadow-sm group/video"
+              className="flex items-center gap-3 bg-white/15 backdrop-blur-md border border-white/20 hover:bg-white/25 rounded-lg p-4 transition-colors group/video"
             >
-              <div className="w-10 h-10 bg-[var(--accent-subtle)] border border-[var(--accent)]/20 rounded flex items-center justify-center text-[var(--accent)] group-hover/video:bg-[var(--accent)] group-hover/video:text-white transition-all">
+              <div className="w-10 h-10 bg-white/20 border border-white/20 rounded flex items-center justify-center text-white group-hover/video:bg-white group-hover/video:text-black transition-all">
                 ▶
               </div>
               <div>
-                <p className="text-sm font-bold text-[var(--text-primary)]">Watch Highlight Reel</p>
-                <p className="text-[11px] text-[var(--text-muted)] font-medium">Opens in new tab</p>
+                <p className="text-sm font-bold text-white">Watch Highlight Reel</p>
+                <p className="text-[11px] text-white/50 font-medium">Opens in new tab</p>
               </div>
             </a>
           )}
 
           {/* Admin-only section */}
           {isAdmin && adminCoach && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-5 space-y-4 shadow-sm">
-              <p className="text-[10px] text-red-600 uppercase tracking-widest font-bold">Admin Controls</p>
-              <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
+            <div className="bg-red-900/40 backdrop-blur-md border border-red-400/30 rounded-lg p-5 space-y-4">
+              <p className="text-[10px] text-red-300 uppercase tracking-widest font-bold">Admin Controls</p>
+              <div className="flex items-center gap-3 text-sm text-white/80">
                 <span>📧</span>
                 <span className="font-mono text-xs">{adminCoach.email}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`text-[9px] px-3 py-1.5 rounded font-bold uppercase tracking-wider ${
-                  adminCoach.stripeConnected ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-gray-100 text-gray-400 border border-gray-250"
+                  adminCoach.stripeConnected ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/30" : "bg-white/10 text-white/40 border border-white/15"
                 }`}>
                   {adminCoach.stripeConnected ? "Stripe ✓ Connected" : "Stripe ✗ Not Connected"}
                 </span>
@@ -396,7 +400,7 @@ function CoachProfileModal({
               {adminCoach.banned ? (
                 <button
                   onClick={() => onUnban?.(adminCoach.id)}
-                  className="w-full py-3 bg-white hover:bg-gray-50 text-gray-700 border border-[var(--border-default)] rounded text-xs font-bold uppercase tracking-wider transition-all"
+                  className="w-full py-3 bg-white/15 hover:bg-white/25 text-white border border-white/20 rounded text-xs font-bold uppercase tracking-wider transition-all"
                 >
                   Restore Access
                 </button>
@@ -414,7 +418,7 @@ function CoachProfileModal({
 
         {/* Book button footer (players only) */}
         {isPlayer && onBook && (
-          <div className="p-4 border-t border-[var(--border-default)] bg-white shrink-0">
+          <div className="relative z-[1] p-4 border-t border-white/15 bg-black/40 backdrop-blur-md shrink-0">
             <button
               onClick={() => { onClose(); onBook(coach as Coach); }}
               className="w-full py-4 gradient-btn font-bold text-sm"
